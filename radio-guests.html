@@ -50,6 +50,8 @@ header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 9
 .day .dots i{width:7px;height:7px;border-radius:50%}
 .day.sun .wd,.day.sun .dn{color:var(--hot)} .day.sat .wd{color:var(--acc)}
 .day.empty{opacity:.42}
+.day.past{opacity:.55;border-style:dashed}
+.day.past.empty{opacity:.25}
 .day.today{border-color:var(--acc);border-width:2px}
 .day.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
 .day.on .wd,.day.on .dn{color:var(--acc-ink)}
@@ -72,6 +74,7 @@ main{max-width:1600px;margin:0 auto;padding:16px 16px 60px}
 .snip{background:#fff7d6;color:#3b2f00;border-radius:10px;padding:9px 11px;font-size:13.5px;line-height:1.55}
 .snip b{display:block;font-size:14.5px;margin-bottom:3px}
 .snip .tm{display:inline-block;min-width:44px;font-weight:900;color:#b45309}
+.kept{font-size:12px;font-weight:700;color:#b45309;background:#fff1d6;border-radius:8px;padding:5px 9px}
 .linkcard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;aspect-ratio:auto!important;padding:26px 12px;background:linear-gradient(135deg,#f58529,#dd2a7b 50%,#8134af)!important;color:#fff;text-align:center;font-weight:700;text-decoration:none}
 .linkcard span{font-size:28px}
 .pill.src{background:rgba(255,255,255,.22);color:#fff}
@@ -225,6 +228,9 @@ const addDays = (ymd,n) => { const d=new Date(ymd+'T00:00:00Z'); d.setUTCDate(d.
 const diffDays = (a,b) => Math.round((new Date(a+'T00:00:00Z')-new Date(b+'T00:00:00Z'))/864e5);
 const pad = n => String(n).padStart(2,'0');
 const wdIdx = ymd => new Date(ymd+'T00:00:00Z').getUTCDay();
+// 한 주 = 월~일. 이번 주 월요일 / 그 날짜가 속한 주의 일요일
+const weekStart = ymd => addDays(ymd, -((wdIdx(ymd)+6)%7));
+const weekEnd   = ymd => addDays(weekStart(ymd), 6);
 const tsYmd = ts => ymdOf(new Date(ts.replace(/\+0000$/,'Z')));
 
 const DATE_RE = /(20\d{2})\s*[.\/-]\s*(\d{1,2})\s*[.\/-]\s*(\d{1,2})|(?<!\d)(2\d)(0[1-9]|1[0-2])([0-2]\d|3[01])(?!\d)|(\d{1,2})\s*월\s*(\d{1,2})\s*일|(?<![\d.\/:])(\d{1,2})\s*[\/.]\s*(\d{1,2})(?![\d:])/g;
@@ -282,14 +288,14 @@ let overrides = store.get('overrides', {});
 const SYNC_URL = 'https://script.google.com/macros/s/AKfycbyWFC0vzaAbKPoDMc2rrF4ucckHh9VTRrSPLAi_6MPQN_XAE1Ahak-Ufmd2hFuGf8ki/exec';   // ← 배포한 웹 앱 주소(…/exec)를 여기에 넣으면 모든 기기가 자동 연동
 let syncUrl = SYNC_URL || store.get('syncUrl', '');
 let syncOk = null;     // null: 미설정, true: 연동됨, false: 오류
-let igData = {}, ytData = null;   // 집 PC 확장이 올린 인스타 / 저장소가 읽은 유튜브
+let igData = {}, ytData = null, keepData = {};   // 집 PC 확장이 올린 인스타 / 저장소가 읽은 유튜브
 async function pullSync(){
   if(!syncUrl) return false;
   try{
     const r = await fetch(syncUrl + (syncUrl.includes('?')?'&':'?') + 'v=2&t=' + Date.now());
     const j = await r.json();
     if(j && typeof j==='object'){
-      if(j.overrides){ overrides = j.overrides; igData = j.ig || {}; ytData = j.yt || null; }
+      if(j.overrides){ overrides = j.overrides; igData = j.ig || {}; ytData = j.yt || null; keepData = j.keep || {}; }
       else overrides = j;   // 예전 저장소 코드
       store.set('overrides', overrides); syncOk = true; return true;
     }
@@ -350,6 +356,13 @@ async function loadAll(){
       }
     }
     for(const q of o.posts){ const k = postKey(q); if(k !== String(q.id)) q._oid = String(q.id); q.id = k; }
+    // 보관함: 인스타·홈페이지에서 지워졌어도 방송 날짜가 지나기 전이면 다시 보여줌
+    const have2 = new Set(o.posts.map(q=>q.id));
+    for(const id in keepData){
+      const k = keepData[id];
+      if(k.slug !== p.slug || have2.has(id) || weekEnd(k.until) < today()) continue;
+      o.posts.push({...k.post, id, _kept:true, _keepDates:k.dates||{}});
+    }
     o.posts.sort((a,b)=>a.timestamp<b.timestamp?1:-1);
     if(o.posts[0]) o.latestAny = tsYmd(o.posts[0].timestamp);
     return o;
@@ -372,11 +385,20 @@ function slidesOf(post){
 
 function classify(p, post, t, queue){
   const posted = tsYmd(post.timestamp);
+  if(post._kept){
+    const ov0 = overrides[post.id]; if(ov0 && ov0.hide) return;
+    const sl = slidesOf(post), x = d => diffDays(d,t);
+    for(const [d,st] of Object.entries(post._keepDates)){
+      if(d>=weekStart(t) && x(d)<=DAYS_AHEAD) entries.push({prog:p, post, posted, slides:sl, date:d, start:st.s||0, weekly:!!st.w, manual:!!st.m});
+      else if(x(d)>DAYS_AHEAD && x(d)<=FAR_DAYS) unknown.push({prog:p, post, posted, slides:sl, guess:d, far:true, confirmed:!!st.m});
+    }
+    return;
+  }
   if(diffDays(t, posted) > LOOKBACK_DAYS) return;
   const ov = overrides[post.id] || (post._oid && overrides[post._oid]);
   if(ov && ov.hide) return;
   const slides = slidesOf(post);
-  const inWin = d => { const x=diffDays(d,t); return x>=0 && x<=DAYS_AHEAD; };
+  const inWin = d => d >= weekStart(t) && diffDays(d,t) <= DAYS_AHEAD;   // 이번 주 월요일부터 2주 뒤까지
   const inFar = d => { const x=diffDays(d,t); return x>DAYS_AHEAD && x<=FAR_DAYS; };
   const base = {prog:p, post, posted, slides};
   if(ov && ov.date){
@@ -443,13 +465,44 @@ function rebuild(queue, force){
     const v = overrides[k];
     if(!v || !v.link) continue;
     const p = progs.find(x=>x.slug===v.slug); if(!p) continue;
-    const x = diffDays(v.date, t); if(x<0 || x>FAR_DAYS) continue;
+    const x = diffDays(v.date, t); if(v.date < weekStart(t) || x>FAR_DAYS) continue;
     const e = {prog:p, post:{id:k, caption:v.note||'직접 추가한 게시물', permalink:v.link, timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:v.date, start:0, link:true};
     if(x<=DAYS_AHEAD) entries.push(e); else unknown.push({...e, guess:v.date, far:true, confirmed:true});
   }
   // 보고 있는 날짜의 내용이 그대로면 위쪽 날짜 칸만 고치고 사진은 건드리지 않음
   if(force===false && sigOf()===lastSig) renderDays(); else render();
   if(!ocrBusy) setStatus(`업데이트 ${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}`);
+  if(!ocrBusy) saveKeep();
+}
+
+/* 화면에 잡힌 일정을 저장소 보관함에 올림 (원본이 삭제돼도 날짜 지날 때까지 보이게) */
+const keepSent = {};
+function saveKeep(){
+  if(!syncUrl || !syncOk) return;
+  const add = {}, t = today();
+  const items = [...entries, ...unknown.filter(e=>e.guess && e.far)];
+  for(const e of items){
+    if(e.link || !e.post || !e.post.permalink || e.post._kept) continue;
+    const id = e.post.id, d = e.date || e.guess;
+    if(!d || d < weekStart(t)) continue;
+    const a = add[id] || (add[id] = {slug:e.prog.slug, until:d, dates:{}, post:null});
+    if(d > a.until) a.until = d;
+    a.dates[d] = {s:e.start||0, w:e.weekly?1:0, m:(e.manual||e.confirmed)?1:0};
+    if(!a.post){
+      const q = e.post;
+      a.post = {permalink:q.permalink, caption:(q.caption||'').slice(0,1500), timestamp:q.timestamp, media_type:q.media_type,
+        media_url:q.media_url, thumbnail_url:q.thumbnail_url, children:q.children, username:q.username,
+        _yt:q._yt||undefined, _ig:q._ig||undefined};
+    }
+  }
+  const send = {};
+  for(const id in add){
+    const sig = add[id].until + '|' + Object.keys(add[id].dates).sort().join(',');
+    const old = keepData[id], oldSig = old && (old.until + '|' + Object.keys(old.dates||{}).sort().join(','));
+    if(keepSent[id] === sig || oldSig === sig) continue;
+    keepSent[id] = sig; send[id] = add[id];
+  }
+  if(Object.keys(send).length) pushSync({keep:send});
 }
 
 async function runOcr(){
@@ -490,15 +543,16 @@ function render(){
 }
 function renderDays(){
   const t = today();
-  const days = [...Array(DAYS_AHEAD+1)].map((_,i)=>addDays(t,i));
+  const ws = weekStart(t), days = [...Array(diffDays(t,ws)+DAYS_AHEAD+1)].map((_,i)=>addDays(ws,i));
   const progsOn = d => progs.filter(p=>entries.some(e=>e.date===d && e.prog===p));
   $('days').innerHTML = days.map(d=>{
     const ps = progsOn(d), w = wdIdx(d);
-    return `<div class="day ${d===selDay?'on':''} ${d===t?'today':''} ${ps.length?'':'empty'} ${w===0?'sun':w===6?'sat':''}" data-d="${d}">
+    return `<div class="day ${d===selDay?'on':''} ${d===t?'today':''} ${d<t?'past':''} ${ps.length?'':'empty'} ${w===0?'sun':w===6?'sat':''}" data-d="${d}">
       <div class="wd">${d===t?'오늘':WD[w]}</div><div class="dn">${+d.slice(8)}</div>
       <div class="dots">${ps.slice(0,6).map(p=>`<i style="background:${p.color}"></i>`).join('')}</div></div>`;
   }).join('') + `<div class="day chk ${selDay==='unknown'?'on':''} ${unknown.length?'':'empty'}" data-d="unknown"><div class="wd">확인 필요</div><div class="dn">${unknown.length}</div><div class="dots"></div></div>`;
   $('days').querySelectorAll('.day').forEach(el=>el.onclick=()=>{ selDay=el.dataset.d; render(); scrollTo({top:0}); });
+  if(!window.__daysScrolled){ window.__daysScrolled = 1; const td = $('days').querySelector('.day.today'); if(td) $('days').scrollLeft = Math.max(0, td.offsetLeft - 16); }
 }
 function renderMain(){
   const t = today();
@@ -558,7 +612,8 @@ function daySnippet(text, ymd){
   return `<div class="snip"><b>${esc(lines[0])}</b>${lines.slice(1).map(l=>`<div>${esc(l).replace(/^(\d{1,2}:\d{2})/,'<span class="tm">$1</span>')}</div>`).join('')}</div>`;
 }
 function srcPill(post){
-  return post._yt ? '<span class="pill src">유튜브</span>' : post._ig ? '<span class="pill src">인스타 직접</span>' : '';
+  return (post._kept ? '<span class="pill src" title="원본이 삭제돼서 보관해 둔 내용이에요">🗂 보관본</span>' : '')
+    + (post._yt ? '<span class="pill src">유튜브</span>' : post._ig ? '<span class="pill src">인스타 직접</span>' : '');
 }
 function cardHTML(e, isUnknown){
   const n = e.slides.length;
@@ -574,6 +629,7 @@ function cardHTML(e, isUnknown){
     </div>
     <div class="body">
       ${e.post._yt && e.date ? daySnippet(e.post.caption, e.date) : ''}
+      ${e.post._kept ? '<div class="kept">🗂 원본이 삭제돼서 보관해 둔 내용이에요 (방송 주가 끝나면 정리돼요)</div>' : ''}
       <div class="cap">${esc(e.post.caption)}</div>
       <div class="act">
         <a class="ig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener">${e.post._yt?'유튜브에서 보기':'인스타에서 보기'}</a>
@@ -628,7 +684,7 @@ function bindActs(card){
       if(!d){ alert('날짜 형식을 확인해 주세요 (예: 10/14)'); return; }
       overrides[id] = overrides[id] && overrides[id].link ? {...overrides[id], date:d, t:now} : {date:d, t:now};
     }
-    pushSync(overrides[id] ? {set:{[id]:overrides[id]}} : {del:[id]});
+    pushSync(overrides[id] ? {set:{[id]:overrides[id]}, ...(a==='hide'?{unkeep:[id]}:{})} : {del:[id]});
     store.set('overrides', overrides); rebuild(false, true);
   });
 }
