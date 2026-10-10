@@ -231,6 +231,7 @@ const wdIdx = ymd => new Date(ymd+'T00:00:00Z').getUTCDay();
 // 한 주 = 월~일. 이번 주 월요일 / 그 날짜가 속한 주의 일요일
 const weekStart = ymd => addDays(ymd, -((wdIdx(ymd)+6)%7));
 const weekEnd   = ymd => addDays(weekStart(ymd), 6);
+const ovDates = v => v ? (v.dates || (v.date ? [v.date] : [])) : [];   // 날짜 하나/여러 개 모두 지원
 const tsYmd = ts => ymdOf(new Date(ts.replace(/\+0000$/,'Z')));
 
 const DATE_RE = /(20\d{2})\s*[.\/-]\s*(\d{1,2})\s*[.\/-]\s*(\d{1,2})|(?<!\d)(2\d)(0[1-9]|1[0-2])([0-2]\d|3[01])(?!\d)|(\d{1,2})\s*월\s*(\d{1,2})\s*일|(?<![\d.\/:])(\d{1,2})\s*[\/.]\s*(\d{1,2})(?![\d:])/g;
@@ -404,9 +405,11 @@ function classify(p, post, t, queue){
   const inWin = d => d >= weekStart(t) && diffDays(d,t) <= DAYS_AHEAD;   // 이번 주 월요일부터 2주 뒤까지
   const inFar = d => { const x=diffDays(d,t); return x>DAYS_AHEAD && x<=FAR_DAYS; };
   const base = {prog:p, post, posted, slides};
-  if(ov && ov.date){
-    if(inWin(ov.date)) entries.push({...base, date:ov.date, start:0, manual:true});
-    else if(inFar(ov.date)) unknown.push({...base, guess:ov.date, far:true, confirmed:true});
+  if(ov && ovDates(ov).length){
+    for(const d of ovDates(ov)){
+      if(inWin(d)) entries.push({...base, date:d, start:0, manual:true});
+      else if(inFar(d)) unknown.push({...base, guess:d, far:true, confirmed:true});
+    }
     return;
   }
 
@@ -436,7 +439,7 @@ function classify(p, post, t, queue){
   const fut = [...all].filter(inWin).sort();
   if(!fut.length){
     const far = [...all].filter(inFar).sort();
-    if(far.length) unknown.push({...base, guess:far[0], far:true});   // 2주 뒤~한 달 뒤 미리 잡힌 일정
+    if(far.length) unknown.push({...base, guess:far[0], guessAll:far, far:true});   // 2주 뒤~한 달 뒤 미리 잡힌 일정
     else if(!all.size && guestish && !pending && diffDays(t,posted)<=4) unknown.push(base);
     return;
   }
@@ -444,7 +447,7 @@ function classify(p, post, t, queue){
   const ocrText = slides.map(s=>ocrCache[s.id]||'').join(' ');
   const futureAll = future || FUTURE_RE.test(ocrText) || (slides.length>1 && all.size>=3);
   if(!futureAll){
-    if(diffDays(t,posted)<=10) unknown.push({...base, guess:fut[0]});
+    if(diffDays(t,posted)<=10) unknown.push({...base, guess:fut[0], guessAll:[...all].filter(d=>inWin(d)||inFar(d)).sort()});
     return;
   }
   const weekly = slides.length>1 && all.size>=3;
@@ -468,9 +471,11 @@ function rebuild(queue, force){
     const v = overrides[k];
     if(!v || !v.link) continue;
     const p = progs.find(x=>x.slug===v.slug); if(!p) continue;
-    const x = diffDays(v.date, t); if(v.date < weekStart(t) || x>FAR_DAYS) continue;
-    const e = {prog:p, post:{id:k, caption:v.note||'직접 추가한 게시물', permalink:v.link, timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:v.date, start:0, link:true};
-    if(x<=DAYS_AHEAD) entries.push(e); else unknown.push({...e, guess:v.date, far:true, confirmed:true});
+    for(const d of ovDates(v)){
+      const x = diffDays(d, t); if(d < weekStart(t) || x>FAR_DAYS) continue;
+      const e = {prog:p, post:{id:k, caption:v.note||'직접 추가한 게시물', permalink:v.link, timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:d, start:0, link:true};
+      if(x<=DAYS_AHEAD) entries.push(e); else unknown.push({...e, guess:d, far:true, confirmed:true});
+    }
   }
   // 보고 있는 날짜의 내용이 그대로면 위쪽 날짜 칸만 고치고 사진은 건드리지 않음
   if(force===false && sigOf()===lastSig) renderDays(); else render();
@@ -636,7 +641,7 @@ function cardHTML(e, isUnknown){
       <div class="cap">${esc(e.post.caption)}</div>
       <div class="act">
         <a class="ig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener">${e.post._yt?'유튜브에서 보기':'인스타에서 보기'}</a>
-        ${isUnknown && e.guess && !e.confirmed?`<button data-a="ok" data-g="${e.guess}" style="color:#fff;background:var(--acc);border-color:var(--acc);font-weight:700">${+e.guess.slice(5,7)}/${+e.guess.slice(8)} 출연 맞음</button>`:''}
+        ${isUnknown && e.guess && !e.confirmed?`<button data-a="ok" data-g="${(e.guessAll&&e.guessAll.length?e.guessAll:[e.guess]).join(',')}" style="color:#fff;background:var(--acc);border-color:var(--acc);font-weight:700">${(()=>{const g=e.guessAll&&e.guessAll.length?e.guessAll:[e.guess]; const f=x=>`${+x.slice(5,7)}/${+x.slice(8)}`; return g.length>1?`${f(g[0])}~${f(g[g.length-1])} 출연 맞음`:`${f(g[0])} 출연 맞음`;})()}</button>`:''}
         <button data-a="date">${isUnknown?'날짜 지정':'날짜 수정'}</button>
         <button data-a="hide">숨기기</button>
         ${e.manual?'<button data-a="reset">자동으로 되돌리기</button>':''}
@@ -678,14 +683,15 @@ function bindActs(card){
     const id = card.dataset.id, a = b.dataset.a;
     const now = Date.now();
     if(a==='hide') overrides[id]={hide:true, t:now};
-    if(a==='ok') overrides[id]={date:b.dataset.g, t:now};
+    if(a==='ok') overrides[id]={dates:b.dataset.g.split(','), t:now};
     if(a==='reset' || a==='del') delete overrides[id];
     if(a==='date'){
-      const v = prompt('방송 날짜를 입력하세요 (예: 10/14)', '');
+      const v = prompt('방송 날짜를 입력하세요\n· 하루: 10/14\n· 여러 날: 10/14, 10/16\n· 기간: 11/9~11/14', '');
       if(!v) return;
-      const d = findDates(v, today())[0];
-      if(!d){ alert('날짜 형식을 확인해 주세요 (예: 10/14)'); return; }
-      overrides[id] = overrides[id] && overrides[id].link ? {...overrides[id], date:d, t:now} : {date:d, t:now};
+      const ds = findDates(v.replace(/[,，、]/g,' , '), today());
+      if(!ds.length){ alert('날짜 형식을 확인해 주세요 (예: 10/14 또는 11/9~11/14)'); return; }
+      const old = overrides[id];
+      overrides[id] = old && old.link ? {...old, date:undefined, dates:ds, t:now} : {dates:ds, t:now};
     }
     pushSync(overrides[id] ? {set:{[id]:overrides[id]}, ...(a==='hide'?{unkeep:[id]}:{})} : {del:[id]});
     store.set('overrides', overrides); rebuild(false, true);
@@ -763,11 +769,12 @@ $('add').onclick = () => {
   const list = progs.map((p,i)=>`${i+1}. ${p.name}`).join('\n');
   const n = +prompt('어느 프로그램인가요? 번호를 입력하세요\n\n' + list, '');
   const p = progs[n-1]; if(!p) return;
-  const d = findDates(prompt('방송 날짜 (예: 10/14)', '') || '', today())[0];
-  if(!d){ alert('날짜 형식을 확인해 주세요 (예: 10/14)'); return; }
+  const ds = findDates((prompt('방송 날짜\n· 하루: 10/14\n· 여러 날: 10/14, 10/16\n· 기간: 11/9~11/14', '') || '').replace(/[,，、]/g,' , '), today());
+  if(!ds.length){ alert('날짜 형식을 확인해 주세요 (예: 10/14 또는 11/9~11/14)'); return; }
+  const d = ds[0];
   const note = prompt('메모 (출연자 이름 등, 비워도 돼요)', '') || '';
   const id = 'link_' + Date.now().toString(36);
-  overrides[id] = {link, slug:p.slug, date:d, note, t:Date.now()};
+  overrides[id] = {link, slug:p.slug, dates:ds, note, t:Date.now()};
   pushSync({set:{[id]:overrides[id]}}); store.set('overrides', overrides);
   selDay = diffDays(d, today())<=DAYS_AHEAD ? d : 'unknown';
   rebuild(false, true);
