@@ -324,11 +324,14 @@ async function getJSON(url){ const r = await fetch(url,{cache:'no-cache'}); if(!
 async function loadAll(){
   setStatus('불러오는 중…');
   await pullSync();
-  progs = await Promise.all(PROGRAMS.map(async p => {
+  const extra = Object.values(overrides).filter(v=>v && v.prog && !PROGRAMS.some(x=>x.slug===v.slug))
+                     .map(v=>({slug:v.slug, name:v.name||v.slug, ig:v.ig||'', added:true}));
+  progs = await Promise.all([...PROGRAMS, ...extra].map(async p => {
     const o = {...p, start:9999, posts:[], err:'', latest:'', color:'#6b7280', logo:'', ch:''};
     try{
       const m = (await getJSON(`${API}/program-api/1.0/menu/${p.slug}`)).program;
       o.vodid = m.vodid; o.broad = m.broaddate; o.start = startMin(m.broaddate);
+      if(p.added && m.title) o.name = m.title;
       if(m.color) o.color = m.color;
       if(m.circleimg) o.logo = m.circleimg.startsWith('//') ? 'https:'+m.circleimg : m.circleimg;
       o.ch = m.section==='PF' ? '파워FM' : m.section==='LF' ? '러브FM' : '';
@@ -735,7 +738,7 @@ function igBtnInit(){
 igBtnInit(); setTimeout(igBtnInit, 500);
 $('igc').onclick = () => {
   const b = $('igc'); b.disabled = true; b.textContent = '📷 수집 준비…';
-  window.postMessage({rg:'collect'}, '*');
+  window.postMessage({rg:'collect', accounts:progs.map(p=>p.ig).filter(Boolean)}, '*');
 };
 window.addEventListener('message', async e => {
   if(e.source !== window || !e.data || e.data.rg !== 'ig') return;
@@ -784,6 +787,14 @@ $('info').onclick = () => {
   }).join('');
   $('main').innerHTML = `<div class="side" style="border-left-color:var(--acc)"><h3>프로그램 상태</h3>
     <table class="st">${rows}</table>
+    <h3 style="margin-top:18px">프로그램 추가</h3>
+    <p>SBS 홈페이지에서 프로그램 화면을 열고 주소를 붙여넣으세요. (예: programs.sbs.co.kr/radio/<b>cultwoshow</b>/main) 인스타 계정은 있으면 적어주세요.</p>
+    <div class="act" style="margin-top:8px">
+      <input id="np_url" placeholder="홈페이지 주소" style="flex:2;min-width:220px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)">
+      <input id="np_ig" placeholder="인스타 계정 (예: sbs.power)" style="flex:1;min-width:150px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)">
+      <button id="np_add" style="color:#fff;background:var(--acc);border-color:var(--acc);font-weight:700">추가</button>
+    </div>
+    ${progs.filter(p=>p.added).length ? `<p style="margin-top:8px">추가한 프로그램: ${progs.filter(p=>p.added).map(p=>`<b>${esc(p.name)}</b> <button class="np_del" data-s="${p.slug}" style="font-size:11px;border:1px solid var(--line);border-radius:6px;background:none;color:var(--sub);cursor:pointer">삭제</button>`).join(' · ')}</p>` : ''}
     <h3 style="margin-top:18px">기기 간 연동</h3>
     <p>${syncUrl ? (syncOk===false ? '<span class="bad">연동 주소에 접속이 안 돼요</span>' : '<span class="ok">연동됨</span> — 숨기기·날짜 지정이 모든 기기에 똑같이 적용돼요.') : '연동 안 됨 — 숨기기·날짜 지정이 이 기기에만 저장돼요.'}</p>
     ${SYNC_URL ? '' : `<div class="act" style="margin-top:8px"><input id="surl" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(syncUrl)}" style="flex:1;min-width:240px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><button id="ssave">연동 주소 저장</button></div>`}
@@ -801,6 +812,26 @@ $('info').onclick = () => {
     $('info').onclick();
   };
   $('back').onclick=render;
+  $('np_add').onclick = async () => {
+    const raw = $('np_url').value.trim(), ig = $('np_ig').value.trim().replace(/^@/,'').replace(/^https?:\/\/(www\.)?instagram\.com\//,'').replace(/[\/?].*$/,'');
+    const m = /radio\/([A-Za-z0-9_\-]+)/.exec(raw) || /^([A-Za-z0-9_\-]+)$/.exec(raw);
+    if(!m){ alert('홈페이지 주소를 확인해 주세요.\n예: https://programs.sbs.co.kr/radio/cultwoshow/main'); return; }
+    const slug = m[1];
+    if(progs.some(p=>p.slug===slug)){ alert('이미 있는 프로그램이에요.'); return; }
+    $('np_add').disabled = true; $('np_add').textContent = '확인 중…';
+    try{
+      const info = (await getJSON(`${API}/program-api/1.0/menu/${slug}`)).program;
+      const id = 'prog:' + slug;
+      overrides[id] = {prog:true, slug, name:info.title, ig};   // t 없음 = 60일 자동정리 대상 아님
+      pushSync({set:{[id]:overrides[id]}}); store.set('overrides', overrides);
+      await loadAll(); alert(`'${info.title}' 추가 완료!`); $('info').onclick();
+    }catch(e){ alert('SBS 홈페이지에서 이 프로그램을 찾지 못했어요. 주소를 확인해 주세요.'); $('np_add').disabled=false; $('np_add').textContent='추가'; }
+  };
+  document.querySelectorAll('.np_del').forEach(b=>b.onclick=async()=>{
+    if(!confirm('이 프로그램을 목록에서 뺄까요?')) return;
+    const id = 'prog:' + b.dataset.s; delete overrides[id];
+    pushSync({del:[id]}); store.set('overrides', overrides); await loadAll(); $('info').onclick();
+  });
 };
 loadAll();
 </script>
