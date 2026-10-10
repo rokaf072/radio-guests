@@ -58,6 +58,17 @@ main{max-width:1600px;margin:0 auto;padding:16px 16px 60px}
 .jump button img{width:28px;height:28px;border-radius:50%;object-fit:cover;background:#fff}
 .jump button:hover{border-color:var(--pc)}
 .jump button.on{background:var(--pc);border-color:var(--pc);color:#fff}
+.sec{font-size:17px;font-weight:900;margin:6px 0 12px;display:flex;flex-wrap:wrap;align-items:baseline;gap:8px}
+.sec small{font-size:12.5px;font-weight:500;color:var(--sub)}
+.sec+.board{margin-bottom:26px}
+.board+.sec{margin-top:26px}
+.snip{background:#fff7d6;color:#3b2f00;border-radius:10px;padding:9px 11px;font-size:13.5px;line-height:1.55}
+.snip b{display:block;font-size:14.5px;margin-bottom:3px}
+.snip .tm{display:inline-block;min-width:44px;font-weight:900;color:#b45309}
+.linkcard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;aspect-ratio:auto!important;padding:26px 12px;background:linear-gradient(135deg,#f58529,#dd2a7b 50%,#8134af)!important;color:#fff;text-align:center;font-weight:700;text-decoration:none}
+.linkcard span{font-size:28px}
+.pill.src{background:rgba(255,255,255,.22);color:#fff}
+.addbtn{position:fixed;right:18px;bottom:18px;z-index:30;border:0;border-radius:999px;background:var(--acc);color:#fff;font-weight:700;font-size:14px;padding:12px 18px;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
 .empty-msg{text-align:center;color:var(--sub);padding:70px 0 40px;font-size:15px}
 
 .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;align-items:start}
@@ -158,6 +169,7 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 </header>
 <main id="main"></main>
 
+<button class="addbtn" id="add">＋ 링크 추가</button>
 <div class="lb" id="lb">
   <button class="x" id="lbx" aria-label="닫기">×</button>
   <span class="count" id="lbc"></span>
@@ -169,21 +181,22 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 <script>
 /* ===== 프로그램 목록: 여기에 한 줄 추가하면 끝 (slug = programs.sbs.co.kr/radio/○○○) ===== */
 const PROGRAMS = [
-  {slug:'0chulpowerfm',    name:'김영철의 파워FM'},
-  {slug:'cinetown11',      name:'박하선의 씨네타운'},
-  {slug:'sbsbigmoney',     name:'박연미의 목돈연구소', igOnly:'mokdo_n'},
-  {slug:'sbs12n',          name:'12시엔 주현영'},
-  {slug:'cultwoshow',      name:'두시탈출 컬투쇼'},
-  {slug:'kingcastlepower', name:'황제성의 황제파워'},
-  {slug:'auditionlife',    name:'인생은 오디션', igOnly:'audition1035'},
-  {slug:'lovegame',        name:'박소현의 러브게임'},
-  {slug:'sbshungry',       name:'유민상의 배고픈 라디오'},
-  {slug:'wind',            name:'6시 저녁바람 김창완입니다', igOnly:'windchang1035'},
-  {slug:'wendy0s',         name:'웬디의 영스트리트'},
-  {slug:'ten',             name:'배성재의 텐', youtube:'https://www.youtube.com/@Bae_ten/posts'},
+  {slug:'0chulpowerfm',    name:'김영철의 파워FM',          ig:'sbs.power'},
+  {slug:'cinetown11',      name:'박하선의 씨네타운',        ig:'sbscine'},
+  {slug:'sbsbigmoney',     name:'박연미의 목돈연구소',      ig:'mokdo_n',        igOnly:true},
+  {slug:'sbs12n',          name:'12시엔 주현영',            ig:'sbs12n'},
+  {slug:'cultwoshow',      name:'두시탈출 컬투쇼',          ig:'cultwoshow'},
+  {slug:'kingcastlepower', name:'황제성의 황제파워',        ig:'kingcastle_power_'},
+  {slug:'auditionlife',    name:'인생은 오디션',            ig:'audition1035',   igOnly:true},
+  {slug:'lovegame',        name:'박소현의 러브게임',        ig:'lovegame1077'},
+  {slug:'sbshungry',       name:'유민상의 배고픈 라디오',   ig:'sbs_hungry'},
+  {slug:'wind',            name:'6시 저녁바람 김창완입니다', ig:'windchang1035',  igOnly:true},
+  {slug:'wendy0s',         name:'웬디의 영스트리트',        ig:'sbsyoungstreet'},
+  {slug:'ten',             name:'배성재의 텐',              ig:'sbs_ten', youtube:'https://www.youtube.com/@Bae_ten/posts'},
 ];
 const DAYS_AHEAD = 13;
-const LOOKBACK_DAYS = 21;
+const LOOKBACK_DAYS = 30;   // 이 기간 안에 올라온 게시물을 확인
+const FAR_DAYS = 31;        // 2주 뒤~한 달 뒤 일정은 "확인 필요"로
 const API = 'https://static.apis.sbs.co.kr';
 const WD = ['일','월','화','수','목','금','토'];
 
@@ -261,12 +274,17 @@ let overrides = store.get('overrides', {});
 const SYNC_URL = 'https://script.google.com/macros/s/AKfycbyWFC0vzaAbKPoDMc2rrF4ucckHh9VTRrSPLAi_6MPQN_XAE1Ahak-Ufmd2hFuGf8ki/exec';   // ← 배포한 웹 앱 주소(…/exec)를 여기에 넣으면 모든 기기가 자동 연동
 let syncUrl = SYNC_URL || store.get('syncUrl', '');
 let syncOk = null;     // null: 미설정, true: 연동됨, false: 오류
+let igData = {}, ytData = null;   // 집 PC 확장이 올린 인스타 / 저장소가 읽은 유튜브
 async function pullSync(){
   if(!syncUrl) return false;
   try{
-    const r = await fetch(syncUrl + (syncUrl.includes('?')?'&':'?') + 't=' + Date.now());
+    const r = await fetch(syncUrl + (syncUrl.includes('?')?'&':'?') + 'v=2&t=' + Date.now());
     const j = await r.json();
-    if(j && typeof j==='object'){ overrides = j; store.set('overrides', overrides); syncOk = true; return true; }
+    if(j && typeof j==='object'){
+      if(j.overrides){ overrides = j.overrides; igData = j.ig || {}; ytData = j.yt || null; }
+      else overrides = j;   // 예전 저장소 코드
+      store.set('overrides', overrides); syncOk = true; return true;
+    }
   }catch(e){ syncOk = false; }
   return false;
 }
@@ -305,13 +323,36 @@ async function loadAll(){
         o.posts = ig.data || [];
         if(o.posts[0]) o.latest = tsYmd(o.posts[0].timestamp);
       }
-    }catch(e){ o.err = '불러오기 실패'; }
+    }catch(e){ o.err = 'SBS 불러오기 실패'; }
+    // 인스타 직접 수집분을 합침 (같은 게시물은 SBS 쪽 사진을 우선 — SBS 사진은 만료되지 않음)
+    const igd = p.ig && igData[p.ig];
+    if(igd && igd.posts){
+      o.igAt = igd.at;
+      const have = new Set(o.posts.map(postKey));
+      for(const q of igd.posts){ if(!have.has(postKey(q))){ o.posts.push({...q, _ig:true}); have.add(postKey(q)); } }
+    }
+    // 배성재의 텐 유튜브 게시판
+    if(p.youtube && ytData && ytData.posts){
+      o.ytAt = ytData.at; o.ytErr = ytData.err;
+      for(const y of ytData.posts){
+        const imgs = (y.imgs||[]).map((u,i)=>({id:'yt_'+y.id+'_'+i, media_type:'IMAGE', media_url:u}));
+        o.posts.push({id:'yt_'+y.id, caption:y.text, timestamp:y.pub, _yt:true,
+          media_type: imgs.length>1?'CAROUSEL_ALBUM':'IMAGE', media_url: imgs[0] ? imgs[0].media_url : null,
+          permalink:'https://www.youtube.com/post/'+y.id, ...(imgs.length>1?{children:{data:imgs}}:{})});
+      }
+    }
+    for(const q of o.posts){ const k = postKey(q); if(k !== String(q.id)) q._oid = String(q.id); q.id = k; }
+    o.posts.sort((a,b)=>a.timestamp<b.timestamp?1:-1);
+    if(o.posts[0]) o.latestAny = tsYmd(o.posts[0].timestamp);
     return o;
   }));
   progs.sort((a,b)=>a.start-b.start);
   rebuild(true);
   runOcr();
 }
+
+// 같은 인스타 게시물은 SBS·인스타 어느 쪽에서 와도 같은 이름(주소 끝부분)으로
+function postKey(q){ const m = /instagram\.com\/(?:p|reel|tv)\/([^/?#]+)/.exec(q.permalink||''); return m ? m[1] : String(q.id); }
 
 function slidesOf(post){
   if(post.children && post.children.data){
@@ -324,21 +365,34 @@ function slidesOf(post){
 function classify(p, post, t, queue){
   const posted = tsYmd(post.timestamp);
   if(diffDays(t, posted) > LOOKBACK_DAYS) return;
-  const ov = overrides[post.id];
+  const ov = overrides[post.id] || (post._oid && overrides[post._oid]);
   if(ov && ov.hide) return;
   const slides = slidesOf(post);
   const inWin = d => { const x=diffDays(d,t); return x>=0 && x<=DAYS_AHEAD; };
+  const inFar = d => { const x=diffDays(d,t); return x>DAYS_AHEAD && x<=FAR_DAYS; };
   const base = {prog:p, post, posted, slides};
-  if(ov && ov.date){ if(inWin(ov.date)) entries.push({...base, date:ov.date, start:0, manual:true}); return; }
+  if(ov && ov.date){
+    if(inWin(ov.date)) entries.push({...base, date:ov.date, start:0, manual:true});
+    else if(inFar(ov.date)) unknown.push({...base, guess:ov.date, far:true, confirmed:true});
+    return;
+  }
 
   const cap = post.caption || '';
   const isVideo = post.media_type==='VIDEO' || /\/reel\//.test(post.permalink||'');
   if(isVideo) return;                                   // 영상 클립은 지난 방송분
-  const future = FUTURE_RE.test(cap);
+  // 유튜브 게시판의 [안내] 일정 글은 앞으로의 생.녹 일정표
+  const ytSched = post._yt && /안내|생녹|생방|일정|편성/.test(cap);
+  const future = ytSched || FUTURE_RE.test(cap);
   if(RECAP_RE.test(cap) && !future) return;             // 방송 후기·기념사진
   const guestish = GUEST_RE.test(cap) || future;
 
-  const capDates = findDates(cap, posted);
+  let capDates = findDates(cap, posted);
+  // 유튜브 공지는 "오늘 밤", "내일" 처럼 쓰는 경우가 많음
+  if(post._yt && !capDates.length){
+    if(/모레/.test(cap)) capDates = [addDays(posted,2)];
+    else if(/내일/.test(cap)) capDates = [addDays(posted,1)];
+    else if(/오늘|tonight|잠시\s*후|곧/i.test(cap)) capDates = [posted];
+  }
   const ocrable = slides.filter(s=>s.url && !/\.(heic|mp4)(\?|$)/i.test(s.url));
   const wantOcr = guestish && ocrable.length>0 && diffDays(t,posted) <= 10 && (capDates.length!==1 || slides.length>1);
   const pending = wantOcr && ocrable.some(s=>!(s.id in ocrCache));
@@ -348,7 +402,9 @@ function classify(p, post, t, queue){
   const all = new Set(capDates); slideDates.forEach(ds=>ds.forEach(d=>all.add(d)));
   const fut = [...all].filter(inWin).sort();
   if(!fut.length){
-    if(!all.size && guestish && !pending && diffDays(t,posted)<=4) unknown.push(base);
+    const far = [...all].filter(inFar).sort();
+    if(far.length) unknown.push({...base, guess:far[0], far:true});   // 2주 뒤~한 달 뒤 미리 잡힌 일정
+    else if(!all.size && guestish && !pending && diffDays(t,posted)<=4) unknown.push(base);
     return;
   }
   // 앞으로 나온다는 말이 없으면 자동으로 올리지 않고 "확인 필요"로 (찾은 날짜를 같이 보여줌)
@@ -375,6 +431,14 @@ function rebuild(queue, force){
   entries=[]; unknown=[];
   const t = today();
   for(const p of progs) for(const post of p.posts) classify(p, post, t, queue);
+  for(const k in overrides){
+    const v = overrides[k];
+    if(!v || !v.link) continue;
+    const p = progs.find(x=>x.slug===v.slug); if(!p) continue;
+    const x = diffDays(v.date, t); if(x<0 || x>FAR_DAYS) continue;
+    const e = {prog:p, post:{id:k, caption:v.note||'직접 추가한 게시물', permalink:v.link, timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:v.date, start:0, link:true};
+    if(x<=DAYS_AHEAD) entries.push(e); else unknown.push({...e, guess:v.date, far:true, confirmed:true});
+  }
   // 보고 있는 날짜의 내용이 그대로면 위쪽 날짜 칸만 고치고 사진은 건드리지 않음
   if(force===false && sigOf()===lastSig) renderDays(); else render();
   if(!ocrBusy) setStatus(`업데이트 ${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}`);
@@ -434,11 +498,16 @@ function renderMain(){
   if(selDay==='unknown'){
     $('when').textContent = '확인 필요'; $('jump').innerHTML='';
     m.innerHTML = unknown.length
-      ? `<p class="empty-msg" style="padding:0 0 16px;text-align:left">자동으로 확정하기 애매한 게시물이에요. 출연 예고가 맞으면 <b>출연 맞음</b>이나 <b>날짜 지정</b>, 아니면 <b>숨기기</b>를 눌러주세요. 정리한 건 다시 안 나와요.</p>
-         <div class="board">${unknown.sort((a,b)=>a.prog.start-b.prog.start).map(e=>`<section class="prog" style="--pc:${e.prog.color}">
-           <div class="ph">${e.prog.logo?`<img class="logo" src="${e.prog.logo}" alt="">`:''}<div class="nm"><h2>${esc(e.prog.name)}</h2>
-           <div class="meta"><span class="pill time">${fmtTime(e.prog.start)}</span>${e.guess?`<span class="pill hot">찾은 날짜 ${+e.guess.slice(5,7)}/${+e.guess.slice(8)}</span>`:'<span class="pill">날짜 없음</span>'}</div></div></div>
-           <div class="stack">${cardHTML(e,true)}</div></section>`).join('')}</div>`
+      ? (()=>{
+          const box = (e)=>`<section class="prog" style="--pc:${e.prog.color}">
+            <div class="ph">${e.prog.logo?`<img class="logo" src="${e.prog.logo}" alt="">`:''}<div class="nm"><h2>${esc(e.prog.name)}</h2>
+            <div class="meta"><span class="pill time">${fmtTime(e.prog.start)}</span>${e.guess?`<span class="pill ${e.confirmed?'week':'hot'}">${e.confirmed?'예정':'찾은 날짜'} ${+e.guess.slice(5,7)}/${+e.guess.slice(8)} (${WD[wdIdx(e.guess)]})</span>`:'<span class="pill">날짜 없음</span>'}${srcPill(e.post)}</div></div></div>
+            <div class="stack">${cardHTML(e,true)}</div></section>`;
+          const far = unknown.filter(e=>e.far).sort((a,b)=>a.guess<b.guess?-1:a.guess>b.guess?1:a.prog.start-b.prog.start);
+          const near = unknown.filter(e=>!e.far).sort((a,b)=>a.prog.start-b.prog.start);
+          return (near.length?`<h3 class="sec">확인 필요 <small>자동으로 확정하기 애매한 게시물 — 맞으면 <b>출연 맞음</b>·<b>날짜 지정</b>, 아니면 <b>숨기기</b></small></h3><div class="board">${near.map(box).join('')}</div>`:'')
+               + (far.length?`<h3 class="sec">2주 뒤 ~ 한 달 뒤 미리 잡힌 일정 <small>날짜가 다가오면 해당 날짜 칸으로 자동으로 옮겨가요</small></h3><div class="board">${far.map(box).join('')}</div>`:'');
+        })()
       : `<div class="empty-msg">확인할 게시물이 없어요 👍</div>`;
     bindCards(); return;
   }
@@ -450,23 +519,45 @@ function renderMain(){
   const html = on.map(p=>{
     const es = list.filter(e=>e.prog===p).sort((a,b)=>a.post.timestamp<b.post.timestamp?1:-1);
     const bc = es.some(isBanchung), wk = es.some(e=>e.weekly);
+    const sn = p.youtube && es.some(e=>e.post._yt);
     return `<section class="prog" id="p-${p.slug}" style="--pc:${p.color}">
       <div class="ph">${p.logo?`<img class="logo" src="${p.logo}" alt="">`:''}
         <div class="nm"><h2>${esc(p.name)}</h2>
-          <div class="meta"><span class="pill time">${fmtTime(p.start)}</span>${p.ch?`<span class="pill">${p.ch}</span>`:''}${bc?'<span class="pill hot">방청</span>':''}${wk?'<span class="pill week">주간 편성표</span>':''}</div>
+          <div class="meta"><span class="pill time">${fmtTime(p.start)}</span>${p.ch?`<span class="pill">${p.ch}</span>`:''}${bc?'<span class="pill hot">방청</span>':''}${wk?'<span class="pill week">주간 편성표</span>':''}${sn?'<span class="pill yt">생.녹</span>':''}</div>
         </div></div>
       <div class="stack">${es.map(e=>cardHTML(e)).join('')}</div></section>`;
   }).join('');
   const ten = progs.find(p=>p.youtube);
   m.innerHTML = (html ? `<div class="board">${html}</div>` : `<div class="empty-msg">${selDay===t?'오늘':'이 날'} 올라온 출연 정보가 없어요</div>`) +
-    (ten ? `<div class="side" style="margin-top:18px"><h3>배성재의 텐 · 유튜브 <span class="pill yt">생.녹</span></h3><p>유튜브 생방송·생.녹 공지는 <a href="${ten.youtube}" target="_blank" rel="noopener">유튜브 게시판 열기 →</a></p></div>` : '');
+    (ten && !(ten.ytAt && !ten.ytErr) ? `<div class="side" style="margin-top:18px"><h3>배성재의 텐 · 유튜브 <span class="pill yt">생.녹</span></h3><p>유튜브 게시판을 자동으로 읽지 못했어요. <a href="${ten.youtube}" target="_blank" rel="noopener">유튜브 게시판 직접 열기 →</a></p></div>` : '');
   $('jump').querySelectorAll('button').forEach(b=>b.onclick=()=>{ setHH(); document.getElementById('p-'+b.dataset.j).scrollIntoView({behavior:'smooth'}); });
   setHH(); spy();
   bindCards();
 }
 
+// 유튜브 주간 일정 글에서 그날 부분만 꺼냄 ("10/7(수) - 20:00 … - 22:00 …")
+function daySnippet(text, ymd){
+  if(!text) return '';
+  const m = +ymd.slice(5,7), d = +ymd.slice(8);
+  const re = new RegExp(`(?<![\\d/])0?${m}\\s*[/.]\\s*0?${d}(?!\\d)`);
+  const hit = re.exec(text); if(!hit) return '';
+  let body = text.slice(hit.index);
+  const next = /(?<![\d/])\d{1,2}\s*[\/.]\s*\d{1,2}\s*\(/g; next.lastIndex = hit[0].length;
+  const n = next.exec(body); if(n) body = body.slice(0, n.index);
+  body = body.replace(/[\u{1F300}-\u{1FAFF}\u2190-\u21FF\u2B00-\u2BFF\u2600-\u27BF\uFE0F♥♡]/gu,' ').replace(/\s*-\s*(?=\d{1,2}:\d{2})/g,'\n').replace(/[ \t]+/g,' ').trim();
+  const lines = body.split('\n').map(x=>x.trim()).filter(Boolean);
+  if(lines.length<2) return '';
+  return `<div class="snip"><b>${esc(lines[0])}</b>${lines.slice(1).map(l=>`<div>${esc(l).replace(/^(\d{1,2}:\d{2})/,'<span class="tm">$1</span>')}</div>`).join('')}</div>`;
+}
+function srcPill(post){
+  return post._yt ? '<span class="pill src">유튜브</span>' : post._ig ? '<span class="pill src">인스타 직접</span>' : '';
+}
 function cardHTML(e, isUnknown){
   const n = e.slides.length;
+  if(e.link) return `<div class="card" data-id="${e.post.id}" data-start="0"><div class="car" style="aspect-ratio:auto">
+      <a class="linkcard" href="${esc(e.post.permalink)}" target="_blank" rel="noopener"><span>📷</span>직접 추가한 게시물<br>눌러서 인스타에서 보기</a></div>
+    <div class="body"><div class="cap">${esc(e.post.caption)}</div>
+      <div class="act"><button data-a="date">날짜 수정</button><button data-a="del">삭제</button></div></div></div>`;
   return `<div class="card" data-id="${e.post.id}" data-start="${e.start||0}" style="--pc:${e.prog.color}">
     <div class="car" data-link="${esc(e.post.permalink)}">
       <div class="track">${e.slides.map(x=>`<img loading="lazy" src="${esc(x.url)}" alt="" draggable="false">`).join('')}</div>
@@ -474,10 +565,11 @@ function cardHTML(e, isUnknown){
       <span class="count">1 / ${n}</span><div class="dotsbar">${e.slides.map((_,i)=>`<button data-i="${i}" aria-label="${i+1}번째"></button>`).join('')}</div>`:''}
     </div>
     <div class="body">
+      ${e.post._yt && e.date ? daySnippet(e.post.caption, e.date) : ''}
       <div class="cap">${esc(e.post.caption)}</div>
       <div class="act">
-        <a class="ig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener">인스타에서 보기</a>
-        ${isUnknown && e.guess?`<button data-a="ok" data-g="${e.guess}" style="color:#fff;background:var(--acc);border-color:var(--acc);font-weight:700">${+e.guess.slice(5,7)}/${+e.guess.slice(8)} 출연 맞음</button>`:''}
+        <a class="ig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener">${e.post._yt?'유튜브에서 보기':'인스타에서 보기'}</a>
+        ${isUnknown && e.guess && !e.confirmed?`<button data-a="ok" data-g="${e.guess}" style="color:#fff;background:var(--acc);border-color:var(--acc);font-weight:700">${+e.guess.slice(5,7)}/${+e.guess.slice(8)} 출연 맞음</button>`:''}
         <button data-a="date">${isUnknown?'날짜 지정':'날짜 수정'}</button>
         <button data-a="hide">숨기기</button>
         ${e.manual?'<button data-a="reset">자동으로 되돌리기</button>':''}
@@ -487,6 +579,7 @@ function cardHTML(e, isUnknown){
 function bindCards(){
   document.querySelectorAll('.card').forEach(card=>{
     const car = card.querySelector('.car'), track = card.querySelector('.track');
+    if(!track){ bindActs(card); return; }
     const imgs = [...track.querySelectorAll('img')], n = imgs.length;
     const prev = car.querySelector('.prev'), next = car.querySelector('.next'), cnt = car.querySelector('.count');
     const dots = [...car.querySelectorAll('.dotsbar button')];
@@ -508,23 +601,27 @@ function bindCards(){
         car.innerHTML = `<iframe src="${car.dataset.link.replace(/\/?$/,'/')}embed/" loading="lazy" allowtransparency="true"></iframe>`;
       };
     });
-    card.querySelector('.cap').onclick=e=>e.currentTarget.classList.toggle('open');
-    card.querySelectorAll('.act button').forEach(b=>b.onclick=()=>{
-      const id = card.dataset.id, a = b.dataset.a;
-      const now = Date.now();
-      if(a==='hide') overrides[id]={hide:true, t:now};
-      if(a==='ok') overrides[id]={date:b.dataset.g, t:now};
-      if(a==='reset') delete overrides[id];
-      if(a==='date'){
-        const v = prompt('방송 날짜를 입력하세요 (예: 10/14)', '');
-        if(!v) return;
-        const d = findDates(v, today())[0];
-        if(!d){ alert('날짜 형식을 확인해 주세요 (예: 10/14)'); return; }
-        overrides[id] = {date:d, t:now};
-      }
-      pushSync(overrides[id] ? {set:{[id]:overrides[id]}} : {del:[id]});
-      store.set('overrides', overrides); rebuild(false, true);
-    });
+    bindActs(card);
+  });
+}
+
+function bindActs(card){
+  card.querySelector('.cap').onclick=e=>e.currentTarget.classList.toggle('open');
+  card.querySelectorAll('.act button').forEach(b=>b.onclick=()=>{
+    const id = card.dataset.id, a = b.dataset.a;
+    const now = Date.now();
+    if(a==='hide') overrides[id]={hide:true, t:now};
+    if(a==='ok') overrides[id]={date:b.dataset.g, t:now};
+    if(a==='reset' || a==='del') delete overrides[id];
+    if(a==='date'){
+      const v = prompt('방송 날짜를 입력하세요 (예: 10/14)', '');
+      if(!v) return;
+      const d = findDates(v, today())[0];
+      if(!d){ alert('날짜 형식을 확인해 주세요 (예: 10/14)'); return; }
+      overrides[id] = overrides[id] && overrides[id].link ? {...overrides[id], date:d, t:now} : {date:d, t:now};
+    }
+    pushSync(overrides[id] ? {set:{[id]:overrides[id]}} : {del:[id]});
+    store.set('overrides', overrides); rebuild(false, true);
   });
 }
 
@@ -566,14 +663,33 @@ $('lb').addEventListener('touchend',e=>{ if(tx==null) return; const dx=e.changed
 
 /* 상태 화면 */
 $('reload').onclick = loadAll;
+$('add').onclick = () => {
+  const link = (prompt('인스타(또는 유튜브) 게시물 링크를 붙여넣으세요') || '').trim();
+  if(!/^https?:\/\//.test(link)) return;
+  const list = progs.map((p,i)=>`${i+1}. ${p.name}`).join('\n');
+  const n = +prompt('어느 프로그램인가요? 번호를 입력하세요\n\n' + list, '');
+  const p = progs[n-1]; if(!p) return;
+  const d = findDates(prompt('방송 날짜 (예: 10/14)', '') || '', today())[0];
+  if(!d){ alert('날짜 형식을 확인해 주세요 (예: 10/14)'); return; }
+  const note = prompt('메모 (출연자 이름 등, 비워도 돼요)', '') || '';
+  const id = 'link_' + Date.now().toString(36);
+  overrides[id] = {link, slug:p.slug, date:d, note, t:Date.now()};
+  pushSync({set:{[id]:overrides[id]}}); store.set('overrides', overrides);
+  selDay = diffDays(d, today())<=DAYS_AHEAD ? d : 'unknown';
+  rebuild(false, true);
+};
 $('info').onclick = () => {
   $('when').textContent = '프로그램 상태'; $('jump').innerHTML='';
   const rows = progs.map(p=>{
-    const st = p.err ? `<span class="bad">${p.err}</span>`
-      : p.igOnly ? `<span style="color:var(--warn);font-weight:700">인스타 직접 수집 예정</span> (@${p.igOnly})`
-      : p.latest && diffDays(today(),p.latest)>30 ? `<span class="bad">SBS 연동 멈춤 (마지막 ${p.latest})</span>`
-      : `<span class="ok">정상</span> · 최근 게시물 ${p.latest||'-'}`;
-    return `<tr><td><span class="sw" style="background:${p.color}"></span></td><td><b>${fmtTime(p.start)}</b></td><td>${esc(p.name)}</td><td>${p.ch}</td><td>${st}</td></tr>`;
+    const ago = ts => { if(!ts) return ''; const m = Math.round((Date.now()-ts)/6e4); return m<60 ? `${m}분 전` : m<1440 ? `${Math.round(m/60)}시간 전` : `${Math.round(m/1440)}일 전`; };
+    const sbs = p.igOnly ? '<span style="color:var(--faint)">홈페이지 없음</span>'
+      : p.err ? `<span class="bad">${p.err}</span>`
+      : p.latest && diffDays(today(),p.latest)>30 ? `<span class="bad">멈춤 (${p.latest})</span>`
+      : `<span class="ok">정상</span> ${p.latest||''}`;
+    const ig = p.igAt ? (Date.now()-p.igAt > 6*36e5 ? `<span style="color:var(--warn);font-weight:700">${ago(p.igAt)}</span>` : `<span class="ok">정상</span> ${ago(p.igAt)}`)
+      : `<span style="color:var(--warn);font-weight:700">집 PC 수집 대기</span>`;
+    const yt = p.youtube ? `<br>유튜브: ${p.ytErr ? `<span class="bad">${esc(p.ytErr)}</span>` : p.ytAt ? `<span class="ok">정상</span> ${ago(p.ytAt)}` : '<span style="color:var(--warn);font-weight:700">저장소 업데이트 필요</span>'}` : '';
+    return `<tr><td><span class="sw" style="background:${p.color}"></span></td><td><b>${fmtTime(p.start)}</b></td><td>${esc(p.name)}<br><small style="color:var(--faint)">@${esc(p.ig||'')}</small></td><td>${p.ch}</td><td>홈페이지: ${sbs}<br>인스타: ${ig}${yt}</td></tr>`;
   }).join('');
   $('main').innerHTML = `<div class="side" style="border-left-color:var(--acc)"><h3>프로그램 상태</h3>
     <table class="st">${rows}</table>
