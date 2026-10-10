@@ -29,6 +29,8 @@ header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 9
 .bar h1 .when{font-size:15px;font-weight:700;color:var(--acc)}
 .iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:10px;height:36px;padding:0 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
 .iconbtn:hover{border-color:var(--acc)}
+.igbtn{background:linear-gradient(135deg,#f58529,#dd2a7b 55%,#8134af);color:#fff;border:0;font-weight:700}
+.igbtn[disabled]{opacity:.75;cursor:wait}
 .status{max-width:1600px;margin:0 auto;padding:4px 16px 0;font-size:12px;color:var(--sub);min-height:18px;display:flex;align-items:center;gap:8px}
 .status .prog-bar{flex:0 0 120px;height:4px;border-radius:2px;background:var(--chip);overflow:hidden;display:none}
 .status .prog-bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
@@ -160,6 +162,7 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 <header>
   <div class="bar">
     <h1>라디오 손님 <span class="when" id="when"></span></h1>
+    <button class="iconbtn igbtn" id="igc" title="집 PC 크롬에서만 보여요" style="display:none">📷 인스타 수집</button>
     <button class="iconbtn" id="reload" title="새로고침">↻ 새로고침</button>
     <button class="iconbtn" id="info" title="프로그램 상태">⚙</button>
   </div>
@@ -663,6 +666,33 @@ $('lb').addEventListener('touchend',e=>{ if(tx==null) return; const dx=e.changed
 
 /* 상태 화면 */
 $('reload').onclick = loadAll;
+
+/* 📷 인스타 수집 — 집 PC 크롬(확장 프로그램 설치된 곳)에서만 버튼이 보이고, 누를 때만 수집 */
+function igBtnInit(){
+  if(document.documentElement.dataset.igCollector) $('igc').style.display = '';
+}
+igBtnInit(); setTimeout(igBtnInit, 500);
+$('igc').onclick = () => {
+  const b = $('igc'); b.disabled = true; b.textContent = '📷 수집 준비…';
+  window.postMessage({rg:'collect'}, '*');
+};
+window.addEventListener('message', async e => {
+  if(e.source !== window || !e.data || e.data.rg !== 'ig') return;
+  const m = e.data, b = $('igc');
+  if(m.type === 'progress'){
+    b.textContent = `📷 ${m.done}/${m.total}`;
+    setStatus(`인스타 수집 중… ${m.user==='전송 중' ? '저장소로 보내는 중' : '@'+m.user} (${m.done}/${m.total})`, m.done/m.total);
+  }
+  if(m.type === 'done'){
+    const r = m.result || {}, fails = Object.entries(r.fail || {});
+    b.disabled = false; b.textContent = '📷 인스타 수집';
+    if(r.busy){ setStatus('이미 수집 중이에요'); return; }
+    const msg = `인스타 수집 완료 — 성공 ${(r.ok||[]).length}개` + (fails.length ? ` · 실패 ${fails.length}개 (${fails.map(([u,er])=>'@'+u+': '+er).join(', ')})` : '') + (r.sendErr ? ` · 전송 실패: ${r.sendErr}` : '');
+    setStatus(msg);
+    if(fails.some(([,er])=>/로그인/.test(er))) alert('인스타 로그인이 필요해요. 이 크롬에서 instagram.com 에 로그인한 뒤 다시 눌러주세요.');
+    if(r.sent){ await loadAll(); setStatus(msg); }
+  }
+});
 $('add').onclick = () => {
   const link = (prompt('인스타(또는 유튜브) 게시물 링크를 붙여넣으세요') || '').trim();
   if(!/^https?:\/\//.test(link)) return;
