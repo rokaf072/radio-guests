@@ -299,7 +299,8 @@ async function pullSync(){
     const r = await fetch(syncUrl + (syncUrl.includes('?')?'&':'?') + 'v=2&t=' + Date.now());
     const j = await r.json();
     if(j && typeof j==='object'){
-      if(j.overrides){ overrides = j.overrides; igData = j.ig || {}; ytData = j.yt || null; keepData = j.keep || {}; }
+      if(j.overrides){ overrides = j.overrides; igData = j.ig || {}; ytData = j.yt || null; keepData = j.keep || {};
+        if(j.ocr) for(const k in j.ocr) if(!(k in ocrCache)) ocrCache[k] = j.ocr[k]; }
       else overrides = j;   // 예전 저장소 코드
       store.set('overrides', overrides); syncOk = true; return true;
     }
@@ -568,6 +569,8 @@ function saveKeep(){
   if(Object.keys(send).length) pushSync({keep:send});
 }
 
+const ocrNew = {};   // 이번에 새로 읽은 결과 → 저장소로 공유
+function shareOcr(){ const k = Object.keys(ocrNew); if(!k.length) return; const b = {}; k.forEach(x=>{ b[x]=ocrNew[x]; delete ocrNew[x]; }); pushSync({ocr:b}); }
 async function runOcr(){
   if(ocrBusy || !ocrQueue.length) return;
   ocrBusy = true;
@@ -582,15 +585,18 @@ async function runOcr(){
         if(!(s.id in ocrCache)){
           try{ const {data} = await w.recognize(s.url); ocrCache[s.id] = data.text || ''; }
           catch(e){ ocrCache[s.id] = ''; }
+          ocrNew[s.id] = ocrCache[s.id];
           store.set('ocrCache', pruneCache(ocrCache));
         }
         done++;
         setStatus(`사진 속 날짜 읽는 중… ${done}/${total}`, done/total);
         if(done%3===0) rebuild(false, false);
+        if(done%5===0) shareOcr();
       }
     }));
   }catch(e){ setStatus('사진 글자 읽기를 시작하지 못했어요 — 본문 날짜만 사용 중'); }
   ocrBusy = false;
+  shareOcr();
   rebuild(false, false);
 }
 function pruneCache(c){ const k=Object.keys(c); if(k.length>600) k.slice(0,k.length-600).forEach(x=>delete c[x]); return c; }
