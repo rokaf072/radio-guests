@@ -292,6 +292,7 @@ let overrides = store.get('overrides', {});
 const SYNC_URL = 'https://script.google.com/macros/s/AKfycbyWFC0vzaAbKPoDMc2rrF4ucckHh9VTRrSPLAi_6MPQN_XAE1Ahak-Ufmd2hFuGf8ki/exec';   // ← 배포한 웹 앱 주소(…/exec)를 여기에 넣으면 모든 기기가 자동 연동
 let syncUrl = SYNC_URL || store.get('syncUrl', '');
 let syncOk = null;     // null: 미설정, true: 연동됨, false: 오류
+let ocrUploaded = false;
 let igData = {}, ytData = null, keepData = {};   // 집 PC 확장이 올린 인스타 / 저장소가 읽은 유튜브
 async function pullSync(){
   if(!syncUrl) return false;
@@ -300,7 +301,9 @@ async function pullSync(){
     const j = await r.json();
     if(j && typeof j==='object'){
       if(j.overrides){ overrides = j.overrides; igData = j.ig || {}; ytData = j.yt || null; keepData = j.keep || {};
-        if(j.ocr) for(const k in j.ocr) if(!(k in ocrCache)) ocrCache[k] = j.ocr[k]; }
+        if(j.ocr){ for(const k in j.ocr) if(!(k in ocrCache)) ocrCache[k] = j.ocr[k];
+          // 이 기기가 예전에 읽어 둔 것 중 저장소에 없는 것도 올려 공유
+          if(!ocrUploaded){ ocrUploaded = true; for(const k in ocrCache) if(!(k in j.ocr)) ocrNew[k] = ocrCache[k]; shareOcr(); } } }
       else overrides = j;   // 예전 저장소 코드
       store.set('overrides', overrides); syncOk = true; return true;
     }
