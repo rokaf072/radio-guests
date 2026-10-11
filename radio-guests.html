@@ -74,6 +74,9 @@ main{max-width:1600px;margin:0 auto;padding:16px 16px 60px}
 .snip{background:#fff7d6;color:#3b2f00;border-radius:10px;padding:9px 11px;font-size:13.5px;line-height:1.55}
 .snip b{display:block;font-size:14.5px;margin-bottom:3px}
 .snip .tm{display:inline-block;min-width:44px;font-weight:900;color:#b45309}
+.dline{font-size:12.5px;color:var(--sub);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.dline b{color:var(--ink);background:color-mix(in srgb,#7c3aed 18%,transparent);border-radius:6px;padding:2px 7px;font-weight:700}
+.dline .sep{opacity:.5}
 .kept{font-size:12px;font-weight:700;color:#b45309;background:#fff1d6;border-radius:8px;padding:5px 9px}
 .linkcard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;aspect-ratio:auto!important;padding:26px 12px;background:linear-gradient(135deg,#f58529,#dd2a7b 50%,#8134af)!important;color:#fff;text-align:center;font-weight:700;text-decoration:none}
 .linkcard span{font-size:28px}
@@ -437,7 +440,7 @@ function classify(p, post, t, queue){
     const ov0 = overrides[post.id]; if(ov0 && ov0.hide) return;
     const sl = slidesOf(post), x = d => diffDays(d,t);
     for(const [d,st] of Object.entries(post._keepDates)){
-      if(d>=weekStart(t) && x(d)<=DAYS_AHEAD) entries.push({prog:p, post, posted, slides:sl, date:d, start:st.s||0, weekly:!!st.w, manual:!!st.m});
+      if(d>=weekStart(t) && x(d)<=DAYS_AHEAD) { const ks=Object.keys(post._keepDates).sort(); entries.push({prog:p, post, posted, slides:sl, date:d, start:st.s||0, weekly:!!st.w, manual:!!st.m, range: ks.length>1?[ks[0],ks[ks.length-1]]:null}); }
       else if(x(d)>DAYS_AHEAD && x(d)<=FAR_DAYS) unknown.push({prog:p, post, posted, slides:sl, guess:d, far:true, confirmed:!!st.m});
     }
     return;
@@ -498,7 +501,8 @@ function classify(p, post, t, queue){
   for(const d of fut){
     let idx = slideDates.findIndex(ds=>ds.length===1 && ds[0]===d);
     if(idx<0) idx = slideDates.findIndex(ds=>ds.length>0 && ds.length<=2 && ds.includes(d));
-    entries.push({...base, date:d, start:Math.max(0,idx), weekly});
+    const sa = [...all].sort();
+    entries.push({...base, date:d, start:Math.max(0,idx), weekly, range: sa.length>1 ? [sa[0], sa[sa.length-1]] : null});
   }
 }
 
@@ -521,6 +525,13 @@ function rebuild(queue, force){
       if(x<=DAYS_AHEAD) entries.push(e); else unknown.push({...e, guess:d, far:true, confirmed:true});
     }
   }
+  // 보관본(원본 삭제됨)은 같은 프로그램·같은 날짜에 새 게시물이 있으면 확인 필요로 옮김
+  const fresh = new Set(entries.filter(e=>!e.post._kept).map(e=>e.prog.slug+'|'+e.date));
+  entries = entries.filter(e=>{
+    if(!e.post._kept || !fresh.has(e.prog.slug+'|'+e.date)) return true;
+    if(!unknown.some(u=>u.post.id===e.post.id)) unknown.push({...e, guess:e.date, confirmed:true, replaced:true});
+    return false;
+  });
   // 보고 있는 날짜의 내용이 그대로면 위쪽 날짜 칸만 고치고 사진은 건드리지 않음
   if(force===false && sigOf()===lastSig) renderDays(); else render();
   if(!ocrBusy) setStatus(`업데이트 ${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}`);
@@ -615,7 +626,7 @@ function renderMain(){
       ? (()=>{
           const box = (e)=>`<section class="prog" style="--pc:${e.prog.color}">
             <div class="ph">${e.prog.logo?`<img class="logo" src="${e.prog.logo}" alt="">`:''}<div class="nm"><h2>${esc(e.prog.name)}</h2>
-            <div class="meta"><span class="pill time">${fmtTime(e.prog.start)}</span>${e.guess?`<span class="pill ${e.confirmed?'week':'hot'}">${e.confirmed?'예정':'찾은 날짜'} ${+e.guess.slice(5,7)}/${+e.guess.slice(8)} (${WD[wdIdx(e.guess)]})</span>`:'<span class="pill">날짜 없음</span>'}${srcPill(e.post)}</div></div></div>
+            <div class="meta"><span class="pill time">${fmtTime(e.prog.start)}</span>${e.replaced?'<span class="pill">새 게시물로 대체됨</span>':''}${e.guess?`<span class="pill ${e.confirmed?'week':'hot'}">${e.confirmed?'예정':'찾은 날짜'} ${+e.guess.slice(5,7)}/${+e.guess.slice(8)} (${WD[wdIdx(e.guess)]})</span>`:'<span class="pill">날짜 없음</span>'}${srcPill(e.post)}</div></div></div>
             <div class="stack">${cardHTML(e,true)}</div></section>`;
           const far = unknown.filter(e=>e.far).sort((a,b)=>a.guess<b.guess?-1:a.guess>b.guess?1:a.prog.start-b.prog.start);
           const near = unknown.filter(e=>!e.far).sort((a,b)=>a.prog.start-b.prog.start);
@@ -663,6 +674,15 @@ function daySnippet(text, ymd){
   if(lines.length<2) return '';
   return `<div class="snip"><b>${esc(lines[0])}</b>${lines.slice(1).map(l=>`<div>${esc(l).replace(/^(\d{1,2}:\d{2})/,'<span class="tm">$1</span>')}</div>`).join('')}</div>`;
 }
+// 카드에 '올린 날짜'와 주간표 기간을 표시
+function dateLine(e){
+  const f = d => `${+d.slice(5,7)}/${+d.slice(8)}(${WD[wdIdx(d)]})`;
+  const up = e.post.timestamp ? tsYmd(e.post.timestamp) : '';
+  const parts = [];
+  if(e.range && e.range[0] !== e.range[1]) parts.push(`<b>📅 ${f(e.range[0])} ~ ${f(e.range[1])}</b>`);
+  if(up) parts.push(`올린 날 ${f(up)}`);
+  return parts.length ? `<div class="dline">${parts.join('<span class="sep">·</span>')}</div>` : '';
+}
 function srcPill(post){
   return (post._kept ? '<span class="pill src" title="원본이 삭제돼서 보관해 둔 내용이에요">🗂 보관본</span>' : '')
     + (post._yt ? '<span class="pill src">유튜브</span>' : post._ig ? '<span class="pill src">인스타 직접</span>' : '');
@@ -682,6 +702,7 @@ function cardHTML(e, isUnknown){
     <div class="body">
       ${e.post._yt && e.date ? daySnippet(e.post.caption, e.date) : ''}
       ${e.post._kept ? '<div class="kept">🗂 원본이 삭제돼서 보관해 둔 내용이에요 (방송 주가 끝나면 정리돼요)</div>' : ''}
+      ${dateLine(e)}
       <div class="cap">${esc(e.post.caption)}</div>
       <div class="act">
         <a class="ig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener">${e.post._yt?'유튜브에서 보기':'인스타에서 보기'}</a>
@@ -788,8 +809,8 @@ function igBtnInit(){
 igBtnInit(); setTimeout(igBtnInit, 500);
 $('igc').onclick = () => {
   const b = $('igc'); b.disabled = true; b.textContent = '📷 수집 준비…';
-  // SBS 홈페이지에 인스타 칸이 없는 프로그램만 직접 수집 (요청을 줄여 인스타가 막지 않게)
-  const need = progs.filter(p=>p.ig && (p.igOnly || !(rawSbs[p.slug] && rawSbs[p.slug].posts && rawSbs[p.slug].posts.length))).map(p=>p.ig);
+  // 인스타 계정이 등록된 모든 프로그램을 수집 (프로필 화면을 직접 여는 방식이라 막히지 않음)
+  const need = [...new Set(progs.map(p=>p.ig).filter(Boolean))];
   if(!need.length){ b.disabled=false; b.textContent='📷 인스타 수집'; setStatus('직접 수집할 계정이 없어요 — 모두 SBS 홈페이지에서 받아오고 있어요'); return; }
   window.postMessage({rg:'collect', accounts:need}, '*');
 };
@@ -835,9 +856,7 @@ $('info').onclick = () => {
       : p.latest && diffDays(today(),p.latest)>30 ? `<span class="bad">멈춤 (${p.latest})</span>`
       : `<span class="ok">정상</span> ${p.latest||''}`;
     const ig = p.igAt ? (Date.now()-p.igAt > 6*36e5 ? `<span style="color:var(--warn);font-weight:700">${ago(p.igAt)}</span>` : `<span class="ok">정상</span> ${ago(p.igAt)}`)
-      : (!p.igOnly && rawSbs[p.slug] && rawSbs[p.slug].posts && rawSbs[p.slug].posts.length)
-        ? `<span style="color:var(--faint)">홈페이지로 받는 중 (직접 수집 불필요)</span>`
-        : p.ig ? `<span style="color:var(--warn);font-weight:700">📷 수집 필요</span>` : `<span style="color:var(--faint)">계정 없음</span>`;
+      : p.ig ? `<span style="color:var(--warn);font-weight:700">📷 수집 필요</span>` : `<span style="color:var(--faint)">계정 없음</span>`;
     const yt = p.youtube ? `<br>유튜브: ${p.ytErr ? `<span class="bad">${esc(p.ytErr)}</span>` : p.ytAt ? `<span class="ok">정상</span> ${ago(p.ytAt)}` : '<span style="color:var(--warn);font-weight:700">저장소 업데이트 필요</span>'}` : '';
     return `<tr><td><span class="sw" style="background:${p.color}"></span></td><td><b>${fmtTime(p.start)}</b></td><td>${esc(p.name)}<br><small style="color:var(--faint)">@${esc(p.ig||'')}</small></td><td>${p.ch}</td><td>홈페이지: ${sbs}<br>인스타: ${ig}${yt}</td></tr>`;
   }).join('');
