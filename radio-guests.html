@@ -788,7 +788,10 @@ function igBtnInit(){
 igBtnInit(); setTimeout(igBtnInit, 500);
 $('igc').onclick = () => {
   const b = $('igc'); b.disabled = true; b.textContent = '📷 수집 준비…';
-  window.postMessage({rg:'collect', accounts:progs.map(p=>p.ig).filter(Boolean)}, '*');
+  // SBS 홈페이지에 인스타 칸이 없는 프로그램만 직접 수집 (요청을 줄여 인스타가 막지 않게)
+  const need = progs.filter(p=>p.ig && (p.igOnly || !(rawSbs[p.slug] && rawSbs[p.slug].posts && rawSbs[p.slug].posts.length))).map(p=>p.ig);
+  if(!need.length){ b.disabled=false; b.textContent='📷 인스타 수집'; setStatus('직접 수집할 계정이 없어요 — 모두 SBS 홈페이지에서 받아오고 있어요'); return; }
+  window.postMessage({rg:'collect', accounts:need}, '*');
 };
 window.addEventListener('message', async e => {
   if(e.source !== window || !e.data || e.data.rg !== 'ig') return;
