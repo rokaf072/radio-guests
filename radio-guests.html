@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0e1014">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest?v=3">
+<link rel="icon" type="image/png" href="favicon.png?v=3">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="라디오 손님">
 <title>라디오 손님</title>
@@ -309,7 +309,7 @@ function pushSync(body){
     .then(()=>{ syncOk = true; }).catch(()=>{ syncOk = false; setStatus('⚠ 연동 저장 실패 — 이 기기에만 저장됐어요'); });
 }
 document.addEventListener('visibilitychange', async ()=>{
-  if(document.visibilityState==='visible' && progs.length && await pullSync()) rebuild(false, false);
+  if(document.visibilityState==='visible' && progs.length && !loading && await pullSync()){ buildAll(false); saveSnap(); }
 });
 
 /* ---------- 상태 ---------- */
@@ -322,57 +322,101 @@ function setStatus(s, frac){
 }
 async function getJSON(url){ const r = await fetch(url,{cache:'no-cache'}); if(!r.ok) throw new Error(r.status); return r.json(); }
 
-async function loadAll(){
-  setStatus('불러오는 중…');
-  await pullSync();
+/* ---------- 불러오기: 저장본 즉시 표시 → SBS·구글 동시에 새로 받기 ---------- */
+let rawSbs = store.get('rawSbs', {});      // slug → {meta, posts, at}
+let metaCache = store.get('metaCache', {}); // slug → 프로그램 정보 (시간·색·로고, 하루 보관)
+let loading = false;
+
+function programList(){
   const extra = Object.values(overrides).filter(v=>v && v.prog && !PROGRAMS.some(x=>x.slug===v.slug))
                      .map(v=>({slug:v.slug, name:v.name||v.slug, ig:v.ig||'', added:true}));
-  progs = await Promise.all([...PROGRAMS, ...extra].map(async p => {
-    const o = {...p, start:9999, posts:[], err:'', latest:'', color:'#6b7280', logo:'', ch:''};
-    try{
-      const m = (await getJSON(`${API}/program-api/1.0/menu/${p.slug}`)).program;
-      o.vodid = m.vodid; o.broad = m.broaddate; o.start = startMin(m.broaddate);
-      if(p.added && m.title) o.name = m.title;
-      if(m.color) o.color = m.color;
-      if(m.circleimg) o.logo = m.circleimg.startsWith('//') ? 'https:'+m.circleimg : m.circleimg;
-      o.ch = m.section==='PF' ? '파워FM' : m.section==='LF' ? '러브FM' : '';
-      if(!p.igOnly){
-        const ig = await getJSON(`${API}/gorealra-api/instagram/${o.vodid}.json`);
-        o.posts = ig.data || [];
-        if(o.posts[0]) o.latest = tsYmd(o.posts[0].timestamp);
-      }
-    }catch(e){ o.err = 'SBS 불러오기 실패'; }
-    // 인스타 직접 수집분을 합침 (같은 게시물은 SBS 쪽 사진을 우선 — SBS 사진은 만료되지 않음)
-    const igd = p.ig && igData[p.ig];
-    if(igd && igd.posts){
-      o.igAt = igd.at;
-      const have = new Set(o.posts.map(postKey));
-      for(const q of igd.posts){ if(!have.has(postKey(q))){ o.posts.push({...q, _ig:true}); have.add(postKey(q)); } }
+  return [...PROGRAMS, ...extra];
+}
+async function fetchMeta(p){
+  const c = metaCache[p.slug];
+  if(c && Date.now()-c.at < 864e5) return c;
+  const m = (await getJSON(`${API}/program-api/1.0/menu/${p.slug}`)).program;
+  const v = {vodid:m.vodid, broad:m.broaddate, title:m.title, color:m.color, section:m.section,
+             logo: m.circleimg ? (m.circleimg.startsWith('//') ? 'https:'+m.circleimg : m.circleimg) : '', at:Date.now()};
+  metaCache[p.slug] = v; return v;
+}
+async function fetchSbs(p){
+  try{
+    const meta = await fetchMeta(p);
+    let posts = [];
+    if(!p.igOnly) posts = (await getJSON(`${API}/gorealra-api/instagram/${meta.vodid}.json`)).data || [];
+    rawSbs[p.slug] = {meta, posts, at:Date.now()};
+  }catch(e){ if(rawSbs[p.slug]) rawSbs[p.slug].err = 'SBS 불러오기 실패'; else rawSbs[p.slug] = {err:'SBS 불러오기 실패', posts:[]}; }
+}
+function assemble(p){
+  const r = rawSbs[p.slug] || {posts:[]}, m = r.meta || {};
+  const o = {...p, start:9999, posts:[], err:r.err||'', latest:'', color:'#6b7280', logo:'', ch:''};
+  if(m.vodid){
+    o.vodid = m.vodid; o.broad = m.broad; o.start = startMin(m.broad);
+    if(p.added && m.title) o.name = m.title;
+    if(m.color) o.color = m.color;
+    o.logo = m.logo || '';
+    o.ch = m.section==='PF' ? '파워FM' : m.section==='LF' ? '러브FM' : '';
+  }
+  o.posts = (r.posts||[]).map(q=>({...q}));
+  if(o.posts[0]) o.latest = tsYmd(o.posts[0].timestamp);
+  // 인스타 직접 수집분을 합침 (같은 게시물은 SBS 쪽 사진을 우선 — SBS 사진은 만료되지 않음)
+  const igd = p.ig && igData[p.ig];
+  if(igd && igd.posts){
+    o.igAt = igd.at;
+    const have = new Set(o.posts.map(postKey));
+    for(const q of igd.posts){ if(!have.has(postKey(q))){ o.posts.push({...q, _ig:true}); have.add(postKey(q)); } }
+  }
+  // 배성재의 텐 유튜브 게시판
+  if(p.youtube && ytData && ytData.posts){
+    o.ytAt = ytData.at; o.ytErr = ytData.err;
+    for(const y of ytData.posts){
+      const imgs = (y.imgs||[]).map((u,i)=>({id:'yt_'+y.id+'_'+i, media_type:'IMAGE', media_url:u}));
+      o.posts.push({id:'yt_'+y.id, caption:y.text, timestamp:y.pub, _yt:true,
+        media_type: imgs.length>1?'CAROUSEL_ALBUM':'IMAGE', media_url: imgs[0] ? imgs[0].media_url : null,
+        permalink:'https://www.youtube.com/post/'+y.id, ...(imgs.length>1?{children:{data:imgs}}:{})});
     }
-    // 배성재의 텐 유튜브 게시판
-    if(p.youtube && ytData && ytData.posts){
-      o.ytAt = ytData.at; o.ytErr = ytData.err;
-      for(const y of ytData.posts){
-        const imgs = (y.imgs||[]).map((u,i)=>({id:'yt_'+y.id+'_'+i, media_type:'IMAGE', media_url:u}));
-        o.posts.push({id:'yt_'+y.id, caption:y.text, timestamp:y.pub, _yt:true,
-          media_type: imgs.length>1?'CAROUSEL_ALBUM':'IMAGE', media_url: imgs[0] ? imgs[0].media_url : null,
-          permalink:'https://www.youtube.com/post/'+y.id, ...(imgs.length>1?{children:{data:imgs}}:{})});
-      }
-    }
-    for(const q of o.posts){ const k = postKey(q); if(k !== String(q.id)) q._oid = String(q.id); q.id = k; }
-    // 보관함: 인스타·홈페이지에서 지워졌어도 방송 날짜가 지나기 전이면 다시 보여줌
-    const have2 = new Set(o.posts.map(q=>q.id));
-    for(const id in keepData){
-      const k = keepData[id];
-      if(k.slug !== p.slug || have2.has(id) || weekEnd(k.until) < today()) continue;
-      o.posts.push({...k.post, id, _kept:true, _keepDates:k.dates||{}});
-    }
-    o.posts.sort((a,b)=>a.timestamp<b.timestamp?1:-1);
-    if(o.posts[0]) o.latestAny = tsYmd(o.posts[0].timestamp);
-    return o;
-  }));
-  progs.sort((a,b)=>a.start-b.start);
-  rebuild(true);
+  }
+  for(const q of o.posts){ const k = postKey(q); if(k !== String(q.id)) q._oid = String(q.id); q.id = k; }
+  // 보관함: 인스타·홈페이지에서 지워졌어도 방송 주가 끝나기 전이면 다시 보여줌
+  const have2 = new Set(o.posts.map(q=>q.id));
+  for(const id in keepData){
+    const k = keepData[id];
+    if(k.slug !== p.slug || have2.has(id) || weekEnd(k.until) < today()) continue;
+    o.posts.push({...k.post, id, _kept:true, _keepDates:k.dates||{}});
+  }
+  o.posts.sort((a,b)=>a.timestamp<b.timestamp?1:-1);
+  if(o.posts[0]) o.latestAny = tsYmd(o.posts[0].timestamp);
+  return o;
+}
+function buildAll(queue){
+  progs = programList().map(assemble).sort((a,b)=>a.start-b.start);
+  rebuild(queue, false);
+}
+function saveSnap(){
+  store.set('rawSbs', rawSbs); store.set('metaCache', metaCache);
+  store.set('syncSnap', {ig:igData, yt:ytData, keep:keepData});
+}
+async function loadAll(){
+  if(loading) return; loading = true;
+  // 1) 저장해 둔 지난 화면을 바로 표시
+  if(!progs.length && Object.keys(rawSbs).length){
+    const sn = store.get('syncSnap', null);
+    if(sn){ igData = sn.ig||{}; ytData = sn.yt||null; keepData = sn.keep||{}; }
+    buildAll(false);
+    setStatus('최신 내용 불러오는 중…');
+  } else setStatus('불러오는 중…');
+  // 2) 구글 저장소와 SBS를 동시에
+  const syncP = pullSync();
+  await Promise.all(programList().map(fetchSbs));
+  buildAll(false);                                  // SBS 최신분 먼저 반영
+  setStatus('최신 내용 불러오는 중… (연동 자료)');
+  await syncP;
+  const more = programList().filter(p=>!rawSbs[p.slug]);   // 연동으로 새로 생긴 프로그램
+  if(more.length) await Promise.all(more.map(fetchSbs));
+  buildAll(true);
+  saveSnap();
+  loading = false;
   runOcr();
 }
 
