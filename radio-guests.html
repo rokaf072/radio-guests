@@ -835,7 +835,9 @@ $('info').onclick = () => {
       : p.latest && diffDays(today(),p.latest)>30 ? `<span class="bad">멈춤 (${p.latest})</span>`
       : `<span class="ok">정상</span> ${p.latest||''}`;
     const ig = p.igAt ? (Date.now()-p.igAt > 6*36e5 ? `<span style="color:var(--warn);font-weight:700">${ago(p.igAt)}</span>` : `<span class="ok">정상</span> ${ago(p.igAt)}`)
-      : `<span style="color:var(--warn);font-weight:700">집 PC 수집 대기</span>`;
+      : (!p.igOnly && rawSbs[p.slug] && rawSbs[p.slug].posts && rawSbs[p.slug].posts.length)
+        ? `<span style="color:var(--faint)">홈페이지로 받는 중 (직접 수집 불필요)</span>`
+        : p.ig ? `<span style="color:var(--warn);font-weight:700">📷 수집 필요</span>` : `<span style="color:var(--faint)">계정 없음</span>`;
     const yt = p.youtube ? `<br>유튜브: ${p.ytErr ? `<span class="bad">${esc(p.ytErr)}</span>` : p.ytAt ? `<span class="ok">정상</span> ${ago(p.ytAt)}` : '<span style="color:var(--warn);font-weight:700">저장소 업데이트 필요</span>'}` : '';
     return `<tr><td><span class="sw" style="background:${p.color}"></span></td><td><b>${fmtTime(p.start)}</b></td><td>${esc(p.name)}<br><small style="color:var(--faint)">@${esc(p.ig||'')}</small></td><td>${p.ch}</td><td>홈페이지: ${sbs}<br>인스타: ${ig}${yt}</td></tr>`;
   }).join('');
