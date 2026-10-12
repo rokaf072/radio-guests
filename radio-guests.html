@@ -1295,6 +1295,23 @@ $('sr').onclick = e=>{ if(e.target.id==='sr') closeSearch(); };
 $('srch').onclick = openSearch;
 addEventListener('popstate', ()=>closeSearch(true));
 
+/* 2019년 이전 채우기: 오래된 장수 프로그램 7개의 다시듣기에서 2016.10 ~ 2019.12 기간만 */
+const OLD_PROGS = [/컬투쇼/, /러브게임/, /이숙영|러브FM/, /배성재의\s*텐/, /김영철의\s*파워FM/, /씨네타운/, /영스트리트/];
+async function startRangeCrawl(){
+  await loadHist();
+  const H = histData || {}, names = H._names || {}, list = [], seen = new Set();
+  const add = (slug, name) => { if(!slug || slug.startsWith('T:') || seen.has(slug)) return; seen.add(slug); list.push({slug, name}); };
+  for(const re of OLD_PROGS){
+    progs.filter(p=>re.test(p.name)).forEach(p=>add(p.slug, p.name));
+    Object.entries(names).filter(([c,t])=>re.test(t)).forEach(([c,t])=>add(c, t));   // 진행자가 바뀌기 전 옛 프로그램 코드도
+  }
+  const kst = new Date(Date.now()+9*36e5).toISOString().slice(0,10);
+  const from = addDays(kst, -3650), to = '2019-12-30';
+  if(!confirm(`장수 프로그램의 다시듣기에서 ${from} ~ ${to} 출연 기록을 채울까요?\n\n${list.map(p=>'· '+p.name).join('\n')}\n\n2020년 이후는 편성표로 이미 있어서 건너뛰어요. 프로그램마다 몇 분씩 걸려요 (창은 열어두세요).`)) return;
+  histRun = {done:1, total:list.length, user:'준비 중'}; showHistToast();
+  window.postMessage({rg:'range', progs:list, from, to}, '*');
+}
+
 /* 편성표 출연자 10년치 (SBS 편성표 데이터 — 날짜별로 바로 받아서 빠름) */
 function startSchedCrawl(){
   if(!confirm('SBS 편성표에서 지난 10년 동안의 프로그램별 출연자를 모아 올까요? (이미 받은 날짜는 건너뛰고 그 이전부터 이어서 받아요)\n\n파워FM·러브FM 전체 · 10~20분쯤 걸려요. 그동안 이 창은 열어두세요. (이미 받은 기록은 중복 없이 합쳐져요)')) return;
@@ -1433,7 +1450,7 @@ $('info').onclick = () => {
     ${progs.filter(p=>p.added).length ? `<p style="margin-top:8px">추가한 프로그램: ${progs.filter(p=>p.added).map(p=>`<b>${esc(p.name)}</b> <button class="np_del" data-s="${p.slug}" style="font-size:11px;border:1px solid var(--line);border-radius:6px;background:none;color:var(--sub);cursor:pointer">삭제</button>`).join(' · ')}</p>` : ''}
     ${(document.documentElement.dataset.igCollector||'') >= '2.2' ? `<h3 style="margin-top:18px">지난 출연 기록 (검색용)</h3>
     <p>SBS 홈페이지 [다시듣기]·[방송클립영상] 목록에서 지난 3년 기록을 한 번에 모아요. 오늘부터는 자동으로 쌓여요.</p>
-    <div class="act" style="margin-top:8px">${(document.documentElement.dataset.igCollector||'') >= '2.3' ? '<button id="schedgo" class="pri">🎙 편성표 출연자 가져오기 (10년)</button>' : ''}<button id="histgo">📚 다시듣기·클립 기록 (10년)</button></div>` : ''}
+    <div class="act" style="margin-top:8px">${(document.documentElement.dataset.igCollector||'') >= '2.3' ? '<button id="schedgo" class="pri">🎙 편성표 출연자 가져오기 (10년)</button>' : ''}${(document.documentElement.dataset.igCollector||'') >= '2.4' ? '<button id="rangego" class="pri">📼 2019년 이전 채우기 (장수 프로그램)</button>' : ''}<button id="histgo">📚 다시듣기·클립 기록 (10년)</button></div>` : ''}
     <h3 style="margin-top:18px">기기 간 연동</h3>
     <p>${syncUrl ? (syncOk===false ? '<span class="bad">연동 주소에 접속이 안 돼요</span>' : '<span class="ok">연동됨</span> — 숨기기·날짜 지정이 모든 기기에 똑같이 적용돼요.') : '연동 안 됨 — 숨기기·날짜 지정이 이 기기에만 저장돼요.'}</p>
     ${SYNC_URL ? '' : `<div class="act" style="margin-top:8px"><input id="surl" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(syncUrl)}" style="flex:1;min-width:240px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><button id="ssave">연동 주소 저장</button></div>`}
@@ -1453,6 +1470,7 @@ $('info').onclick = () => {
   $('back').onclick=render;
   if($('histgo')) $('histgo').onclick = startHistCrawl;
   if($('schedgo')) $('schedgo').onclick = startSchedCrawl;
+  if($('rangego')) $('rangego').onclick = startRangeCrawl;
   $('np_add').onclick = async () => {
     const raw = $('np_url').value.trim(), ig = $('np_ig').value.trim().replace(/^@/,'').replace(/^https?:\/\/(www\.)?instagram\.com\//,'').replace(/[\/?].*$/,'');
     const m = /radio\/([A-Za-z0-9_\-]+)/.exec(raw) || /^([A-Za-z0-9_\-]+)$/.exec(raw);
