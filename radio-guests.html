@@ -1193,7 +1193,17 @@ async function loadHist(){
   return histData;
 }
 // 페이지가 열리고 조금 뒤 미리 준비 (검색 버튼을 누르면 바로 뜨게)
-setTimeout(()=>{ loadHist().then(()=>{ if(histData) setTimeout(()=>nameIndex(histData), 100); }); }, 2500);
+setTimeout(()=>{ loadHist().then(()=>{ if(histData) setTimeout(()=>nameIndex(histData), 100); autoSched(); }); }, 2500);
+// 집 PC(확장 프로그램 있는 곳)에서 열면: 마지막으로 받은 편성표 날짜 다음날 ~ 어제 출연자를 조용히 자동 저장
+function autoSched(){
+  if((document.documentElement.dataset.igCollector||'') < '2.3' || !histData) return;
+  let newest = '';
+  for(const s in histData){ if(s==='_names') continue; for(const d in histData[s]) if(d > newest && histData[s][d].some(x=>typeof x==='string' && x.startsWith('🎙'))) newest = d; }
+  if(!newest) return;
+  const t = today(), gap = diffDays(t, newest) - 1;      // 받아야 할 날 수 (어제까지)
+  if(gap < 1) return;
+  window.postMessage({rg:'sched', days: Math.min(gap, 60), before: t}, '*');
+}
 const progBySlug = s => progs.find(p=>p.slug===s) || (histData && histData._names && histData._names[s] ? {slug:s, name:histData._names[s], color:'#5b6478'} : null);
 function openSearch(){
   $('sr').classList.add('on'); document.body.style.overflow='hidden';
@@ -1358,13 +1368,13 @@ window.addEventListener('message', e=>{
   if(e.source !== window || !e.data || e.data.rg !== 'sched-r') return;
   const m = e.data;
   if(m.type==='sprogress'){
-    histRun = {done:m.done, total:m.total, user:`편성표 ${m.user}까지`, kind:'편성표'}; showHistToast();
+    if(m.total <= 60) return;   // 자동 하루치 저장은 조용히
     setStatus(`편성표 출연자 가져오는 중… ${m.user} (${m.done}/${m.total}일)`, m.done/m.total);
     if(m.done % 360 < 6) fetchHist();
   }
   if(m.type==='sdone'){
     const r = m.result||{};
-    histRun = null; showHistToast(); fetchHist();
+    fetchHist(); return;   // 자동 저장은 알림 없이 기록만 새로
     const msg = r.busy ? '이미 가져오는 중이에요' : `✅ 편성표 출연자 가져오기 완료 — ${(r.total||0).toLocaleString()}건 · ${r.days||0}일치` + (r.oldest?` (가장 오래된 날 ${r.oldest})`:'') + (r.err?` · 오류: ${r.err}`:'');
     setStatus(msg); if(!r.busy) alert(msg);
   }
@@ -1476,9 +1486,6 @@ $('info').onclick = () => {
       <button id="np_add" style="color:#fff;background:var(--acc);border-color:var(--acc);font-weight:700">추가</button>
     </div>
     ${progs.filter(p=>p.added).length ? `<p style="margin-top:8px">추가한 프로그램: ${progs.filter(p=>p.added).map(p=>`<b>${esc(p.name)}</b> <button class="np_del" data-s="${p.slug}" style="font-size:11px;border:1px solid var(--line);border-radius:6px;background:none;color:var(--sub);cursor:pointer">삭제</button>`).join(' · ')}</p>` : ''}
-    ${(document.documentElement.dataset.igCollector||'') >= '2.2' ? `<h3 style="margin-top:18px">지난 출연 기록 (검색용)</h3>
-    <p>SBS 홈페이지 [다시듣기]·[방송클립영상] 목록에서 지난 3년 기록을 한 번에 모아요. 오늘부터는 자동으로 쌓여요.</p>
-    <div class="act" style="margin-top:8px">${(document.documentElement.dataset.igCollector||'') >= '2.3' ? '<button id="schedgo" class="pri">🎙 편성표 출연자 가져오기 (10년)</button>' : ''}${(document.documentElement.dataset.igCollector||'') >= '2.4' ? '<button id="rangego" class="pri">📼 2019년 이전 채우기 (장수 프로그램)</button>' : ''}<button id="histgo">📚 다시듣기·클립 기록 (10년)</button></div>` : ''}
     <h3 style="margin-top:18px">기기 간 연동</h3>
     <p>${syncUrl ? (syncOk===false ? '<span class="bad">연동 주소에 접속이 안 돼요</span>' : '<span class="ok">연동됨</span> — 숨기기·날짜 지정이 모든 기기에 똑같이 적용돼요.') : '연동 안 됨 — 숨기기·날짜 지정이 이 기기에만 저장돼요.'}</p>
     ${SYNC_URL ? '' : `<div class="act" style="margin-top:8px"><input id="surl" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(syncUrl)}" style="flex:1;min-width:240px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><button id="ssave">연동 주소 저장</button></div>`}
