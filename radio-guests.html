@@ -225,6 +225,11 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 .sim{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 6px 4px;font-size:12px;color:var(--faint)}
 .pk.sm{padding:4px 9px;font-size:12px;border-radius:9px}
 .pk.sm span{font-size:11px}
+.yrt{width:calc(100% - 12px);margin:10px 6px;border-collapse:collapse;font-size:12.5px}
+.yrt th{color:var(--faint);font-weight:700;text-align:right;padding:5px 8px;border-bottom:1px solid var(--line)}
+.yrt th:first-child,.yrt td:first-child{text-align:left}
+.yrt td{text-align:right;padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.04);font-weight:700}
+.yrt td.z{color:var(--hot);opacity:.7}
 .addbtn{position:fixed;right:18px;bottom:18px;z-index:30;border:0;border-radius:999px;background:var(--acc);color:#fff;font-weight:800;font-size:14px;padding:12px 18px;box-shadow:0 10px 26px rgba(123,140,255,.35);cursor:pointer}
 
 /* ---------- 크게 보기 (상세 화면) ---------- */
@@ -323,7 +328,7 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 <div class="sr" id="sr" role="dialog" aria-modal="true">
   <div class="srbox">
     <div class="srhead">
-      <div class="srin"><span>🔍</span><input id="sq" placeholder="출연자 이름으로 검색 (예: 김희재)" autocomplete="off"><button id="sx" aria-label="닫기">×</button></div>
+      <div class="srin"><span>🔍</span><input id="sq" type="search" name="rg-guest-q" spellcheck="false" placeholder="출연자 이름으로 검색 (예: 김희재)" autocomplete="off"><button id="sx" aria-label="닫기">×</button></div>
       <div class="srrun" id="srun" style="display:none"></div>
       <div class="srsum" id="ssum"></div>
     </div>
@@ -1142,6 +1147,7 @@ const progBySlug = s => progs.find(p=>p.slug===s) || (histData && histData._name
 function openSearch(){
   $('sr').classList.add('on'); document.body.style.overflow='hidden';
   try{ history.pushState({sr:1},''); }catch(_){}
+  $('sq').value = ''; searchPick = null; $('slist').innerHTML = ''; $('slist').scrollTop = 0;   // 열 때마다 새 검색
   $('sq').focus(); $('ssum').textContent = '기록 불러오는 중…';
   loadHist().then(()=>doSearch());
 }
@@ -1189,8 +1195,17 @@ function doSearch(){
   if(!q){
     $('ssum').innerHTML = total ? `저장된 기록 <b>${total.toLocaleString()}</b>건 · ${span[0]} ~ ${span[span.length-1]}` : '아직 저장된 기록이 없어요 — ⚙ 화면에서 [지난 기록 가져오기]를 눌러주세요';
     // 프로그램별로 몇 건이 쌓였는지 + 최근 제목 예시 (기록이 잘 들어왔는지 확인용)
+    // 연도별·출처별 기록 수 (어느 시기 자료가 비어 있는지 확인용)
+    const yr = {};
+    for(const s in H){ if(s==='_names') continue; for(const d in H[s]) for(const x of H[s][d]){
+      const t = typeof x==='string' ? x : x.t, y = d.slice(0,4);
+      const k = /^🎙/.test(t) ? 'sch' : /^🎬/.test(t) ? 'clip' : /^📸/.test(t) ? 'photo' : typeof x==='object' ? 'ig' : 'aod';
+      const r = yr[y] || (yr[y] = {sch:0, aod:0, clip:0, photo:0, ig:0}); r[k]++;
+    } }
+    const yrs = Object.keys(yr).sort().reverse();
+    const yrTable = yrs.length ? `<table class="yrt"><tr><th>연도</th><th>🎙 편성표</th><th>다시듣기</th><th>🎬 클립</th><th>📸 포토</th><th>인스타</th></tr>${yrs.map(y=>`<tr><td>${y}</td>${['sch','aod','clip','photo','ig'].map(k=>`<td class="${yr[y][k]?'':'z'}">${yr[y][k].toLocaleString()}</td>`).join('')}</tr>`).join('')}</table>` : '';
     const allP = [...progs, ...Object.keys(H).filter(s=>s!=='_names' && !progs.some(p=>p.slug===s)).map(progBySlug).filter(Boolean)];
-    $('slist').innerHTML = total ? `<div class="sov">${allP.map(p=>{
+    $('slist').innerHTML = total ? yrTable + `<div class="sov">${allP.map(p=>{
       const ds = Object.keys(H[p.slug]||{}).sort(); const n = ds.reduce((a,d)=>a+H[p.slug][d].length,0);
       const last = ds.length ? H[p.slug][ds[ds.length-1]] : null; const ex = last ? (typeof last[0]==='string'?last[0]:last[0].t).split(' ‖ ')[0] : '';
       return `<div class="si" style="--pc:${p.color}"><div class="sb"><div class="spn">${p.logo?`<img src="${p.logo}" alt="">`:''}${esc(p.name)} <span style="color:var(--sub);font-weight:600">· ${n?`${n.toLocaleString()}건 (${ds[0]} ~ ${ds[ds.length-1]})`:'기록 없음'}</span></div>${ex?`<div class="st"><span>예: ${esc(ex.slice(0,90))}</span></div>`:''}</div></div>`;
@@ -1278,11 +1293,12 @@ window.addEventListener('message', e=>{
 
 /* 지난 300일 기록 가져오기 (집 PC 확장 프로그램이 SBS 홈페이지 다시듣기·클립 목록을 읽음) */
 function startHistCrawl(){
-  const list = progs.filter(p=>!p.igOnly).map(p=>({slug:p.slug, name:p.name}));
-  if(!confirm(`SBS 홈페이지의 [다시듣기]·[방송클립영상] 목록에서 지난 3년 출연 기록을 모아 올까요?\n\n프로그램 ${list.length}개 · 40분~1시간쯤 걸려요. 그동안 이 창은 열어두세요. (이미 받은 기록은 중복 없이 합쳐져요)`)) return;
+  let list = progs.filter(p=>!p.igOnly).map(p=>({slug:p.slug, name:p.name, added:p.added}));
+  if(list.some(p=>p.added) && confirm('⚙에서 직접 추가한 프로그램만 가져올까요?\n\n[확인] 추가한 프로그램만 (빠름)\n[취소] 모든 프로그램')) list = list.filter(p=>p.added);
+  if(!confirm(`SBS 홈페이지의 [다시듣기]·[방송클립영상] 목록에서 지난 10년 출연 기록을 모아 올까요?\n\n프로그램 ${list.length}개 · 프로그램마다 몇 분씩 걸려요. 그동안 이 창은 열어두세요. (이미 받은 기록은 중복 없이 합쳐져요)`)) return;
   setStatus('지난 기록 가져오는 중…', 0);
   histRun = {done:1, total:list.length, user:'준비 중'}; showHistToast();
-  window.postMessage({rg:'hist', progs:list, days:1095}, '*');
+  window.postMessage({rg:'hist', progs:list, days:3650}, '*');
 }
 let histRun = null;   // 가져오는 중이면 {done,total,user}
 function showHistToast(){
@@ -1384,7 +1400,7 @@ $('info').onclick = () => {
     ${progs.filter(p=>p.added).length ? `<p style="margin-top:8px">추가한 프로그램: ${progs.filter(p=>p.added).map(p=>`<b>${esc(p.name)}</b> <button class="np_del" data-s="${p.slug}" style="font-size:11px;border:1px solid var(--line);border-radius:6px;background:none;color:var(--sub);cursor:pointer">삭제</button>`).join(' · ')}</p>` : ''}
     ${(document.documentElement.dataset.igCollector||'') >= '2.2' ? `<h3 style="margin-top:18px">지난 출연 기록 (검색용)</h3>
     <p>SBS 홈페이지 [다시듣기]·[방송클립영상] 목록에서 지난 3년 기록을 한 번에 모아요. 오늘부터는 자동으로 쌓여요.</p>
-    <div class="act" style="margin-top:8px">${(document.documentElement.dataset.igCollector||'') >= '2.3' ? '<button id="schedgo" class="pri">🎙 편성표 출연자 가져오기 (10년)</button>' : ''}<button id="histgo">📚 다시듣기·클립 기록 (3년)</button></div>` : ''}
+    <div class="act" style="margin-top:8px">${(document.documentElement.dataset.igCollector||'') >= '2.3' ? '<button id="schedgo" class="pri">🎙 편성표 출연자 가져오기 (10년)</button>' : ''}<button id="histgo">📚 다시듣기·클립 기록 (10년)</button></div>` : ''}
     <h3 style="margin-top:18px">기기 간 연동</h3>
     <p>${syncUrl ? (syncOk===false ? '<span class="bad">연동 주소에 접속이 안 돼요</span>' : '<span class="ok">연동됨</span> — 숨기기·날짜 지정이 모든 기기에 똑같이 적용돼요.') : '연동 안 됨 — 숨기기·날짜 지정이 이 기기에만 저장돼요.'}</p>
     ${SYNC_URL ? '' : `<div class="act" style="margin-top:8px"><input id="surl" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(syncUrl)}" style="flex:1;min-width:240px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><button id="ssave">연동 주소 저장</button></div>`}
