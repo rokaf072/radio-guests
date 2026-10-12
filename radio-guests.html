@@ -17,7 +17,6 @@
 :root{
   --bg:#0b0c10; --panel:#15171d; --panel2:#1c1f27; --ink:#f3f4f8; --sub:#a3a9b6; --faint:#6b7180; --line:#262a34;
   --acc:#7b8cff; --acc-ink:#fff; --warn:#f5b13d; --hot:#ff5a73; --chip:#232733; --shadow:0 10px 30px rgba(0,0,0,.45);
-  --tw:200px;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -70,15 +69,23 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .sec small{font-size:12.5px;font-weight:500;color:var(--sub)}
 .wall+.sec{margin-top:34px}
 .empty-msg{text-align:center;color:var(--sub);padding:80px 0 40px;font-size:15px}
-.wall{display:flex;flex-wrap:wrap;gap:22px 16px;align-items:flex-start}
-.grp{scroll-margin-top:var(--hh,200px);display:flex;flex-direction:column;gap:9px;max-width:100%}
-.gh{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;padding-left:2px}
-.gh img{width:32px;height:32px;flex:0 0 32px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--pc)}
-.gh .gt{min-width:0;flex:1}
-.gh .l1{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;overflow:hidden}
-.gh .tm{font-size:13px;font-weight:900;color:color-mix(in srgb,var(--pc) 45%,#fff);letter-spacing:-.2px}
-.gh .nm{font-size:14px;font-weight:800;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
-.tiles{display:flex;flex-wrap:wrap;gap:10px}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:14px;align-items:stretch}
+.board+.sec{margin-top:34px}
+.pc{scroll-margin-top:var(--hh,200px);background:var(--panel);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 24px rgba(0,0,0,.35);transition:border-color .2s}
+.pc:hover{border-color:color-mix(in srgb,var(--pc) 55%,transparent)}
+.pch{display:flex;align-items:center;gap:9px;padding:10px 10px 10px 11px;background:linear-gradient(135deg,color-mix(in srgb,var(--pc) 70%,#000),color-mix(in srgb,var(--pc) 28%,#0d0f14));min-height:58px}
+.pch .lg{width:36px;height:36px;flex:0 0 36px;border-radius:50%;object-fit:cover;background:#fff;border:2px solid rgba(255,255,255,.9)}
+.pch .t{flex:1;min-width:0}
+.pch .nm{font-size:14.5px;font-weight:900;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+.pch .l1{display:flex;align-items:center;gap:4px;margin-top:3px;overflow:hidden}
+.pch .tm{font-size:12px;font-weight:900;background:#fff;color:#111;border-radius:999px;padding:1px 7px}
+.pch .ch{white-space:nowrap;font-size:10.5px;font-weight:700;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:0 6px}
+.posts{display:flex;gap:4px;flex:0 0 auto}
+.posts .pt{width:30px;height:38px;border-radius:7px;border:2px solid rgba(255,255,255,.25);padding:0;overflow:hidden;cursor:pointer;background:#000;opacity:.6;transition:all .15s}
+.posts .pt img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.posts .pt.on{opacity:1;border-color:#fff;box-shadow:0 0 0 2px var(--pc)}
+.posts .pt:hover{opacity:1}
+.pcb{display:flex;flex-direction:column;flex:1}
 
 .pill{font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 7px;background:var(--chip);color:var(--sub);white-space:nowrap;letter-spacing:-.2px}
 .pill.hot{background:var(--hot);color:#fff}
@@ -87,34 +94,40 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .pill.kp{background:#b45309;color:#fff}
 .pill.ch{background:transparent;border:1px solid var(--line);color:var(--faint);padding:1px 6px}
 
-.tile{position:relative;width:var(--tw);border-radius:16px;overflow:hidden;background:var(--panel);cursor:zoom-in;box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 6px 18px rgba(0,0,0,.35);transition:transform .18s ease,box-shadow .18s ease;outline:none}
-.tile:hover,.tile:focus-visible{transform:translateY(-4px);box-shadow:0 0 0 2px color-mix(in srgb,var(--pc) 70%,#fff),0 16px 34px rgba(0,0,0,.5)}
-.tile .pic{position:relative;aspect-ratio:4/5;background:#000;overflow:hidden}
-.tile .pic img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;transition:transform .35s ease}
-.tile:hover .pic img{transform:scale(1.04)}
-.tile .pic::after{content:"";position:absolute;inset:auto 0 0 0;height:40%;background:linear-gradient(transparent,rgba(0,0,0,.55));pointer-events:none}
-.tile .cnt{position:absolute;left:8px;top:8px;z-index:2;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);color:#fff;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 8px;display:flex;align-items:center;gap:4px}
-.tile .tnav{position:absolute;top:44%;transform:translateY(-50%);z-index:3;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#111;font-size:20px;font-weight:800;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.4);transition:transform .12s,opacity .15s}
+.tile{position:relative;cursor:zoom-in;outline:none}
+.tile .pic{position:relative;aspect-ratio:1/1;background:#000;overflow:hidden}
+.tile .pic img.bg{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;filter:blur(18px) brightness(.55) saturate(1.2)}
+.tile .pic img.fg{position:relative;width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s ease}
+.tile:hover .pic img.fg{transform:scale(1.025)}
+.tile .cnt{position:absolute;right:8px;top:8px;z-index:2;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);color:#fff;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 8px}
+.tile .cnt b{font-weight:900}
+.tile .bdg{position:absolute;left:8px;top:8px;z-index:2;display:flex;gap:4px}
+.tile .tnav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:32px;height:32px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:#111;font-size:19px;font-weight:800;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.4);transition:transform .12s,opacity .15s}
 .tile .tnav:hover{transform:translateY(-50%) scale(1.12);background:#fff}
 .tile .tnav.prev{left:7px}.tile .tnav.next{right:7px}
 .tile .tnav[disabled]{opacity:0;pointer-events:none}
-.tile .cnt b{font-weight:900}
-.tile .bdg{position:absolute;right:8px;top:8px;z-index:2;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.tile .zoom{position:absolute;z-index:2;left:50%;bottom:10px;transform:translateX(-50%);display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.92);color:#111;font-size:12px;font-weight:800;border-radius:999px;padding:5px 11px 5px 9px;box-shadow:0 4px 14px rgba(0,0,0,.35);white-space:nowrap;transition:transform .18s,background .18s}
-.tile .zoom svg{width:14px;height:14px}
-.tile:hover .zoom{transform:translateX(-50%) scale(1.06);background:#fff}
-.tile .ft{padding:8px 10px 10px;display:flex;flex-direction:column;gap:3px}
-.tile .rg{font-size:12.5px;font-weight:800;color:var(--ink);letter-spacing:-.2px}
-.tile .up{font-size:11px;color:var(--faint)}
-.tile .sn{font-size:11.5px;line-height:1.45;color:var(--sub);margin-top:2px}
-.tile .sn b{color:#ffcf6b;font-weight:800;margin-right:4px}
-.tile .q{display:flex;gap:5px;margin-top:6px}
-.tile .q button{flex:1;font-size:11.5px;font-weight:700;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:9px;padding:5px 4px;cursor:pointer;color:var(--sub)}
-.tile .q button.ok{background:var(--acc);border-color:var(--acc);color:#fff}
-.tile .q button:hover{border-color:var(--acc)}
-.tile.link .pic{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#f58529,#dd2a7b 50%,#8134af);color:#fff;font-weight:800;font-size:13px;text-align:center;padding:12px}
-.tile.link .pic span{font-size:30px}
-.tile .noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:#fff;font-weight:700;font-size:12.5px;background:linear-gradient(135deg,color-mix(in srgb,var(--pc) 80%,#000),#111)}
+.tile .zoom{position:absolute;z-index:2;right:8px;bottom:8px;display:flex;align-items:center;gap:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);color:#fff;font-size:12px;font-weight:800;border-radius:999px;padding:6px;transition:all .2s;white-space:nowrap}
+.tile .zoom svg{width:15px;height:15px;flex:0 0 15px}
+.tile .zoom em{font-style:normal;max-width:0;overflow:hidden;transition:max-width .25s,margin .25s}
+.tile:hover .zoom{background:#fff;color:#111;padding:6px 11px 6px 9px}
+.tile:hover .zoom em{max-width:80px;margin-left:5px}
+.tile .pic.link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:linear-gradient(135deg,#f58529,#dd2a7b 50%,#8134af);color:#fff;font-weight:800;font-size:13.5px;text-align:center}
+.tile .pic.link span{font-size:32px}
+.tile .pic.link small{font-weight:600;opacity:.85}
+.tile .noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:#fff;font-weight:700;font-size:12.5px;text-align:center;background:linear-gradient(135deg,color-mix(in srgb,var(--pc) 80%,#000),#111)}
+
+.ft{padding:9px 11px 10px;display:flex;flex-direction:column;gap:5px;flex:1}
+.ft .dl1{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--faint);flex-wrap:wrap}
+.ft .dl1 b{font-size:12px;color:var(--ink);background:rgba(124,58,237,.25);border-radius:7px;padding:2px 7px;font-weight:800}
+.ft .cp{font-size:12.5px;line-height:1.5;color:var(--sub);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:37px}
+.ft .sn{font-size:12px;line-height:1.5;color:var(--sub)}
+.ft .sn div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ft .sn b{color:#ffcf6b;font-weight:800;margin-right:5px}
+.ft .ic{display:flex;gap:5px;margin-top:auto;padding-top:3px}
+.ft .ic a,.ft .ic button{font-size:11.5px;font-weight:700;border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:8px;padding:4px 9px;cursor:pointer;color:var(--sub);text-decoration:none;white-space:nowrap}
+.ft .ic a{color:#f7a3c8;border-color:rgba(221,42,123,.35)}
+.ft .ic a:hover,.ft .ic button:hover{border-color:var(--acc);color:var(--ink)}
+.ft .ic .ok{background:var(--acc);border-color:var(--acc);color:#fff}
 
 .side{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);padding:18px;margin-top:8px;border:1px solid var(--line)}
 .side h3{margin:0 0 6px;font-size:16px;font-weight:900;display:flex;align-items:center;gap:8px}
@@ -167,6 +180,9 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 .vw .snip{background:rgba(255,207,107,.08);border:1px solid rgba(255,207,107,.25);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.6}
 .vw .snip b{display:block;font-size:14.5px;margin-bottom:3px}
 .vw .snip .tm{display:inline-block;min-width:46px;font-weight:900;color:#ffcf6b}
+.vw .cap .go{display:inline-flex;align-items:center;gap:6px;color:var(--ink);font-weight:700;cursor:pointer;border-radius:8px;padding:1px 6px;margin-left:-6px;background:rgba(123,140,255,.10);transition:background .12s}
+.vw .cap .go:hover{background:rgba(123,140,255,.28)}
+.vw .cap .go .gi{font-size:11px;font-weight:800;color:var(--acc)}
 .vw .cap{font-size:13.5px;line-height:1.65;color:var(--sub);white-space:pre-wrap;word-break:break-word}
 .vw .vf{border-top:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;gap:8px}
 .vw .vf .pn{flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--faint)}
@@ -176,8 +192,7 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 .vw .hint{font-size:11px;color:var(--faint);text-align:center;padding:0 0 10px}
 
 @media (max-width:820px){
-  :root{--tw:calc((100vw - 32px - 10px)/2)}
-  .wall{gap:20px 10px}
+  .board{grid-template-columns:repeat(auto-fill,minmax(min(250px,calc(50% - 8px)),1fr));gap:10px}
   .vw{flex-direction:column}
   .vw .stage{flex:0 0 auto;height:62vh;padding:10px 8px 4px}
   .vw .snav{width:40px;height:40px;font-size:20px;background:rgba(255,255,255,.75)}
@@ -186,11 +201,12 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
   .vw .hint{display:none}
 }
 @media (max-width:600px){
+  .pch .ch{display:none} .pch{padding:8px;gap:7px;min-height:52px} .pch .lg{width:30px;height:30px;flex-basis:30px} .pch .nm{font-size:13px} .posts .pt{width:24px;height:32px} .ft .cp{-webkit-line-clamp:1;min-height:0} .ft .ic a,.ft .ic button{padding:4px 6px}
   .bar h1{font-size:18px}
   .day{width:48px}.day .dn{font-size:17px}
   .iconbtn{padding:0 10px}
 }
-@media (min-width:821px) and (max-width:1100px){ :root{--tw:180px} }
+
 </style>
 </head>
 <body>
@@ -198,6 +214,7 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
   <div class="bar">
     <h1>라디오 손님 <span class="when" id="when"></span></h1>
     <button class="iconbtn igbtn" id="igc" title="집 PC 크롬에서만 보여요" style="display:none">📷 인스타 수집</button>
+    
     <button class="iconbtn" id="reload" title="새로고침">↻ 새로고침</button>
     <button class="iconbtn" id="info" title="프로그램 상태">⚙</button>
   </div>
@@ -660,83 +677,128 @@ function progPills(p, es){
   const bc = es.some(isBanchung), wk = es.some(e=>e.weekly), sn = p.youtube && es.some(e=>e.post._yt);
   return (bc?'<span class="pill hot">방청</span>':'') + (wk?'<span class="pill week">주간표</span>':'') + (sn?'<span class="pill yt">생.녹</span>':'');
 }
-// 프로그램 묶음 (로고·시간·이름 + 포스터들)
-function grpHTML(p, es, opt={}){
-  return `<section class="grp" id="p-${p.slug}" style="--pc:${p.color}">
-    <div class="gh">${p.logo?`<img src="${p.logo}" alt="">`:''}<div class="gt">
-      <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${opt.pills!==undefined?opt.pills:progPills(p,es)}</div>
-      <div class="nm" title="${esc(p.name)}">${esc(p.name)}</div></div></div>
-    <div class="tiles">${es.map(e=>tileHTML(e, opt.unknown)).join('')}</div></section>`;
+const tileKey = e => e.post.id + '|' + selDay;
+const tileIdx = e => { const n = e.slides.length; const k = tileKey(e); const i = k in pos ? pos[k] : (e.start||0); return Math.max(0, Math.min(n-1, i)); };
+const postPos = {};   // 프로그램 카드에서 보고 있는 게시물 번호
+
+/* 프로그램 카드 한 장: 머리(로고·이름·시간) + 게시물 바꾸기 + 사진 + 짧은 정보. 모든 카드 높이가 같음 */
+function cardHTML(p, es, isUnknown){
+  const ks = es.map(e=>viewList.push(e)-1);
+  const key = (isUnknown ? 'u:'+es[0].post.id : p.slug) + '|' + selDay;
+  const a = Math.min(postPos[key]||0, es.length-1);
+  const pills = isUnknown ? (es[0].replaced?'<span class="pill">대체됨</span>':'') : progPills(p, es);
+  return `<section class="pc grp" id="${isUnknown?'u-'+esc(es[0].post.id):'p-'+p.slug}" style="--pc:${p.color}" data-ks="${ks.join(',')}" data-key="${esc(key)}" data-u="${isUnknown?1:''}">
+    <div class="pch">${p.logo?`<img class="lg" src="${p.logo}" alt="">`:''}
+      <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
+        <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${p.ch?`<span class="ch">${p.ch}</span>`:''}${pills}</div></div>
+      ${es.length>1?`<div class="posts" title="이 프로그램 게시물 ${es.length}개">${es.map((e,j)=>{ const s=e.slides[e.start||0]||e.slides[0]; return `<button class="pt ${j===a?'on':''}" data-j="${j}" aria-label="${j+1}번째 게시물">${s?`<img src="${esc(s.url)}" alt="">`:'📷'}</button>`; }).join('')}</div>`:''}
+    </div>
+    <div class="pcb">${bodyHTML(viewList[ks[a]], ks[a], isUnknown)}</div>
+  </section>`;
 }
-function tileHTML(e, isUnknown){
-  const k = viewList.push(e) - 1;
+function bodyHTML(e, k, isUnknown){
   const n = e.slides.length, si = tileIdx(e), s = e.slides[si];
   const up = e.post.timestamp ? tsYmd(e.post.timestamp) : '';
   let rg = '';
   if(isUnknown) rg = e.guess ? `${e.confirmed?'예정':'찾은 날짜'} ${fmd(e.guess)}` : '날짜 없음';
-  else if(e.range && e.range[0]!==e.range[1]) rg = `📅 ${fmd(e.range[0])} ~ ${fmd(e.range[1])}`;
+  else if(e.range && e.range[0]!==e.range[1]) rg = `${fmd(e.range[0])} ~ ${fmd(e.range[1])}`;
   const sn = e.post._yt && e.date ? snipLines(e.post.caption, e.date) : null;
-  const bdg = (e.post._kept?'<span class="pill kp" title="원본이 삭제돼서 보관해 둔 내용">보관본</span>':'')
-    + (e.replaced?'<span class="pill">대체됨</span>':'') + (isBanchung(e)?'<span class="pill hot">방청</span>':'');
+  const bdg = (e.post._kept?'<span class="pill kp" title="원본이 삭제돼서 보관해 둔 내용">보관본</span>':'') + (isUnknown && isBanchung(e)?'<span class="pill hot">방청</span>':'');
   const g = isUnknown && e.guess && !e.confirmed ? (e.guessAll&&e.guessAll.length?e.guessAll:[e.guess]) : null;
+  const short = d => `${+d.slice(5,7)}/${+d.slice(8)}`;
   const pic = e.link
-    ? `<div class="pic"><span>📷</span>직접 추가한 게시물</div>`
-    : `<div class="pic">${s?`<img loading="lazy" src="${esc(s.url)}" alt="" draggable="false">`:''}
-        ${n>1?`<span class="cnt">❐ <b>${si+1}</b>/${n}</span><button class="tnav prev" data-d="-1" aria-label="이전 사진" ${si<=0?'disabled':''}>‹</button><button class="tnav next" data-d="1" aria-label="다음 사진" ${si>=n-1?'disabled':''}>›</button>`:''}${bdg?`<span class="bdg">${bdg}</span>`:''}
-        <span class="zoom">${ZOOM}크게 보기</span></div>`;
-  return `<div class="tile ${e.link?'link':''}" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}" style="--pc:${e.prog.color}">
-    ${pic}
+    ? `<div class="pic link"><span>📷</span>직접 추가한 게시물<small>눌러서 보기</small></div>`
+    : `<div class="pic">${s?`<img class="bg" src="${esc(s.url)}" alt="" aria-hidden="true"><img class="fg" loading="lazy" src="${esc(s.url)}" alt="" draggable="false">`:''}
+        ${n>1?`<span class="cnt"><b>${si+1}</b>/${n}</span><button class="tnav prev" data-d="-1" aria-label="이전 사진" ${si<=0?'disabled':''}>‹</button><button class="tnav next" data-d="1" aria-label="다음 사진" ${si>=n-1?'disabled':''}>›</button>`:''}
+        ${bdg?`<span class="bdg">${bdg}</span>`:''}
+        <span class="zoom">${ZOOM}<em>크게 보기</em></span></div>`;
+  const text = sn
+    ? `<div class="sn">${sn.lines.slice(0,3).map(l=>{const m=/^(\d{1,2}:\d{2})\s*(.*)$/.exec(l); return `<div>${m?`<b>${m[1]}</b>${esc(m[2])}`:esc(l)}</div>`;}).join('')}</div>`
+    : `<div class="cp">${esc((e.post.caption||'').replace(/\s+/g,' ').trim())}</div>`;
+  return `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${pic}</div>
     <div class="ft">
-      ${rg?`<div class="rg">${rg}</div>`:''}
-      ${sn?`<div class="sn">${sn.lines.slice(0,4).map(l=>{const m=/^(\d{1,2}:\d{2})\s*(.*)$/.exec(l); return `<div>${m?`<b>${m[1]}</b>${esc(m[2])}`:esc(l)}</div>`;}).join('')}</div>`:''}
-      ${up?`<div class="up">올린 날 ${fmd(up)}${e.post._yt?' · 유튜브':''}</div>`:''}
-      ${g?`<div class="q"><button class="ok" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${+g[0].slice(5,7)}/${+g[0].slice(8)}~${+g[g.length-1].slice(5,7)}/${+g[g.length-1].slice(8)}`:`${+g[0].slice(5,7)}/${+g[0].slice(8)}`} 맞음</button><button data-a="hide">숨기기</button></div>`:''}
-    </div></div>`;
+      <div class="dl1">${rg?`<b>📅 ${rg}</b>`:''}${up?`<span>올린 날 ${short(up)}</span>`:''}</div>
+      ${text}
+      <div class="ic" data-id="${esc(e.post.id)}">
+        ${g?`<button class="ok" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${short(g[0])}~${short(g[g.length-1])}`:short(g[0])} 맞음</button>`:''}
+        ${e.post.permalink?`<a href="${esc(e.post.permalink)}" target="_blank" rel="noopener" title="${e.post._yt?'유튜브':'인스타'}에서 보기">${e.post._yt?'유튜브':'인스타'} ↗</a>`:''}
+        ${g?'':`<button data-a="date" title="날짜 수정">날짜</button>`}
+        ${e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" title="숨기기">숨기기</button>'}
+        ${e.manual&&!e.link?'<button data-a="reset" title="자동으로 되돌리기">↺</button>':''}
+      </div>
+    </div>`;
 }
-
-// 타일에서 보고 있는 사진 번호 (다시 그려도 유지)
-const tileKey = e => e.post.id + '|' + selDay;
-const tileIdx = e => { const n = e.slides.length; const k = tileKey(e); const i = k in pos ? pos[k] : (e.start||0); return Math.max(0, Math.min(n-1, i)); };
 function tileGo(tile, d){
   const e = viewList[+tile.dataset.k], n = e.slides.length, i = tileIdx(e) + d;
   if(i<0 || i>=n) return;
   pos[tileKey(e)] = i;
-  const img = tile.querySelector('.pic img'); if(img) img.src = e.slides[i].url;
+  tile.querySelectorAll('.pic img').forEach(img=>img.src = e.slides[i].url);
   tile.querySelector('.cnt b').textContent = i+1;
   tile.querySelector('.tnav.prev').disabled = i<=0; tile.querySelector('.tnav.next').disabled = i>=n-1;
   if(e.slides[i+1]) new Image().src = e.slides[i+1].url;   // 다음 장 미리 받아두기
 }
+
 function renderMain(){
   const t = today();
   const m = $('main');
   viewList = [];
   if(selDay==='unknown'){
     $('when').textContent = '확인 필요'; $('jump').innerHTML='';
-    const wall = list => {
-      const out = []; // 같은 프로그램끼리 묶되, 순서는 유지
-      for(const e of list){ const last = out[out.length-1]; if(last && last.p===e.prog) last.es.push(e); else out.push({p:e.prog, es:[e]}); }
-      return `<div class="wall">${out.map(o=>grpHTML(o.p, o.es, {unknown:true, pills:''})).join('')}</div>`;
-    };
+    const board = list => `<div class="board">${list.map(e=>cardHTML(e.prog, [e], true)).join('')}</div>`;
     const far = unknown.filter(e=>e.far).sort((a,b)=>a.guess<b.guess?-1:a.guess>b.guess?1:a.prog.start-b.prog.start);
     const near = unknown.filter(e=>!e.far).sort((a,b)=>a.prog.start-b.prog.start);
     m.innerHTML = unknown.length
-      ? (near.length?`<h3 class="sec">확인 필요 <small>자동으로 확정하기 애매한 게시물 — 맞으면 <b>✓ 맞음</b>, 아니면 <b>숨기기</b> (사진을 누르면 크게 보여요)</small></h3>${wall(near)}`:'')
-        + (far.length?`<h3 class="sec">2주 뒤 ~ 한 달 뒤 미리 잡힌 일정 <small>날짜가 다가오면 해당 날짜 칸으로 자동으로 옮겨가요</small></h3>${wall(far)}`:'')
+      ? (near.length?`<h3 class="sec">확인 필요 <small>자동으로 확정하기 애매한 게시물 — 맞으면 <b>✓ 맞음</b>, 아니면 <b>숨기기</b></small></h3>${board(near)}`:'')
+        + (far.length?`<h3 class="sec">2주 뒤 ~ 한 달 뒤 미리 잡힌 일정 <small>날짜가 다가오면 해당 날짜 칸으로 자동으로 옮겨가요</small></h3>${board(far)}`:'')
       : `<div class="empty-msg">확인할 게시물이 없어요 👍</div>`;
-    bindTiles(); return;
+    bindCards(); return;
   }
   const w = wdIdx(selDay);
   $('when').textContent = `${+selDay.slice(5,7)}월 ${+selDay.slice(8)}일 (${WD[w]})${selDay===t?' · 오늘':''}`;
   const list = entries.filter(e=>e.date===selDay);
   const on = progs.filter(p=>list.some(e=>e.prog===p));
   $('jump').innerHTML = on.length>1 ? on.map(p=>`<button data-j="${p.slug}" style="--pc:${p.color}">${p.logo?`<img src="${p.logo}" alt="">`:''}${esc(p.name)}</button>`).join('') : '';
-  const html = on.map(p=>grpHTML(p, list.filter(e=>e.prog===p).sort((a,b)=>a.post.timestamp<b.post.timestamp?1:-1))).join('');
+  // 주간 편성표를 먼저, 그다음 최근에 올린 순
+  const html = on.map(p=>cardHTML(p, list.filter(e=>e.prog===p).sort((a,b)=>(b.weekly?1:0)-(a.weekly?1:0) || (a.post.timestamp<b.post.timestamp?1:-1)))).join('');
   const ten = progs.find(p=>p.youtube);
-  m.innerHTML = (html ? `<div class="wall">${html}</div>` : `<div class="empty-msg">${selDay===t?'오늘':'이 날'} 올라온 출연 정보가 없어요</div>`) +
+  m.innerHTML = (html ? `<div class="board">${html}</div>` : `<div class="empty-msg">${selDay===t?'오늘':'이 날'} 올라온 출연 정보가 없어요</div>`) +
     (ten && !(ten.ytAt && !ten.ytErr) ? `<div class="side" style="margin-top:24px"><h3>배성재의 텐 · 유튜브 <span class="pill yt">생.녹</span></h3><p>유튜브 게시판을 자동으로 읽지 못했어요. <a href="${ten.youtube}" target="_blank" rel="noopener">유튜브 게시판 직접 열기 →</a></p></div>` : '');
-  $('jump').querySelectorAll('button').forEach(b=>b.onclick=()=>{ setHH(); document.getElementById('p-'+b.dataset.j).scrollIntoView({behavior:'smooth'}); });
+  $('jump').querySelectorAll('button').forEach(b=>b.onclick=()=>{ setHH(); document.getElementById('p-'+b.dataset.j).scrollIntoView({behavior:'smooth', block:'nearest'}); });
   setHH(); spy();
-  bindTiles();
+  bindCards();
+}
+
+function bindCards(){
+  document.querySelectorAll('.pc').forEach(pc=>{
+    const ks = pc.dataset.ks.split(',').map(Number), isU = !!pc.dataset.u;
+    pc.querySelectorAll('.pt').forEach(b=>b.onclick=()=>{
+      const j = +b.dataset.j; postPos[pc.dataset.key] = j;
+      pc.querySelectorAll('.pt').forEach(x=>x.classList.toggle('on', x===b));
+      pc.querySelector('.pcb').innerHTML = bodyHTML(viewList[ks[j]], ks[j], isU);
+      bindBody(pc);
+    });
+    bindBody(pc);
+  });
+}
+function bindBody(pc){
+  const tile = pc.querySelector('.tile'), k = +tile.dataset.k;
+  tile.onclick = ev => {
+    const nv = ev.target.closest('.tnav');
+    if(nv){ ev.stopPropagation(); tileGo(tile, +nv.dataset.d); return; }
+    if(tile._swiped && Date.now()-tile._swiped<400) return;
+    openView(k, tileIdx(viewList[k]));
+  };
+  tile.onkeydown = ev => {
+    if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); openView(k, tileIdx(viewList[k])); }
+    else if(ev.key==='ArrowLeft' || ev.key==='ArrowRight'){ ev.preventDefault(); tileGo(tile, ev.key==='ArrowLeft'?-1:1); }
+  };
+  let sx=null, sy=null;
+  tile.addEventListener('touchstart', ev=>{ sx=ev.touches[0].clientX; sy=ev.touches[0].clientY; }, {passive:true});
+  tile.addEventListener('touchend', ev=>{ if(sx==null) return; const dx=ev.changedTouches[0].clientX-sx, dy=ev.changedTouches[0].clientY-sy; sx=null;
+    if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.5){ tile._swiped=Date.now(); tileGo(tile, dx<0?1:-1); } }, {passive:true});
+  const fg = tile.querySelector('.pic img.fg');
+  if(fg) fg.onerror = () => { tile.querySelectorAll('.pic img').forEach(i=>i.remove()); tile.querySelector('.pic').insertAdjacentHTML('afterbegin', '<div class="noimg"><span style="font-size:26px">📷</span>사진을 불러오지 못했어요<br>눌러서 보기</div>'); };
+  pc.querySelectorAll('.ic button[data-a]').forEach(b=>b.onclick=()=>doAct(b.parentNode.dataset.id, b.dataset.a, b.dataset.g));
 }
 
 // 유튜브 주간 일정 글에서 그날 부분만 꺼냄 ("10/7(수) - 20:00 … - 22:00 …")
@@ -766,31 +828,6 @@ function dateLine(e){
   else if(e.guess) parts.push(`<b>${e.confirmed?'예정':'찾은 날짜'} ${fmd(e.guess)}</b>`);
   if(up) parts.push(`올린 날 ${fmd(up)}`);
   return parts.length ? `<div class="dl">${parts.join('<span style="opacity:.4">·</span>')}</div>` : '';
-}
-
-function bindTiles(){
-  document.querySelectorAll('.tile').forEach(tile=>{
-    const k = +tile.dataset.k;
-    tile.onclick = ev => {
-      const nv = ev.target.closest('.tnav');
-      if(nv){ ev.stopPropagation(); tileGo(tile, +nv.dataset.d); return; }
-      if(tile._swiped && Date.now()-tile._swiped<400) return;
-      const b = ev.target.closest('button[data-a]');
-      if(b){ ev.stopPropagation(); doAct(tile.dataset.id, b.dataset.a, b.dataset.g); return; }
-      openView(k, tileIdx(viewList[k]));
-    };
-    tile.onkeydown = ev => {
-      if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); openView(k, tileIdx(viewList[k])); }
-      else if(ev.key==='ArrowLeft' || ev.key==='ArrowRight'){ ev.preventDefault(); tileGo(tile, ev.key==='ArrowLeft'?-1:1); }
-    };
-    // 폰: 타일 사진을 옆으로 쓸어서 넘기기
-    let sx=null, sy=null;
-    tile.addEventListener('touchstart', ev=>{ sx=ev.touches[0].clientX; sy=ev.touches[0].clientY; }, {passive:true});
-    tile.addEventListener('touchend', ev=>{ if(sx==null) return; const dx=ev.changedTouches[0].clientX-sx, dy=ev.changedTouches[0].clientY-sy; sx=null;
-      if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.5){ tile._swiped=Date.now(); tileGo(tile, dx<0?1:-1); } }, {passive:true});
-    const img = tile.querySelector('.pic img');
-    if(img) img.onerror = () => { img.remove(); tile.querySelector('.pic').insertAdjacentHTML('afterbegin', '<div class="noimg"><span style="font-size:26px">📷</span>사진을 불러오지 못했어요<br>눌러서 보기</div>'); };
-  });
 }
 
 // 숨기기·날짜 수정 등 (어느 기기에서 해도 연동)
@@ -877,14 +914,46 @@ function drawSide(){
         ${e.link?'<button data-a="del">삭제</button>':'<button data-a="hide">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset">자동으로 되돌리기</button>':''}
       </div>
-      <div class="cap">${esc(e.post.caption||'')}</div>
+      <div class="cap">${capLinks(e)}</div>
     </div>
     <div class="vf"><div class="pn"><button id="vpp">‹ 이전 게시물</button><span>${vK+1} / ${viewList.length}</span><button id="vpn">다음 게시물 ›</button></div></div>
     <div class="hint">← → 사진 넘기기 · ↑ ↓ 게시물 넘기기 · Esc 닫기</div>`;
   $('vx').onclick = closeView;
+  $('vside').querySelectorAll('.cap .go').forEach(a=>a.onclick=()=>{ vI=+a.dataset.i; drawStage(); });
   $('vpp').disabled = vK<=0; $('vpn').disabled = vK>=viewList.length-1;
   $('vpp').onclick = ()=>postGo(-1); $('vpn').onclick = ()=>postGo(1);
   $('vside').querySelectorAll('.act button').forEach(b=>b.onclick=()=>{ if(doAct(e.post.id, b.dataset.a, b.dataset.g)) closeView(); });
+}
+// 글 속 "[수] 만남의 광장 / 육식맨" 같은 줄을 누르면 그날 사진으로 바로 이동
+function daySlide(e, ymd){
+  const n = e.slides.length; if(n<2) return -1;
+  const posted = e.post.timestamp ? tsYmd(e.post.timestamp) : today();
+  const sd = e.slides.map(s=>findDates(ocrCache[s.id]||'', posted));
+  let i = sd.findIndex(ds=>ds.length===1 && ds[0]===ymd);
+  if(i<0) i = sd.findIndex(ds=>ds.length>0 && ds.length<=2 && ds.includes(ymd));
+  if(i>=0) return i;
+  const r = e.range || (e.date ? [weekStart(e.date), addDays(weekStart(e.date),6)] : null);
+  if(!r) return -1;
+  const off = diffDays(ymd, r[0]), span = diffDays(r[1], r[0]) + 1;
+  if(off<0 || off>=span) return -1;
+  if(n === span+1) return off+1;      // 첫 장 표지 + 하루 한 장
+  if(n === span) return off;
+  return -1;
+}
+function capLinks(e){
+  const text = e.post.caption || '';
+  if(e.slides.length<2) return esc(text);
+  const posted = e.post.timestamp ? tsYmd(e.post.timestamp) : today();
+  const base = e.range ? e.range[0] : (e.date || posted);
+  const WK = '일월화수목금토';
+  return text.split('\n').map(line=>{
+    let ymd = null;
+    const w = /^\s*[\[(【<]?\s*([월화수목금토일])(?:요일)?\s*[\])】>]/.exec(line) || /^\s*([월화수목금토일])요일/.exec(line);
+    if(w){ const wi = WK.indexOf(w[1]); ymd = addDays(weekStart(base), (wi+6)%7); }
+    else { const ds = findDates(line, posted); if(ds.length===1) ymd = ds[0]; }
+    const i = ymd ? daySlide(e, ymd) : -1;
+    return i>=0 ? `<a class="go" data-i="${i}" title="${i+1}번째 사진으로">${esc(line)}<span class="gi">${i+1}/${e.slides.length} ›</span></a>` : esc(line);
+  }).join('\n');
 }
 function slideGo(d){ const n = viewList[vK].slides.length, k = vI+d; if(k<0||k>=n) return; vI=k; drawStage(); }
 function postGo(d){ const k = vK+d; if(k<0||k>=viewList.length) return; openView(k); }
