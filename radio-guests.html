@@ -217,6 +217,14 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 .sdates{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-left:32px}
 .sdates span{font-size:12px;font-weight:700;color:var(--sub);background:color-mix(in srgb,var(--pc) 16%,var(--panel2));border-radius:7px;padding:3px 8px;cursor:default}
 .sdates small{color:var(--faint);font-weight:600}
+.picks{display:flex;flex-wrap:wrap;gap:8px;padding:12px 6px}
+.pk{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:9px 13px;cursor:pointer;color:var(--ink);font-size:14px}
+.pk:hover{border-color:var(--acc);background:rgba(123,140,255,.12)}
+.pk span{font-size:12px;font-weight:800;color:#ffcf6b}
+.pk mark{background:rgba(255,207,107,.25);color:#ffe2a3;border-radius:3px}
+.sim{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 6px 4px;font-size:12px;color:var(--faint)}
+.pk.sm{padding:4px 9px;font-size:12px;border-radius:9px}
+.pk.sm span{font-size:11px}
 .addbtn{position:fixed;right:18px;bottom:18px;z-index:30;border:0;border-radius:999px;background:var(--acc);color:#fff;font-weight:800;font-size:14px;padding:12px 18px;box-shadow:0 10px 26px rgba(123,140,255,.35);cursor:pointer}
 
 /* ---------- 크게 보기 (상세 화면) ---------- */
@@ -1138,8 +1146,41 @@ function openSearch(){
   loadHist().then(()=>doSearch());
 }
 function closeSearch(fromPop){ if(!$('sr').classList.contains('on')) return; $('sr').classList.remove('on'); document.body.style.overflow=''; if(!fromPop && history.state && history.state.sr){ try{ history.back(); }catch(_){} } }
+// 기록 글에서 출연자 이름만 뽑아 색인 (이름 단위로 정확히 세기)
+let searchPick = null, nameIdxCache = null, nameIdxFor = null;
+const NAME_STOP = /^(dj|스페셜|게스트|출연|출연자|특별|초대석|초대|코너|생방송|생방|녹음|보라|보는라디오|라디오|방송분|방송|다시듣기|하이라이트|with|feat|외|등|및|그리고|특집|라이브|live|sbs|파워fm|러브fm|월|화|수|목|금|토|일)$/i;
+function namesOf(t){
+  t = t.split(' ‖ ')[0].replace(/^[🎙🎬📸]\s*/u,'').replace(/\[[^\]]*라디오[^\]]*\]|\[[^\]]*컬투쇼[^\]]*\]/g,' ')
+    .replace(/\d{4}년\s*\d{1,2}월\s*\d{1,2}일|\d{1,2}월\s*\d{1,2}일|\d{1,2}\/\d{1,2}|\([월화수목금토일]\)/g,' ');
+  const out = [];
+  t.split(/[\/,·|&+:：()\[\]{}<>「」『』"'“”‘’!?~♥♡★☆]|\s+[xX×]\s+|\s+with\.?\s*|\s+feat\.?\s*|\s{2,}/i).forEach(seg=>{
+    seg.trim().split(/\s+/).forEach(w=>{
+      w = w.replace(/^[^0-9A-Za-z가-힣]+|[^0-9A-Za-z가-힣]+$/g,'').replace(/(씨|님|양|군)$/,'');
+      if(w.length<2 || w.length>16 || /^\d+$/.test(w) || NAME_STOP.test(w)) return;
+      out.push(w);
+    });
+  });
+  return out;
+}
+function nameIndex(H){
+  if(nameIdxFor === H && nameIdxCache) return nameIdxCache;
+  const names = {}, recs = [];
+  for(const s in H){ if(s==='_names') continue;
+    for(const d in H[s]){
+      const keys = new Set(), texts = [];
+      for(const x of H[s][d]){ const t = typeof x==='string' ? x : x.t; texts.push(t); namesOf(t).forEach(w=>keys.add(w.toLowerCase())); }
+      keys.forEach(k=>{ const c = names[k] || (names[k] = {key:k, label:k, n:0}); c.n++; });
+      recs.push({s, d, t:texts.join(' / '), x:texts[0], keys});
+    }
+  }
+  // 표시용 이름은 원래 글자(대소문자) 그대로
+  for(const r of recs) namesOf(r.t).forEach(w=>{ const c = names[w.toLowerCase()]; if(c && c.label===c.key) c.label = w; });
+  nameIdxFor = H; nameIdxCache = {names, recs};
+  return nameIdxCache;
+}
+const hlName = (label, q) => { const i = label.toLowerCase().indexOf(q.toLowerCase().replace(/\s+/g,'')); return i<0 ? esc(label) : esc(label.slice(0,i)) + '<mark>' + esc(label.slice(i, i+q.replace(/\s+/g,'').length)) + '</mark>' + esc(label.slice(i+q.replace(/\s+/g,'').length)); };
 function doSearch(){
-  const q = $('sq').value.trim(), H = histData || {};
+  let q = $('sq').value.trim(); const H = histData || {};
   $('srun').innerHTML = histRun ? `<i class="spin"></i> 지난 기록 가져오는 중 — <b>${esc(histRun.user)}</b> (${histRun.kind==='편성표'?histRun.done.toLocaleString()+'/'+histRun.total.toLocaleString()+'일':'프로그램 '+histRun.done+'/'+histRun.total}) · 끝나면 결과가 더 늘어나요` : '';
   $('srun').style.display = histRun ? '' : 'none';
   const days = new Set(); let total = 0;
@@ -1158,13 +1199,30 @@ function doSearch(){
   }
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
   const nos = s => s.replace(/\s+/g,'');   // 띄어쓰기 무시 (보이 넥스트 도어 = 보이넥스트도어)
+  const idxN = nameIndex(H), qn = nos(q.toLowerCase());
+  // 이름 후보: 검색어가 들어간 출연자 이름들 (예: '보이' → 보이넥스트도어, 보이스퍼 …)
+  const cands = Object.values(idxN.names).filter(c=>c.key.includes(qn)).sort((a,b)=>b.n-a.n);
+  const exact = idxN.names[qn];
+  let pick = searchPick && idxN.names[searchPick] ? idxN.names[searchPick] : (exact || (cands.length===1 ? cands[0] : null));
+  if(!pick && cands.length > 1 && words.length===1){
+    $('ssum').innerHTML = `<b>${esc(q)}</b> — 이름이 <b>${cands.length}</b>개 있어요. 누구를 찾으세요?`;
+    $('slist').innerHTML = `<div class="picks">${cands.slice(0,40).map(c=>`<button class="pk" data-k="${esc(c.key)}"><b>${hlName(c.label, q)}</b><span>${c.n}회</span></button>`).join('')}</div>`;
+    $('slist').querySelectorAll('.pk').forEach(b=>b.onclick=()=>{ searchPick = b.dataset.k; $('sq').value = idxN.names[b.dataset.k].label; doSearch(); });
+    return;
+  }
   const hits = [];
-  for(const s in H){ if(s==='_names') continue; for(const d in H[s]) for(const x of H[s][d]){
-    const t = typeof x==='string' ? x : x.t;
-    const low = t.toLowerCase();
-    const lowN = nos(low);
-    if(words.every(w=>low.includes(w)) || lowN.includes(nos(q.toLowerCase()))) hits.push({s, d, x, t});
-  } }
+  if(pick){
+    for(const r of idxN.recs) if(r.keys.has(pick.key)) hits.push(r);
+  } else {
+    for(const r of idxN.recs){ const low = r.t.toLowerCase(); if(words.every(w=>low.includes(w)) || nos(low).includes(qn)) hits.push(r); }
+  }
+  const others = pick ? cands.filter(c=>c.key!==pick.key).slice(0,12) : [];
+  setTimeout(()=>{
+    if(!others.length) return;
+    $('slist').insertAdjacentHTML('afterbegin', `<div class="sim">비슷한 이름: ${others.map(c=>`<button class="pk sm" data-k="${esc(c.key)}">${esc(c.label)} <span>${c.n}</span></button>`).join('')}</div>`);
+    $('slist').querySelectorAll('.sim .pk').forEach(b=>b.onclick=()=>{ searchPick = b.dataset.k; $('sq').value = idxN.names[b.dataset.k].label; doSearch(); });
+  });
+  if(pick) q = pick.label;
   hits.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:0);
   // 같은 날·같은 프로그램은 한 줄로
   const grp = [], idx = {};
@@ -1188,7 +1246,7 @@ function doSearch(){
   }).join('');
 }
 let sqT = null;
-$('sq').addEventListener('input', ()=>{ clearTimeout(sqT); sqT = setTimeout(doSearch, 180); });
+$('sq').addEventListener('input', ()=>{ searchPick = null; clearTimeout(sqT); sqT = setTimeout(doSearch, 180); });
 $('sq').addEventListener('keydown', e=>{ if(e.key==='Escape') closeSearch(); });
 $('sx').onclick = ()=>closeSearch();
 $('sr').onclick = e=>{ if(e.target.id==='sr') closeSearch(); };
