@@ -244,6 +244,14 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 .vw .thumbs{display:flex;gap:6px;padding:12px 4px 2px;overflow-x:auto;max-width:100%;scrollbar-width:none}
 .vw .thumbs::-webkit-scrollbar{display:none}
 .vw .thumbs img{width:48px;height:60px;object-fit:cover;object-position:top;border-radius:8px;opacity:.45;cursor:pointer;flex:0 0 auto;border:2px solid transparent;transition:opacity .15s}
+.vw .thumbs img.ex{border-color:#ff4fd8;opacity:.75}
+.vw .exbadge{position:absolute;top:58px;left:50%;transform:translateX(-50%);z-index:3;background:#ff4fd8;color:#fff;font-size:12.5px;font-weight:800;border-radius:999px;padding:5px 12px;box-shadow:0 4px 14px rgba(255,79,216,.45)}
+.vw .exbox{border:1px solid rgba(255,79,216,.45);background:rgba(255,79,216,.08);border-radius:12px;padding:10px 12px;font-size:13px}
+.vw .exbox small{color:var(--faint)}
+.vw .exi{display:flex;gap:8px;align-items:center;margin-top:7px}
+.vw .exi span{flex:1;min-width:0;color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vw .exi button{border:0;background:#ff4fd8;color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+.vw .exi a{color:#f7a3c8;text-decoration:none;font-weight:800}
 .vw .thumbs img.on{opacity:1;border-color:#fff}
 .vw .thumbs img:hover{opacity:.85}
 .vw .snav{position:absolute;top:50%;transform:translateY(-50%);width:50px;height:50px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#111;font-size:26px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.4);z-index:3}
@@ -1023,11 +1031,25 @@ document.addEventListener('click', ev=>{
 });
 
 /* ---------- 크게 보기 ---------- */
-let vK = 0, vI = 0;
+let vK = 0, vI = 0, vSl = [], vIns = -1, vExtra = [];
 const vw = $('vw');
+// 주간표를 크게 볼 때: 같은 날 같은 프로그램의 추가 게시물을 그날 사진 바로 뒤에 끼워 넣음
+function buildSlides(e){
+  vExtra = []; vIns = -1;
+  const own = e.slides.map((s,i)=>({url:s.url, wi:i, ex:null}));
+  if(!e.weekly || !e.date || selDay==='unknown'){ vSl = own; return; }
+  vExtra = viewList.filter(x=>x!==e && x.prog===e.prog && x.date===e.date && !x.weekly && x.slides && x.slides.length);
+  if(!vExtra.length){ vSl = own; return; }
+  let ins = daySlide(e, e.date); if(ins<0) ins = Math.max(0, e.start||0);
+  vIns = ins;
+  const add = []; vExtra.forEach(x=>x.slides.forEach((s,i)=>add.push({url:s.url, wi:-1, ex:x, xi:i})));
+  vSl = [...own.slice(0, ins+1), ...add, ...own.slice(ins+1)];
+}
+const toPos = wi => vIns>=0 && wi>vIns ? wi + vSl.filter(s=>s.ex).length : wi;
 function openView(k, at){
   vK = k; const e = viewList[k]; if(!e) return;
-  vI = at!=null ? at : Math.min(e.start||0, Math.max(0, e.slides.length-1));
+  buildSlides(e);
+  vI = toPos(at!=null ? at : Math.min(e.start||0, Math.max(0, e.slides.length-1)));
   if(!vw.classList.contains('on')){ try{ history.pushState({vw:1},''); }catch(_){} }
   vw.classList.add('on'); document.body.style.overflow='hidden';
   drawSide(); drawStage();
@@ -1035,11 +1057,11 @@ function openView(k, at){
 function hideView(){ vw.classList.remove('on'); document.body.style.overflow=''; $('vstage').querySelector('.imgwrap').innerHTML=''; }
 function closeView(){ if(!vw.classList.contains('on')) return; hideView(); if(history.state && history.state.vw){ try{ history.back(); }catch(_){} } }
 function drawStage(){
-  const e = viewList[vK], n = e.slides.length, wrap = $('vstage').querySelector('.imgwrap');
+  const e = viewList[vK], n = vSl.length, wrap = $('vstage').querySelector('.imgwrap'), cur = vSl[vI] || {};
   if(e.link || !n){
     wrap.innerHTML = `<a class="linkbig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener"><span>📷</span>직접 추가한 게시물<br>눌러서 인스타에서 보기</a>`;
   } else {
-    wrap.innerHTML = `<img class="big" src="${esc(e.slides[vI].url)}" alt="" draggable="false">`;
+    wrap.innerHTML = `${cur.ex?`<span class="exbadge">➕ 추가 게시물 · ${esc(postLabel(cur.ex))}</span>`:''}<img class="big" src="${esc(cur.url)}" alt="" draggable="false">`;
     wrap.querySelector('img').onclick = ev => { ev.stopPropagation(); closeView(); };   // 한 번 더 누르면 원래 화면으로
     wrap.querySelector('img').onerror = () => {
       const link = (e.post.permalink||'').replace(/\/?$/,'/');
@@ -1049,7 +1071,7 @@ function drawStage(){
   $('vcount').style.display = n>1 ? '' : 'none';
   $('vcount').textContent = `${vI+1} / ${n}`;
   $('vprev').disabled = vI<=0; $('vnext').disabled = vI>=n-1;
-  $('vthumbs').innerHTML = n>1 ? e.slides.map((s,i)=>`<img src="${esc(s.url)}" data-i="${i}" class="${i===vI?'on':''}" alt="">`).join('') : '';
+  $('vthumbs').innerHTML = n>1 ? vSl.map((s,i)=>`<img src="${esc(s.url)}" data-i="${i}" class="${i===vI?'on':''} ${s.ex?'ex':''}" alt="" title="${s.ex?'추가 게시물':''}">`).join('') : '';
   $('vthumbs').querySelectorAll('img').forEach(im=>im.onclick=()=>{ vI=+im.dataset.i; drawStage(); });
   const on = $('vthumbs').querySelector('.on'); if(on) on.scrollIntoView({block:'nearest', inline:'center'});
 }
@@ -1063,6 +1085,7 @@ function drawSide(){
       <button class="x" id="vx" aria-label="닫기">×</button></div>
     <div class="vb">
       ${dateLine(e)}
+      ${vExtra.length?`<div class="exbox"><b>➕ 이날 추가 게시물 ${vExtra.length}개</b> <small>— 사진 목록에 그날 사진 바로 뒤로 넣었어요</small>${vExtra.map((x,j)=>`<div class="exi"><button class="exgo" data-x="${j}">${esc(postLabel(x))} 보기</button><span>${esc((x.post.caption||'').replace(/\s+/g,' ').slice(0,90))}</span>${x.post.permalink?`<a href="${esc(x.post.permalink)}" target="_blank" rel="noopener">↗</a>`:''}</div>`).join('')}</div>`:''}
       ${e.replaced?'<div class="kept">같은 날짜에 새 게시물이 올라와서 이 보관본은 확인 필요로 옮겼어요</div>':''}
       ${e.post._kept && !e.replaced?'<div class="kept">🗂 원본이 삭제돼서 보관해 둔 내용이에요 (방송 주가 끝나면 정리돼요)</div>':''}
       ${e.post._yt && e.date ? daySnippet(e.post.caption, e.date) : ''}
@@ -1078,7 +1101,9 @@ function drawSide(){
     <div class="vf"><div class="pn"><button id="vpp">‹ 이전 게시물</button><span>${vK+1} / ${viewList.length}</span><button id="vpn">다음 게시물 ›</button></div></div>
     <div class="hint">← → 사진 넘기기 · ↑ ↓ 게시물 넘기기 · Esc 닫기</div>`;
   $('vx').onclick = closeView;
-  $('vside').querySelectorAll('.cap .go').forEach(a=>a.onclick=()=>{ vI=+a.dataset.i; drawStage(); });
+  $('vside').querySelectorAll('.cap .go').forEach(a=>a.onclick=()=>{ vI=toPos(+a.dataset.i); drawStage(); });
+  $('vside').querySelectorAll('.cap .go .gi').forEach(g=>{ g.textContent = `${toPos(+g.parentNode.dataset.i)+1}/${vSl.length} ›`; });
+  $('vside').querySelectorAll('.exgo').forEach(b=>b.onclick=()=>{ const x = vExtra[+b.dataset.x]; vI = vSl.findIndex(s=>s.ex===x); drawStage(); });
   $('vpp').disabled = vK<=0; $('vpn').disabled = vK>=viewList.length-1;
   $('vpp').onclick = ()=>postGo(-1); $('vpn').onclick = ()=>postGo(1);
   $('vside').querySelectorAll('.act button').forEach(b=>b.onclick=()=>{ if(doAct(e.post.id, b.dataset.a, b.dataset.g)) closeView(); });
@@ -1114,7 +1139,7 @@ function capLinks(e){
     return i>=0 ? `<a class="go" data-i="${i}" title="${i+1}번째 사진으로">${esc(line)}<span class="gi">${i+1}/${e.slides.length} ›</span></a>` : esc(line);
   }).join('\n');
 }
-function slideGo(d){ const n = viewList[vK].slides.length, k = vI+d; if(k<0||k>=n) return; vI=k; drawStage(); }
+function slideGo(d){ const n = vSl.length, k = vI+d; if(k<0||k>=n) return; vI=k; drawStage(); }
 function postGo(d){ const k = vK+d; if(k<0||k>=viewList.length) return; openView(k); }
 $('vprev').onclick = ev=>{ ev.stopPropagation(); slideGo(-1); };
 $('vnext').onclick = ev=>{ ev.stopPropagation(); slideGo(1); };
