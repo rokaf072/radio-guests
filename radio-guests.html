@@ -1232,7 +1232,7 @@ function doSearch(){
     const yrs = Object.keys(yr).sort().reverse();
     const yrTable = yrs.length ? `<table class="yrt"><tr><th>연도</th><th>🎙 편성표</th><th>다시듣기</th><th>🎬 클립</th><th>📸 포토</th><th>인스타</th></tr>${yrs.map(y=>`<tr><td>${y}</td>${['sch','aod','clip','photo','ig'].map(k=>`<td class="${yr[y][k]?'':'z'}">${yr[y][k].toLocaleString()}</td>`).join('')}</tr>`).join('')}</table>` : '';
     const allP = [...progs, ...Object.keys(H).filter(s=>s!=='_names' && !progs.some(p=>p.slug===s)).map(progBySlug).filter(Boolean)];
-    $('slist').innerHTML = total ? yrTable + `<div class="sov">${allP.map(p=>{
+    $('slist').innerHTML = total ? `<div class="sov">${allP.map(p=>{
       const ds = Object.keys(H[p.slug]||{}).sort(); const n = ds.reduce((a,d)=>a+H[p.slug][d].length,0);
       const last = ds.length ? H[p.slug][ds[ds.length-1]] : null; const ex = last ? (typeof last[0]==='string'?last[0]:last[0].t).split(' ‖ ')[0] : '';
       return `<div class="si" style="--pc:${p.color}"><div class="sb"><div class="spn">${p.logo?`<img src="${p.logo}" alt="">`:''}${esc(p.name)} <span style="color:var(--sub);font-weight:600">· ${n?`${n.toLocaleString()}건 (${ds[0]} ~ ${ds[ds.length-1]})`:'기록 없음'}</span></div>${ex?`<div class="st"><span>예: ${esc(ex.slice(0,90))}</span></div>`:''}</div></div>`;
@@ -1297,9 +1297,17 @@ addEventListener('popstate', ()=>closeSearch(true));
 
 /* 편성표 출연자 10년치 (SBS 편성표 데이터 — 날짜별로 바로 받아서 빠름) */
 function startSchedCrawl(){
-  if(!confirm('SBS 편성표에서 지난 10년 동안의 프로그램별 출연자를 모아 올까요?\n\n파워FM·러브FM 전체 · 10~20분쯤 걸려요. 그동안 이 창은 열어두세요. (이미 받은 기록은 중복 없이 합쳐져요)')) return;
-  histRun = {done:0, total:3650, user:'준비 중', kind:'편성표'}; showHistToast();
-  window.postMessage({rg:'sched', days:3650}, '*');
+  if(!confirm('SBS 편성표에서 지난 10년 동안의 프로그램별 출연자를 모아 올까요? (이미 받은 날짜는 건너뛰고 그 이전부터 이어서 받아요)\n\n파워FM·러브FM 전체 · 10~20분쯤 걸려요. 그동안 이 창은 열어두세요. (이미 받은 기록은 중복 없이 합쳐져요)')) return;
+  // 이미 받은 편성표 기록이 있으면 그 이전 날짜부터 이어서 (10년 전까지)
+  let oldest = '';
+  const H = histData || {};
+  for(const s in H){ if(s==='_names') continue; for(const d in H[s]) if(H[s][d].some(x=>typeof x==='string' && x.startsWith('🎙')) && (!oldest || d < oldest)) oldest = d; }
+  const kst = new Date(Date.now()+9*36e5).toISOString().slice(0,10);
+  const limit = addDays(kst, -3650);
+  const before = oldest && oldest > limit ? oldest : '';
+  const days = before ? diffDays(before, limit) : 3650;
+  histRun = {done:0, total:days, user:'준비 중', kind:'편성표'}; showHistToast();
+  window.postMessage({rg:'sched', days, before}, '*');
 }
 window.addEventListener('message', e=>{
   if(e.source !== window || !e.data || e.data.rg !== 'sched-r') return;
