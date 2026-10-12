@@ -1130,7 +1130,7 @@ async function loadHist(){
   catch(e){ histData = histData || {}; }
   return histData;
 }
-const progBySlug = s => progs.find(p=>p.slug===s);
+const progBySlug = s => progs.find(p=>p.slug===s) || (histData && histData._names && histData._names[s] ? {slug:s, name:histData._names[s], color:'#5b6478'} : null);
 function openSearch(){
   $('sr').classList.add('on'); document.body.style.overflow='hidden';
   try{ history.pushState({sr:1},''); }catch(_){}
@@ -1140,15 +1140,16 @@ function openSearch(){
 function closeSearch(fromPop){ if(!$('sr').classList.contains('on')) return; $('sr').classList.remove('on'); document.body.style.overflow=''; if(!fromPop && history.state && history.state.sr){ try{ history.back(); }catch(_){} } }
 function doSearch(){
   const q = $('sq').value.trim(), H = histData || {};
-  $('srun').innerHTML = histRun ? `<i class="spin"></i> 지난 기록 가져오는 중 — <b>${esc(histRun.user)}</b> (프로그램 ${histRun.done}/${histRun.total}) · 끝나면 결과가 더 늘어나요` : '';
+  $('srun').innerHTML = histRun ? `<i class="spin"></i> 지난 기록 가져오는 중 — <b>${esc(histRun.user)}</b> (${histRun.kind==='편성표'?histRun.done.toLocaleString()+'/'+histRun.total.toLocaleString()+'일':'프로그램 '+histRun.done+'/'+histRun.total}) · 끝나면 결과가 더 늘어나요` : '';
   $('srun').style.display = histRun ? '' : 'none';
   const days = new Set(); let total = 0;
-  for(const s in H) for(const d in H[s]){ days.add(d); total += H[s][d].length; }
+  for(const s in H){ if(s==='_names') continue; for(const d in H[s]){ days.add(d); total += H[s][d].length; } }
   const span = [...days].sort();
   if(!q){
     $('ssum').innerHTML = total ? `저장된 기록 <b>${total.toLocaleString()}</b>건 · ${span[0]} ~ ${span[span.length-1]}` : '아직 저장된 기록이 없어요 — ⚙ 화면에서 [지난 기록 가져오기]를 눌러주세요';
     // 프로그램별로 몇 건이 쌓였는지 + 최근 제목 예시 (기록이 잘 들어왔는지 확인용)
-    $('slist').innerHTML = total ? `<div class="sov">${progs.map(p=>{
+    const allP = [...progs, ...Object.keys(H).filter(s=>s!=='_names' && !progs.some(p=>p.slug===s)).map(progBySlug).filter(Boolean)];
+    $('slist').innerHTML = total ? `<div class="sov">${allP.map(p=>{
       const ds = Object.keys(H[p.slug]||{}).sort(); const n = ds.reduce((a,d)=>a+H[p.slug][d].length,0);
       const last = ds.length ? H[p.slug][ds[ds.length-1]] : null; const ex = last ? (typeof last[0]==='string'?last[0]:last[0].t).split(' ‖ ')[0] : '';
       return `<div class="si" style="--pc:${p.color}"><div class="sb"><div class="spn">${p.logo?`<img src="${p.logo}" alt="">`:''}${esc(p.name)} <span style="color:var(--sub);font-weight:600">· ${n?`${n.toLocaleString()}건 (${ds[0]} ~ ${ds[ds.length-1]})`:'기록 없음'}</span></div>${ex?`<div class="st"><span>예: ${esc(ex.slice(0,90))}</span></div>`:''}</div></div>`;
@@ -1158,12 +1159,12 @@ function doSearch(){
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
   const nos = s => s.replace(/\s+/g,'');   // 띄어쓰기 무시 (보이 넥스트 도어 = 보이넥스트도어)
   const hits = [];
-  for(const s in H) for(const d in H[s]) for(const x of H[s][d]){
+  for(const s in H){ if(s==='_names') continue; for(const d in H[s]) for(const x of H[s][d]){
     const t = typeof x==='string' ? x : x.t;
     const low = t.toLowerCase();
     const lowN = nos(low);
     if(words.every(w=>low.includes(w)) || lowN.includes(nos(q.toLowerCase()))) hits.push({s, d, x, t});
-  }
+  } }
   hits.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:0);
   // 같은 날·같은 프로그램은 한 줄로
   const grp = [], idx = {};
@@ -1194,6 +1195,29 @@ $('sr').onclick = e=>{ if(e.target.id==='sr') closeSearch(); };
 $('srch').onclick = openSearch;
 addEventListener('popstate', ()=>closeSearch(true));
 
+/* 편성표 출연자 10년치 (SBS 편성표 데이터 — 날짜별로 바로 받아서 빠름) */
+function startSchedCrawl(){
+  if(!confirm('SBS 편성표에서 지난 10년 동안의 프로그램별 출연자를 모아 올까요?\n\n파워FM·러브FM 전체 · 10~20분쯤 걸려요. 그동안 이 창은 열어두세요. (이미 받은 기록은 중복 없이 합쳐져요)')) return;
+  histRun = {done:0, total:3650, user:'준비 중', kind:'편성표'}; showHistToast();
+  window.postMessage({rg:'sched', days:3650}, '*');
+}
+window.addEventListener('message', e=>{
+  if(e.source !== window || !e.data || e.data.rg !== 'sched-r') return;
+  const m = e.data;
+  if(m.type==='sprogress'){
+    histRun = {done:m.done, total:m.total, user:`편성표 ${m.user}까지`, kind:'편성표'}; showHistToast();
+    setStatus(`편성표 출연자 가져오는 중… ${m.user} (${m.done}/${m.total}일)`, m.done/m.total);
+    if(m.done % 360 < 6){ histData = null; if($('sr').classList.contains('on')) loadHist().then(doSearch); }
+  }
+  if(m.type==='sdone'){
+    const r = m.result||{};
+    histRun = null; showHistToast(); histData = null;
+    if($('sr').classList.contains('on')) loadHist().then(doSearch);
+    const msg = r.busy ? '이미 가져오는 중이에요' : `✅ 편성표 출연자 가져오기 완료 — ${(r.total||0).toLocaleString()}건 · ${r.days||0}일치` + (r.oldest?` (가장 오래된 날 ${r.oldest})`:'') + (r.err?` · 오류: ${r.err}`:'');
+    setStatus(msg); if(!r.busy) alert(msg);
+  }
+});
+
 /* 지난 300일 기록 가져오기 (집 PC 확장 프로그램이 SBS 홈페이지 다시듣기·클립 목록을 읽음) */
 function startHistCrawl(){
   const list = progs.filter(p=>!p.igOnly).map(p=>({slug:p.slug, name:p.name}));
@@ -1207,8 +1231,8 @@ function showHistToast(){
   const t = $('htoast');
   if(!histRun){ t.classList.remove('on'); return; }
   t.classList.add('on');
-  $('htxt').textContent = `${histRun.user} · 프로그램 ${histRun.done}/${histRun.total}`;
-  $('hbar').style.width = Math.round((histRun.done-1)/histRun.total*100) + '%';
+  $('htxt').textContent = histRun.kind==='편성표' ? `${histRun.user} · ${histRun.done.toLocaleString()}/${histRun.total.toLocaleString()}일` : `${histRun.user} · 프로그램 ${histRun.done}/${histRun.total}`;
+  $('hbar').style.width = Math.round((histRun.kind==='편성표'?histRun.done:histRun.done-1)/histRun.total*100) + '%';
 }
 window.addEventListener('message', e=>{
   if(e.source !== window || !e.data || e.data.rg !== 'hist-r') return;
@@ -1302,7 +1326,7 @@ $('info').onclick = () => {
     ${progs.filter(p=>p.added).length ? `<p style="margin-top:8px">추가한 프로그램: ${progs.filter(p=>p.added).map(p=>`<b>${esc(p.name)}</b> <button class="np_del" data-s="${p.slug}" style="font-size:11px;border:1px solid var(--line);border-radius:6px;background:none;color:var(--sub);cursor:pointer">삭제</button>`).join(' · ')}</p>` : ''}
     ${(document.documentElement.dataset.igCollector||'') >= '2.2' ? `<h3 style="margin-top:18px">지난 출연 기록 (검색용)</h3>
     <p>SBS 홈페이지 [다시듣기]·[방송클립영상] 목록에서 지난 3년 기록을 한 번에 모아요. 오늘부터는 자동으로 쌓여요.</p>
-    <div class="act" style="margin-top:8px"><button id="histgo" class="pri">📚 지난 기록 가져오기 (3년)</button></div>` : ''}
+    <div class="act" style="margin-top:8px">${(document.documentElement.dataset.igCollector||'') >= '2.3' ? '<button id="schedgo" class="pri">🎙 편성표 출연자 가져오기 (10년)</button>' : ''}<button id="histgo">📚 다시듣기·클립 기록 (3년)</button></div>` : ''}
     <h3 style="margin-top:18px">기기 간 연동</h3>
     <p>${syncUrl ? (syncOk===false ? '<span class="bad">연동 주소에 접속이 안 돼요</span>' : '<span class="ok">연동됨</span> — 숨기기·날짜 지정이 모든 기기에 똑같이 적용돼요.') : '연동 안 됨 — 숨기기·날짜 지정이 이 기기에만 저장돼요.'}</p>
     ${SYNC_URL ? '' : `<div class="act" style="margin-top:8px"><input id="surl" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(syncUrl)}" style="flex:1;min-width:240px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><button id="ssave">연동 주소 저장</button></div>`}
@@ -1321,6 +1345,7 @@ $('info').onclick = () => {
   };
   $('back').onclick=render;
   if($('histgo')) $('histgo').onclick = startHistCrawl;
+  if($('schedgo')) $('schedgo').onclick = startSchedCrawl;
   $('np_add').onclick = async () => {
     const raw = $('np_url').value.trim(), ig = $('np_ig').value.trim().replace(/^@/,'').replace(/^https?:\/\/(www\.)?instagram\.com\//,'').replace(/[\/?].*$/,'');
     const m = /radio\/([A-Za-z0-9_\-]+)/.exec(raw) || /^([A-Za-z0-9_\-]+)$/.exec(raw);
