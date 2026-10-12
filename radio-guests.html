@@ -1442,9 +1442,13 @@ const STROKES = [
   svg.innerHTML = html; svg.style.setProperty('--total', t.toFixed(2)+'s');
   const z = $('sigzone');
   const play = () => { svg.classList.remove('play'); void svg.getBoundingClientRect(); svg.classList.add('play'); };
-  z.addEventListener('mouseenter', play);
-  z.addEventListener('mouseleave', ()=>svg.classList.remove('play'));
-  z.addEventListener('click', e=>{ e.stopPropagation(); svg.classList.contains('play') ? svg.classList.remove('play') : play(); });
+  // 마우스가 머무는 동안 계속 반복 (그리고 → 잠깐 빛나고 → 다시 그리기)
+  let loop = null;
+  const start = () => { if(loop) return; play(); loop = setInterval(play, (t + 1.6) * 1000); };
+  const stop = () => { clearInterval(loop); loop = null; svg.classList.remove('play'); };
+  z.addEventListener('mouseenter', start);
+  z.addEventListener('mouseleave', stop);
+  z.addEventListener('click', e=>{ e.stopPropagation(); loop ? stop() : start(); });
 })();
 
 /* ---------- SBS 일일 편성표 (그날 출연자) ---------- */
