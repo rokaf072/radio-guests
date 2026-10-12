@@ -244,8 +244,7 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
   transform:translateX(-160%) skewX(-18deg);animation:gloss 2s ease-in-out infinite}
 @keyframes gloss{0%{transform:translateX(-160%) skewX(-18deg)}55%,100%{transform:translateX(330%) skewX(-18deg)}}
 .schbtn::before{content:"";position:absolute;inset:0;border-radius:999px;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0) 55%)}
-.schbtn .hint{display:none;position:absolute;left:50%;top:calc(100% + 3px);transform:translateX(-50%);white-space:nowrap;font-size:10.5px;font-weight:700;color:#ffd978;letter-spacing:-.2px;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.6);animation:hintb 1.6s ease-in-out infinite}
-.schbtn.fresh .hint{display:block}
+.schbtn .hint{display:block;position:absolute;left:50%;top:calc(100% + 3px);transform:translateX(-50%);white-space:nowrap;font-size:10.5px;font-weight:700;color:#ffd978;letter-spacing:-.2px;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.6);animation:hintb 1.6s ease-in-out infinite}
 @keyframes hintb{0%,100%{opacity:.65}50%{opacity:1}}
 @media (prefers-reduced-motion:reduce){.schbtn .gl::after{animation:none!important;opacity:0}}
 @keyframes shine{0%,70%{background-position:150% 0}100%{background-position:-60% 0}}
@@ -1473,9 +1472,6 @@ $('schdb').onclick = ()=>{ const i = $('schdate'); try{ i.showPicker(); }catch(_
 $('schdate').onchange = ()=>{ if($('schdate').value){ schDay = $('schdate').value; drawSched(); } };
 addEventListener('popstate', ()=>closeSched(true));
 document.addEventListener('keydown', e=>{ if(!$('sch').classList.contains('on')) return; if(e.key==='Escape') closeSched(); else if(e.key==='ArrowLeft' && e.target.tagName!=='INPUT') $('schp').click(); else if(e.key==='ArrowRight' && e.target.tagName!=='INPUT') $('schn').click(); });
-// 처음 쓰는 기기에만 작은 안내 글씨 (한 번 누르면 사라짐)
-try{ if(!localStorage.getItem('schSeen')) $('schbtn').classList.add('fresh'); }catch(_){}
-$('schbtn').addEventListener('click', ()=>{ $('schbtn').classList.remove('fresh'); try{ localStorage.setItem('schSeen','1'); }catch(_){} });
 // 미리 받아 두고, 버튼에 '오늘 출연 N' 숫자 표시
 setTimeout(async()=>{
   const s = await getSched(today()); if(!s) return;
