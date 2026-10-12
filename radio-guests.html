@@ -1136,20 +1136,47 @@ $('vstage').addEventListener('touchend', ev=>{
 addEventListener('popstate', ()=>{ if(vw.classList.contains('on')) hideView(); });
 
 /* ---------- 출연자 검색 ---------- */
-let histData = null, histAt = 0;
+let histData = null, histAt = 0, histFetching = null;
+// 기록은 이 기기(IndexedDB)에 저장해 두고 바로 씀 → 뒤에서 조용히 최신으로 바꿈
+const idb = (()=>{ let p; const open = () => p || (p = new Promise((res,rej)=>{ const r = indexedDB.open('radio-guests', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }));
+  return {
+    get: k => open().then(db=>new Promise(res=>{ const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(undefined); })).catch(()=>undefined),
+    set: (k,v) => open().then(db=>new Promise(res=>{ const t = db.transaction('kv','readwrite'); t.objectStore('kv').put(v,k); t.oncomplete = res; t.onerror = res; })).catch(()=>{})
+  }; })();
+function fetchHist(){
+  if(histFetching) return histFetching;
+  histFetching = (async()=>{
+    try{
+      const r = await fetch(syncUrl + (syncUrl.includes('?')?'&':'?') + 'v=hist&t=' + Date.now());
+      const j = (await r.json()).hist || {};
+      histData = j; histAt = Date.now(); nameIdxCache = null;
+      idb.set('hist', {at: histAt, data: j});
+      if($('sr').classList.contains('on')) doSearch();      // 열려 있으면 최신으로 다시 보여줌
+      else setTimeout(()=>nameIndex(histData), 50);
+    }catch(e){ histData = histData || {}; }
+    histFetching = null; return histData;
+  })();
+  return histFetching;
+}
 async function loadHist(){
-  if(histData && Date.now()-histAt < 5*6e4) return histData;
-  try{ const r = await fetch(syncUrl + (syncUrl.includes('?')?'&':'?') + 'v=hist&t=' + Date.now()); histData = (await r.json()).hist || {}; histAt = Date.now(); }
-  catch(e){ histData = histData || {}; }
+  if(!histData){
+    const c = await idb.get('hist');
+    if(c && c.data){ histData = c.data; histAt = c.at || 0; }
+  }
+  if(!histData) return fetchHist();                       // 처음 한 번만 기다림
+  if(Date.now()-histAt > 5*6e4) fetchHist();              // 오래됐으면 뒤에서 새로 받기
   return histData;
 }
+// 페이지가 열리고 조금 뒤 미리 준비 (검색 버튼을 누르면 바로 뜨게)
+setTimeout(()=>{ loadHist().then(()=>{ if(histData) setTimeout(()=>nameIndex(histData), 100); }); }, 2500);
 const progBySlug = s => progs.find(p=>p.slug===s) || (histData && histData._names && histData._names[s] ? {slug:s, name:histData._names[s], color:'#5b6478'} : null);
 function openSearch(){
   $('sr').classList.add('on'); document.body.style.overflow='hidden';
   try{ history.pushState({sr:1},''); }catch(_){}
   $('sq').value = ''; searchPick = null; $('slist').innerHTML = ''; $('slist').scrollTop = 0;   // 열 때마다 새 검색
-  $('sq').focus(); $('ssum').textContent = '기록 불러오는 중…';
-  loadHist().then(()=>doSearch());
+  $('sq').focus();
+  if(histData){ doSearch(); loadHist(); }                 // 준비돼 있으면 바로
+  else { $('ssum').textContent = '기록 불러오는 중…'; loadHist().then(()=>doSearch()); }
 }
 function closeSearch(fromPop){ if(!$('sr').classList.contains('on')) return; $('sr').classList.remove('on'); document.body.style.overflow=''; if(!fromPop && history.state && history.state.sr){ try{ history.back(); }catch(_){} } }
 // 기록 글에서 출연자 이름만 뽑아 색인 (이름 단위로 정확히 세기)
@@ -1280,12 +1307,11 @@ window.addEventListener('message', e=>{
   if(m.type==='sprogress'){
     histRun = {done:m.done, total:m.total, user:`편성표 ${m.user}까지`, kind:'편성표'}; showHistToast();
     setStatus(`편성표 출연자 가져오는 중… ${m.user} (${m.done}/${m.total}일)`, m.done/m.total);
-    if(m.done % 360 < 6){ histData = null; if($('sr').classList.contains('on')) loadHist().then(doSearch); }
+    if(m.done % 360 < 6) fetchHist();
   }
   if(m.type==='sdone'){
     const r = m.result||{};
-    histRun = null; showHistToast(); histData = null;
-    if($('sr').classList.contains('on')) loadHist().then(doSearch);
+    histRun = null; showHistToast(); fetchHist();
     const msg = r.busy ? '이미 가져오는 중이에요' : `✅ 편성표 출연자 가져오기 완료 — ${(r.total||0).toLocaleString()}건 · ${r.days||0}일치` + (r.oldest?` (가장 오래된 날 ${r.oldest})`:'') + (r.err?` · 오류: ${r.err}`:'');
     setStatus(msg); if(!r.busy) alert(msg);
   }
@@ -1316,12 +1342,11 @@ window.addEventListener('message', e=>{
     histRun = {done:m.done, total:m.total, user:m.user}; showHistToast();
     setStatus(`지난 기록 가져오는 중… ${m.user} (${m.done}/${m.total})`, (m.done-1)/m.total);
     // 프로그램 하나가 끝날 때마다 검색 결과도 새로 고침
-    if(prev && prev !== m.done){ histData = null; if($('sr').classList.contains('on')) loadHist().then(doSearch); }
+    if(prev && prev !== m.done) fetchHist();
   }
   if(m.type==='hdone'){
     const r = m.result||{}, f = Object.entries(r.fail||{});
-    histRun = null; showHistToast(); histData = null;
-    if($('sr').classList.contains('on')) loadHist().then(doSearch);
+    histRun = null; showHistToast(); fetchHist();
     const msg = r.busy ? '이미 가져오는 중이에요' : `✅ 지난 기록 가져오기 완료 — ${(r.total||0).toLocaleString()}건` + (f.length?` · 못 가져옴: ${f.map(([n,er])=>n+'('+er+')').join(', ')}`:'');
     setStatus(msg); if(!r.busy) alert(msg);
   }
