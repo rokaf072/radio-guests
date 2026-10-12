@@ -23,6 +23,12 @@ html,body{margin:0}
 body{background:radial-gradient(1200px 600px at 10% -10%,rgba(123,140,255,.10),transparent 60%),radial-gradient(900px 500px at 100% 0%,rgba(221,42,123,.08),transparent 60%),var(--bg);background-attachment:fixed;color:var(--ink);font-family:"Pretendard","Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:15px;-webkit-font-smoothing:antialiased;min-height:100vh}
 button{font:inherit;color:inherit}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.085;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22420%22%20height%3D%22420%22%20viewBox%3D%220%200%20420%20420%22%20fill%3D%22none%22%20stroke%3D%22%239aa8ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%20%3Cg%20transform%3D%22translate%2860%2070%29%22%3E%3Crect%20x%3D%22-11%22%20y%3D%22-26%22%20width%3D%2222%22%20height%3D%2238%22%20rx%3D%2211%22/%3E%3Cpath%20d%3D%22M-19%200a19%2019%200%200%200%2038%200M0%2019v13M-10%2032h20%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%28300%2080%29%22%3E%3Cpath%20d%3D%22M-30%200a30%2030%200%200%201%2060%200%22/%3E%3Cpath%20d%3D%22M-18%200a18%2018%200%200%201%2036%200%22/%3E%3Cpath%20d%3D%22M-6%200a6%206%200%200%201%2012%200%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%28200%20210%29%22%3E%3Crect%20x%3D%22-34%22%20y%3D%22-16%22%20width%3D%2268%22%20height%3D%2232%22%20rx%3D%229%22/%3E%3Ccircle%20cx%3D%22-14%22%20cy%3D%220%22%20r%3D%226%22/%3E%3Cpath%20d%3D%22M4%20-5h18M4%205h12%22/%3E%3Cpath%20d%3D%22M-22%20-16l18%20-18%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%2890%20300%29%22%3E%3Cpath%20d%3D%22M0%20-14v20%22/%3E%3Ccircle%20cx%3D%22-5%22%20cy%3D%227%22%20r%3D%225%22/%3E%3Cpath%20d%3D%22M0%20-14l12%204%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%28340%20320%29%22%3E%3Cpath%20d%3D%22M-14%20-12v20M10%20-16v20M-14%20-12l24%20-4%22/%3E%3Ccircle%20cx%3D%22-18%22%20cy%3D%229%22%20r%3D%224.5%22/%3E%3Ccircle%20cx%3D%226%22%20cy%3D%225%22%20r%3D%224.5%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%28250%20380%29%22%3E%3Cpath%20d%3D%22M-40%200h8l5%20-10l6%2020l6%20-26l6%2030l6%20-18l5%208h8%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%28150%2040%29%22%3E%3Ccircle%20r%3D%223%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28380%20200%29%22%3E%3Ccircle%20r%3D%222.5%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2830%20190%29%22%3E%3Ccircle%20r%3D%222%22/%3E%3C/g%3E%20%3C/svg%3E");background-size:420px 420px;-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 20%,transparent 85%);mask-image:radial-gradient(ellipse at 50% 30%,#000 20%,transparent 85%)}
+#bgs{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#bgs img{position:absolute;width:auto;opacity:.12;filter:saturate(.85)}
+#bgs .g1{height:min(52vh,520px);right:2vw;bottom:-6vh;transform:rotate(-12deg)}
+#bgs .g2{height:min(30vh,300px);left:-3vw;bottom:8vh;transform:rotate(18deg) scaleX(-1);opacity:.09}
+#bgs .g3{height:min(22vh,220px);right:30vw;top:42vh;transform:rotate(-28deg);opacity:.07}
+@media (max-width:820px){#bgs .g1{height:30vh;right:-8vw}#bgs .g2{height:18vh}#bgs .g3{display:none}}
 body::after{content:"";position:fixed;right:-120px;bottom:-140px;width:520px;height:520px;z-index:-1;pointer-events:none;border-radius:50%;background:radial-gradient(circle,rgba(123,140,255,.10),transparent 65%)}
 
 
@@ -72,7 +78,8 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .sec small{font-size:12.5px;font-weight:500;color:var(--sub)}
 .wall+.sec{margin-top:34px}
 .empty-msg{text-align:center;color:var(--sub);padding:80px 0 40px;font-size:15px}
-.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:14px;align-items:stretch}
+.board{display:grid;grid-template-columns:repeat(var(--cols,4),minmax(0,1fr));gap:18px;align-items:stretch}
+@media (max-width:1100px){.board{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .board+.sec{margin-top:34px}
 .pc{scroll-margin-top:var(--hh,200px);background:var(--panel);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 24px rgba(0,0,0,.35);transition:border-color .2s}
 .pc:hover{border-color:color-mix(in srgb,var(--pc) 55%,transparent)}
@@ -178,6 +185,17 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 .st a{color:var(--acc);font-weight:700;font-size:12px;white-space:nowrap;text-decoration:none}
 .sth{width:34px;height:42px;object-fit:cover;object-position:top;border-radius:6px;flex:0 0 34px}
 @media (max-width:600px){ .sr{padding:0} .srbox{max-height:100vh;height:100%;border-radius:0} #srch{padding:0 10px} }
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;flex:0 0 14px;vertical-align:-2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.srrun{margin-top:10px;font-size:12.5px;color:#ffe2a3;background:rgba(245,177,61,.12);border:1px solid rgba(245,177,61,.35);border-radius:10px;padding:7px 10px;display:flex;gap:8px;align-items:center}
+.srrun .spin{border-top-color:#ffcf6b}
+.htoast{position:fixed;left:18px;bottom:18px;z-index:40;display:none;gap:12px;align-items:center;background:rgba(21,23,29,.95);border:1px solid rgba(245,177,61,.45);border-radius:14px;padding:12px 16px;box-shadow:0 12px 30px rgba(0,0,0,.5);min-width:280px}
+.htoast.on{display:flex}
+.htoast .spin{width:20px;height:20px;flex-basis:20px;border-top-color:#ffcf6b}
+.htoast b{display:block;font-size:13.5px}
+.htoast span{display:block;font-size:12px;color:var(--sub);margin-top:2px}
+.htoast em{display:block;height:4px;border-radius:2px;background:var(--chip);margin-top:7px;overflow:hidden}
+.htoast em i{display:block;height:100%;background:#ffcf6b;width:0;transition:width .4s}
 .addbtn{position:fixed;right:18px;bottom:18px;z-index:30;border:0;border-radius:999px;background:var(--acc);color:#fff;font-weight:800;font-size:14px;padding:12px 18px;box-shadow:0 10px 26px rgba(123,140,255,.35);cursor:pointer}
 
 /* ---------- 크게 보기 (상세 화면) ---------- */
@@ -258,7 +276,9 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
   <div class="days" id="days"></div>
   <div class="jump" id="jump"></div>
 </header>
+<div id="bgs" aria-hidden="true"><img class="g1" src="bg.png" alt="" onerror="document.getElementById('bgs').remove()"><img class="g2" src="bg.png" alt=""><img class="g3" src="bg.png" alt=""></div>
 <main id="main"></main>
+<div class="htoast" id="htoast"><i class="spin"></i><div><b>지난 출연 기록 가져오는 중</b><span id="htxt"></span><em><i id="hbar"></i></em></div></div>
 
 <button class="addbtn" id="add">＋ 링크 추가</button>
 <div class="vw" id="vw" role="dialog" aria-modal="true">
@@ -275,6 +295,7 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
   <div class="srbox">
     <div class="srhead">
       <div class="srin"><span>🔍</span><input id="sq" placeholder="출연자 이름으로 검색 (예: 김희재)" autocomplete="off"><button id="sx" aria-label="닫기">×</button></div>
+      <div class="srrun" id="srun" style="display:none"></div>
       <div class="srsum" id="ssum"></div>
     </div>
     <div class="srlist" id="slist"></div>
@@ -781,13 +802,14 @@ function postLabel(e){
   if(e.weekly) return '주간 편성표';
   if(e.post._yt) return '유튜브 일정';
   const txt = (e.post.caption||'') + ' ' + e.slides.map(s=>ocrCache[s.id]||'').join(' ');
-  const m = /(?:with\.?|초대석|게스트|출연자)[^가-힣\n]{0,14}([가-힣]{2,4})(?![가-힣])/i.exec(txt);
-  if(m && !/주간|코너|게스트|출연|방송|오늘|함께/.test(m[1])) return m[1];
+  const STOP = /^(에서|에게|함께|오늘|주간|코너|게스트|출연|방송|특별|초대|라디오|생방|생녹|녹방|보라|모집|신청|안내|예고|공개|매주|매일|이번|다음|여러분|청취자|사연)/;
+  const re = /(?:with\.?|초대석|게스트|출연자)[^가-힣\n]{1,14}([가-힣]{2,4})(?![가-힣])/gi;
+  let m; while((m = re.exec(txt))){ if(!STOP.test(m[1])) return m[1]; }
   if(isBanchung(e)) return '방청 안내';
   const up = e.post.timestamp ? tsYmd(e.post.timestamp) : '';
-  return up ? `${+up.slice(5,7)}/${+up.slice(8)} 게시물` : '게시물';
+  return '추가 게시물';
 }
-const shortLabel = l => ({'주간 편성표':'주간표','유튜브 일정':'유튜브','방청 안내':'방청','직접 추가':'직접'})[l] || l.replace(' 게시물','');
+const shortLabel = l => ({'주간 편성표':'주간표','유튜브 일정':'유튜브 일정','방청 안내':'방청','직접 추가':'직접 추가'})[l] || l;
 function bodyHTML(e, k, isUnknown){
   const n = e.slides.length, si = tileIdx(e), s = e.slides[si];
   const up = e.post.timestamp ? tsYmd(e.post.timestamp) : '';
@@ -853,7 +875,8 @@ function renderMain(){
   // 주간 편성표를 먼저, 그다음 최근에 올린 순
   const html = on.map(p=>cardHTML(p, list.filter(e=>e.prog===p).sort((a,b)=>(b.weekly?1:0)-(a.weekly?1:0) || (a.post.timestamp<b.post.timestamp?1:-1)))).join('');
   const ten = progs.find(p=>p.youtube);
-  m.innerHTML = (html ? `<div class="board">${html}</div>` : `<div class="empty-msg">${selDay===t?'오늘':'이 날'} 올라온 출연 정보가 없어요</div>`) +
+  const cols = Math.max(4, Math.min(5, Math.ceil(on.length/2)));   // 두 줄에 맞게 (4~5개씩)
+  m.innerHTML = (html ? `<div class="board" style="--cols:${cols}">${html}</div>` : `<div class="empty-msg">${selDay===t?'오늘':'이 날'} 올라온 출연 정보가 없어요</div>`) +
     (ten && !(ten.ytAt && !ten.ytErr) ? `<div class="side" style="margin-top:24px"><h3>배성재의 텐 · 유튜브 <span class="pill yt">생.녹</span></h3><p>유튜브 게시판을 자동으로 읽지 못했어요. <a href="${ten.youtube}" target="_blank" rel="noopener">유튜브 게시판 직접 열기 →</a></p></div>` : '');
   $('jump').querySelectorAll('button').forEach(b=>b.onclick=()=>{ setHH(); document.getElementById('p-'+b.dataset.j).scrollIntoView({behavior:'smooth', block:'nearest'}); });
   setHH(); spy();
@@ -955,6 +978,15 @@ function spy(){
 }
 addEventListener('scroll', ()=>requestAnimationFrame(spy), {passive:true});
 addEventListener('resize', setHH);
+
+/* 카드 바깥 빈 곳을 누르면 모든 카드가 처음 모습(첫 장·첫 게시물)으로 */
+document.addEventListener('click', ev=>{
+  if(ev.target.closest('.pc, header, .vw, .sr, button, a, input, .side, .addbtn')) return;
+  let changed = false;
+  for(const k in pos) if(k.endsWith('|'+selDay)){ delete pos[k]; changed = true; }
+  for(const k in postPos) if(k.endsWith('|'+selDay)){ delete postPos[k]; changed = true; }
+  if(changed) renderMain();
+});
 
 /* ---------- 크게 보기 ---------- */
 let vK = 0, vI = 0;
@@ -1087,19 +1119,29 @@ function openSearch(){
 function closeSearch(fromPop){ if(!$('sr').classList.contains('on')) return; $('sr').classList.remove('on'); document.body.style.overflow=''; if(!fromPop && history.state && history.state.sr){ try{ history.back(); }catch(_){} } }
 function doSearch(){
   const q = $('sq').value.trim(), H = histData || {};
+  $('srun').innerHTML = histRun ? `<i class="spin"></i> 지난 기록 가져오는 중 — <b>${esc(histRun.user)}</b> (프로그램 ${histRun.done}/${histRun.total}) · 끝나면 결과가 더 늘어나요` : '';
+  $('srun').style.display = histRun ? '' : 'none';
   const days = new Set(); let total = 0;
   for(const s in H) for(const d in H[s]){ days.add(d); total += H[s][d].length; }
   const span = [...days].sort();
   if(!q){
     $('ssum').innerHTML = total ? `저장된 기록 <b>${total.toLocaleString()}</b>건 · ${span[0]} ~ ${span[span.length-1]}` : '아직 저장된 기록이 없어요 — ⚙ 화면에서 [지난 기록 가져오기]를 눌러주세요';
-    $('slist').innerHTML = ''; return;
+    // 프로그램별로 몇 건이 쌓였는지 + 최근 제목 예시 (기록이 잘 들어왔는지 확인용)
+    $('slist').innerHTML = total ? `<div class="sov">${progs.map(p=>{
+      const ds = Object.keys(H[p.slug]||{}).sort(); const n = ds.reduce((a,d)=>a+H[p.slug][d].length,0);
+      const last = ds.length ? H[p.slug][ds[ds.length-1]] : null; const ex = last ? (typeof last[0]==='string'?last[0]:last[0].t).split(' ‖ ')[0] : '';
+      return `<div class="si" style="--pc:${p.color}"><div class="sb"><div class="spn">${p.logo?`<img src="${p.logo}" alt="">`:''}${esc(p.name)} <span style="color:var(--sub);font-weight:600">· ${n?`${n.toLocaleString()}건 (${ds[0]} ~ ${ds[ds.length-1]})`:'기록 없음'}</span></div>${ex?`<div class="st"><span>예: ${esc(ex.slice(0,90))}</span></div>`:''}</div></div>`;
+    }).join('')}</div>` : '';
+    return;
   }
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const nos = s => s.replace(/\s+/g,'');   // 띄어쓰기 무시 (보이 넥스트 도어 = 보이넥스트도어)
   const hits = [];
   for(const s in H) for(const d in H[s]) for(const x of H[s][d]){
     const t = typeof x==='string' ? x : x.t;
     const low = t.toLowerCase();
-    if(words.every(w=>low.includes(w))) hits.push({s, d, x, t});
+    const lowN = nos(low);
+    if(words.every(w=>low.includes(w)) || lowN.includes(nos(q.toLowerCase()))) hits.push({s, d, x, t});
   }
   hits.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:0);
   // 같은 날·같은 프로그램은 한 줄로
@@ -1135,16 +1177,33 @@ function startHistCrawl(){
   const list = progs.filter(p=>!p.igOnly).map(p=>({slug:p.slug, name:p.name}));
   if(!confirm(`SBS 홈페이지의 [다시듣기]·[방송클립영상] 목록에서 지난 300일 출연 기록을 모아 올까요?\n\n프로그램 ${list.length}개 · 10~20분쯤 걸려요. 그동안 이 창은 열어두세요.`)) return;
   setStatus('지난 기록 가져오는 중…', 0);
+  histRun = {done:1, total:list.length, user:'준비 중'}; showHistToast();
   window.postMessage({rg:'hist', progs:list, days:300}, '*');
+}
+let histRun = null;   // 가져오는 중이면 {done,total,user}
+function showHistToast(){
+  const t = $('htoast');
+  if(!histRun){ t.classList.remove('on'); return; }
+  t.classList.add('on');
+  $('htxt').textContent = `${histRun.user} · 프로그램 ${histRun.done}/${histRun.total}`;
+  $('hbar').style.width = Math.round((histRun.done-1)/histRun.total*100) + '%';
 }
 window.addEventListener('message', e=>{
   if(e.source !== window || !e.data || e.data.rg !== 'hist-r') return;
   const m = e.data;
-  if(m.type==='hprogress') setStatus(`지난 기록 가져오는 중… ${m.user} (${m.done}/${m.total})`, (m.done-1)/m.total);
+  if(m.type==='hprogress'){
+    const prev = histRun && histRun.done;
+    histRun = {done:m.done, total:m.total, user:m.user}; showHistToast();
+    setStatus(`지난 기록 가져오는 중… ${m.user} (${m.done}/${m.total})`, (m.done-1)/m.total);
+    // 프로그램 하나가 끝날 때마다 검색 결과도 새로 고침
+    if(prev && prev !== m.done){ histData = null; if($('sr').classList.contains('on')) loadHist().then(doSearch); }
+  }
   if(m.type==='hdone'){
     const r = m.result||{}, f = Object.entries(r.fail||{});
-    histData = null;
-    setStatus(r.busy ? '이미 가져오는 중이에요' : `지난 기록 가져오기 완료 — ${(r.total||0).toLocaleString()}건` + (f.length?` · 못 가져옴: ${f.map(([n,er])=>n+'('+er+')').join(', ')}`:''));
+    histRun = null; showHistToast(); histData = null;
+    if($('sr').classList.contains('on')) loadHist().then(doSearch);
+    const msg = r.busy ? '이미 가져오는 중이에요' : `✅ 지난 기록 가져오기 완료 — ${(r.total||0).toLocaleString()}건` + (f.length?` · 못 가져옴: ${f.map(([n,er])=>n+'('+er+')').join(', ')}`:'');
+    setStatus(msg); if(!r.busy) alert(msg);
   }
 });
 
