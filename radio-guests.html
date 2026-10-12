@@ -1307,6 +1307,9 @@ async function startRangeCrawl(){
   }
   const kst = new Date(Date.now()+9*36e5).toISOString().slice(0,10);
   const from = addDays(kst, -3650), to = '2019-12-30';
+  // 2020년 2월 이후에 시작한 프로그램(새 진행자 홈페이지)은 2019년 자료가 있을 수 없으니 건너뜀
+  const first = s => { const ds = Object.keys(H[s]||{}).sort(); return ds[0] || ''; };
+  for(let i=list.length-1;i>=0;i--){ const f = first(list[i].slug); if(f && f > '2020-02-01') list.splice(i,1); }
   if(!confirm(`장수 프로그램의 다시듣기에서 ${from} ~ ${to} 출연 기록을 채울까요?\n\n${list.map(p=>'· '+p.name).join('\n')}\n\n2020년 이후는 편성표로 이미 있어서 건너뛰어요. 프로그램마다 몇 분씩 걸려요 (창은 열어두세요).`)) return;
   histRun = {done:1, total:list.length, user:'준비 중'}; showHistToast();
   window.postMessage({rg:'range', progs:list, from, to}, '*');
