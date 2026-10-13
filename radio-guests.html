@@ -113,7 +113,7 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 @keyframes spin3{to{transform:rotate(360deg)}}
 /* 인스타 스토리처럼: 사진 왼쪽 아래 동그라미 */
 .story{position:absolute;left:10px;top:calc(100cqw - 92px);display:flex;gap:8px;z-index:4;pointer-events:none}
-.sty{outline:none;pointer-events:auto;border:0;background:none;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.sty{outline:none;pointer-events:auto;border:0;background:none;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;animation:beat 1.3s ease-in-out infinite}
 .sty .ring{width:58px;height:58px;border-radius:50%;padding:3px;background:conic-gradient(from var(--ra,0deg),#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5,#feda75);animation:ringspin 2.4s linear infinite;box-shadow:0 4px 16px rgba(214,41,118,.55)}
 .sty .ring img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:top;border:3px solid #111;display:block}
 .sty b{font-size:11px;font-weight:900;color:#fff;background:linear-gradient(135deg,#ff2d7a,#ff6a3d);border-radius:999px;padding:2px 8px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.5)}
