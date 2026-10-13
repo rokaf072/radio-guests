@@ -99,12 +99,12 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .tabs{display:flex;gap:4px;padding:6px 8px;background:color-mix(in srgb,var(--pc) 14%,#0f1116);border-bottom:1px solid rgba(255,255,255,.06);align-items:center;min-height:42px}
 .pcb{position:relative;container-type:inline-size}
 /* ★ 메인 게스트 탭: 광택 + 심장박동 */
-.tabs.multi .pt.hot{position:relative;overflow:visible;color:#fff;border-color:transparent;background:linear-gradient(135deg,#ff2d7a,#ff6a3d 55%,#ffb13d);box-shadow:0 0 12px rgba(255,60,120,.45);z-index:1}
-.tabs.multi .pt.hot .tabhint{position:absolute;left:50%;bottom:calc(100% + 3px);transform:translateX(-50%);white-space:nowrap;font-size:10.5px;font-weight:800;letter-spacing:-.2px;pointer-events:none;
+.tabs.multi .pt.hot{position:relative;overflow:visible;color:#fff;border-color:transparent;background:linear-gradient(135deg,#ff2d7a,#ff6a3d 55%,#ffb13d);box-shadow:0 0 12px rgba(255,60,120,.45);z-index:1;animation:beat 1.3s ease-in-out infinite}
+.tabs .tabhint{position:absolute;right:8px;width:calc(50% - 30px);text-align:center;bottom:calc(100% - 4px);white-space:nowrap;font-size:10.5px;font-weight:800;letter-spacing:-.2px;pointer-events:none;
   color:#ffd978;text-shadow:0 1px 3px rgba(0,0,0,.6);animation:hintb 1.6s ease-in-out infinite}
 @keyframes hintgloss{0%{background-position:120% 0}100%{background-position:-120% 0}}
-.tabs{overflow:visible}
-@media (max-width:820px){ .tabs.multi .pt.hot .tabhint{display:none} }
+.tabs{overflow:visible;position:relative}
+@media (max-width:820px){ .tabs .tabhint{display:none} }
 .tabs.multi .pt.hot .hs{font-style:normal;font-size:12px;margin-right:2px;display:inline-block}
 .tabs.multi .pt.hot .gl{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit}
 .tabs.multi .pt.hot .gl::after{content:"";position:absolute;top:-30%;bottom:-30%;width:45%;left:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7) 50%,transparent);transform:translateX(-160%) skewX(-18deg);animation:gloss 2s ease-in-out infinite}
@@ -954,7 +954,7 @@ function cardHTML(p, es, isUnknown){
       <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
         <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${p.ch?`<span class="ch">${p.ch}</span>`:''}${pills}</div></div>
     </div>
-    <div class="tabs ${es.length>1?'multi':''}">${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${hot?'<i class="hs">★</i><span class="tabhint">👇 눌러서 추가 게시물 보기</span>':''}<span>${esc(lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
+    <div class="tabs ${es.length>1?'multi':''}">${es.length>1 && es.some(e=>!e.weekly && !e.post._yt) ? '<span class="tabhint">👇 눌러서 추가 게시물 보기</span>' : ''}${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${hot?'<i class="hs">★</i>':''}<span>${esc(lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
     <div class="pcb">${bodyHTML(viewList[ks[a]], ks[a], isUnknown)}${storyHTML(es, a)}</div>
   </section>`;
 }
