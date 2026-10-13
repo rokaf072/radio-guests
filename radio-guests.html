@@ -97,6 +97,25 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .pch .tm{font-size:12px;font-weight:900;background:#fff;color:#111;border-radius:999px;padding:1px 7px}
 .pch .ch{white-space:nowrap;font-size:10.5px;font-weight:700;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:0 6px}
 .tabs{display:flex;gap:4px;padding:6px 8px;background:color-mix(in srgb,var(--pc) 14%,#0f1116);border-bottom:1px solid rgba(255,255,255,.06);align-items:center;min-height:42px}
+.pcb{position:relative;container-type:inline-size}
+/* ★ 메인 게스트 탭: 광택 + 심장박동 */
+.tabs.multi .pt.hot{position:relative;overflow:hidden;color:#fff;border-color:transparent;background:linear-gradient(135deg,#ff2d7a,#ff6a3d 55%,#ffb13d);box-shadow:0 0 0 0 rgba(255,60,120,.7);animation:beat 1.3s ease-in-out infinite;z-index:1}
+.tabs.multi .pt.hot .hs{font-style:normal;font-size:12px;margin-right:2px;animation:spin3 2.6s linear infinite;display:inline-block}
+.tabs.multi .pt.hot .gl{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit}
+.tabs.multi .pt.hot .gl::after{content:"";position:absolute;top:-30%;bottom:-30%;width:45%;left:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7) 50%,transparent);transform:translateX(-160%) skewX(-18deg);animation:gloss 2s ease-in-out infinite}
+.tabs.multi .pt .gl{display:none}.tabs.multi .pt.hot .gl{display:block}
+@keyframes beat{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,60,120,.6)}14%{transform:scale(1.09)}28%{transform:scale(1)}42%{transform:scale(1.07);box-shadow:0 0 0 7px rgba(255,60,120,0)}70%{transform:scale(1)}}
+@keyframes spin3{to{transform:rotate(360deg)}}
+/* 인스타 스토리처럼: 사진 왼쪽 아래 동그라미 */
+.story{position:absolute;left:10px;top:calc(100cqw - 92px);display:flex;gap:8px;z-index:4;pointer-events:none}
+.sty{outline:none;pointer-events:auto;border:0;background:none;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;animation:beat 1.3s ease-in-out infinite}
+.sty .ring{width:58px;height:58px;border-radius:50%;padding:3px;background:conic-gradient(from var(--ra,0deg),#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5,#feda75);animation:ringspin 2.4s linear infinite;box-shadow:0 4px 16px rgba(214,41,118,.55)}
+.sty .ring img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:top;border:3px solid #111;display:block}
+.sty b{font-size:11px;font-weight:900;color:#fff;background:linear-gradient(135deg,#ff2d7a,#ff6a3d);border-radius:999px;padding:2px 8px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.sty.seen{animation:none}.sty.seen .ring{animation:none;background:#555}
+@property --ra{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes ringspin{to{--ra:360deg}}
+@media (prefers-reduced-motion:reduce){.tabs.multi .pt.hot,.sty,.sty .ring,.tabs.multi .pt.hot .gl::after{animation:none!important}}
 .tabs .tn{font-size:10.5px;font-weight:900;color:#fff;background:var(--hot);border-radius:999px;padding:2px 7px;flex:0 0 auto;margin-right:2px;animation:tnp 2.4s ease-in-out 3}
 @keyframes tnp{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 .tabs .pt{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;height:30px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--faint);font-size:12px;font-weight:800;padding:0 6px;cursor:default;letter-spacing:-.3px}
@@ -911,6 +930,15 @@ const tileIdx = e => { const n = e.slides.length; const k = tileKey(e); const i 
 const postPos = {};   // 프로그램 카드에서 보고 있는 게시물 번호
 
 /* 프로그램 카드 한 장: 머리(로고·이름·시간) + 게시물 바꾸기 + 사진 + 짧은 정보. 모든 카드 높이가 같음 */
+// 메인 게스트(추가 게시물) 강조: 인스타 스토리처럼 링 달린 동그라미 + 심장박동 탭
+const seenExtra = {};
+const pkey = e => e.post.id + '|' + selDay;
+function storyHTML(es, a){
+  if(es.length<2 || !(es[a].weekly || es[a].post._yt)) return '';
+  const xs = es.map((e,j)=>({e,j})).filter(o=>!o.e.weekly && !o.e.post._yt && o.e.slides && o.e.slides.length);
+  if(!xs.length) return '';
+  return `<div class="story">${xs.slice(0,2).map(o=>`<button class="sty ${seenExtra[pkey(o.e)]?'seen':''}" data-j="${o.j}" title="메인 게스트 게시물 보기"><span class="ring"><img src="${esc(o.e.slides[0].url)}" alt=""></span><b>${esc(shortLabel(postLabel(o.e)).replace(/^추가 게시물$/,'메인 게스트'))}</b></button>`).join('')}</div>`;
+}
 function cardHTML(p, es, isUnknown){
   const ks = es.map(e=>viewList.push(e)-1);
   const key = (isUnknown ? 'u:'+es[0].post.id : p.slug) + '|' + selDay;
@@ -921,8 +949,8 @@ function cardHTML(p, es, isUnknown){
       <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
         <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${p.ch?`<span class="ch">${p.ch}</span>`:''}${pills}</div></div>
     </div>
-    <div class="tabs ${es.length>1?'multi':''}">${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const s=e.slides[e.start||0]||e.slides[0]; return `<button class="pt ${j===a?'on':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}><span>${esc(es.length>1?shortLabel(postLabel(e)):postLabel(e))}</span></button>`; }).join('')}</div>
-    <div class="pcb">${bodyHTML(viewList[ks[a]], ks[a], isUnknown)}</div>
+    <div class="tabs ${es.length>1?'multi':''}">${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt && !seenExtra[pkey(e)]; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${hot?'<i class="hs">★</i>':''}<span>${esc(hot && /^추가/.test(lb) ? '메인 게스트' : lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
+    <div class="pcb">${bodyHTML(viewList[ks[a]], ks[a], isUnknown)}${storyHTML(es, a)}</div>
   </section>`;
 }
 // 게시물 탭 이름: 주간 편성표 / 출연자 이름 / 유튜브 일정 …
@@ -1017,14 +1045,17 @@ function bindCards(){
     const ks = pc.dataset.ks.split(',').map(Number), isU = !!pc.dataset.u;
     pc.querySelectorAll('.tabs.multi .pt').forEach(b=>b.onclick=()=>{
       const j = +b.dataset.j; postPos[pc.dataset.key] = j;
+      const ev = viewList[ks[j]]; if(!ev.weekly && !ev.post._yt){ seenExtra[pkey(ev)] = 1; b.classList.remove('hot'); const hs=b.querySelector('.hs'); if(hs) hs.remove(); }
       pc.querySelectorAll('.pt').forEach(x=>x.classList.toggle('on', x===b));
-      pc.querySelector('.pcb').innerHTML = bodyHTML(viewList[ks[j]], ks[j], isU);
+      const es2 = ks.map(k=>viewList[k]);
+      pc.querySelector('.pcb').innerHTML = bodyHTML(ev, ks[j], isU) + storyHTML(es2, j);
       bindBody(pc);
     });
     bindBody(pc);
   });
 }
 function bindBody(pc){
+  pc.querySelectorAll('.sty').forEach(s=>s.onclick=ev=>{ ev.stopPropagation(); const t = pc.querySelector(`.tabs .pt[data-j="${s.dataset.j}"]`); if(t) t.click(); });
   const tile = pc.querySelector('.tile'), k = +tile.dataset.k;
   tile.onclick = ev => {
     const nv = ev.target.closest('.tnav');
