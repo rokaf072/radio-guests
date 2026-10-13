@@ -1,0 +1,9 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>인스타 수집</title><link rel="manifest" href="collect.webmanifest"><link rel="icon" href="collect-192.png"><meta name="theme-color" content="#0e1014">
+<style>body{margin:0;background:#0e1014;color:#f3f4f8;font-family:"Malgun Gothic",sans-serif;display:flex;align-items:center;justify-content:center;height:100vh}</style></head>
+<body><div>📷 라디오 손님 여는 중…</div>
+<script>
+// 홈 화면에 추가할 때는 이 페이지에서 (아이콘·이름이 '인스타 수집'으로) → 열면 라디오 손님으로 이동
+if(!/[?&]add/.test(location.search)) setTimeout(()=>location.replace('radio-guests.html'), 300);
+else document.body.firstElementChild.innerHTML = '이 화면에서 <b>⋮ → 더보기 → 홈 화면에 앱 추가</b>를 누르세요';
+</script></body></html>
