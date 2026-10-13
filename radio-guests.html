@@ -937,7 +937,7 @@ function storyHTML(es, a){
   if(es.length<2 || !(es[a].weekly || es[a].post._yt)) return '';
   const xs = es.map((e,j)=>({e,j})).filter(o=>!o.e.weekly && !o.e.post._yt && o.e.slides && o.e.slides.length);
   if(!xs.length) return '';
-  return `<div class="story">${xs.slice(0,2).map(o=>`<button class="sty ${seenExtra[pkey(o.e)]?'seen':''}" data-j="${o.j}" title="메인 게스트 게시물 보기"><span class="ring"><img src="${esc(o.e.slides[0].url)}" alt=""></span><b>${esc(shortLabel(postLabel(o.e)).replace(/^추가 게시물$/,'메인 게스트'))}</b></button>`).join('')}</div>`;
+  return `<div class="story">${xs.slice(0,2).map(o=>`<button class="sty" data-j="${o.j}" title="메인 게스트 게시물 보기"><span class="ring"><img src="${esc(o.e.slides[0].url)}" alt=""></span><b>${esc(shortLabel(postLabel(o.e)).replace(/^추가 게시물$/,'메인 게스트'))}</b></button>`).join('')}</div>`;
 }
 function cardHTML(p, es, isUnknown){
   const ks = es.map(e=>viewList.push(e)-1);
@@ -949,7 +949,7 @@ function cardHTML(p, es, isUnknown){
       <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
         <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${p.ch?`<span class="ch">${p.ch}</span>`:''}${pills}</div></div>
     </div>
-    <div class="tabs ${es.length>1?'multi':''}">${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt && !seenExtra[pkey(e)]; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${hot?'<i class="hs">★</i>':''}<span>${esc(hot && /^추가/.test(lb) ? '메인 게스트' : lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
+    <div class="tabs ${es.length>1?'multi':''}">${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${hot?'<i class="hs">★</i>':''}<span>${esc(hot && /^추가/.test(lb) ? '메인 게스트' : lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
     <div class="pcb">${bodyHTML(viewList[ks[a]], ks[a], isUnknown)}${storyHTML(es, a)}</div>
   </section>`;
 }
@@ -1045,7 +1045,7 @@ function bindCards(){
     const ks = pc.dataset.ks.split(',').map(Number), isU = !!pc.dataset.u;
     pc.querySelectorAll('.tabs.multi .pt').forEach(b=>b.onclick=()=>{
       const j = +b.dataset.j; postPos[pc.dataset.key] = j;
-      const ev = viewList[ks[j]]; if(!ev.weekly && !ev.post._yt){ seenExtra[pkey(ev)] = 1; b.classList.remove('hot'); const hs=b.querySelector('.hs'); if(hs) hs.remove(); }
+      const ev = viewList[ks[j]];
       pc.querySelectorAll('.pt').forEach(x=>x.classList.toggle('on', x===b));
       const es2 = ks.map(k=>viewList[k]);
       pc.querySelector('.pcb').innerHTML = bodyHTML(ev, ks[j], isU) + storyHTML(es2, j);
