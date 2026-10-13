@@ -921,7 +921,7 @@ function renderDays(){
       <div class="wd">${d===t?'오늘':WD[w]}</div><div class="dn">${+d.slice(8)}</div>
       <div class="dots">${ps.slice(0,6).map(p=>`<i style="background:${p.color}"></i>`).join('')}</div></div>`;
   }).join('') + `<div class="day chk ${selDay==='unknown'?'on':''} ${unknown.length?'':'empty'}" data-d="unknown"><div class="wd">확인 필요</div><div class="dn">${unknown.length}</div><div class="dots"></div></div>`;
-  $('days').querySelectorAll('.day').forEach(el=>el.onclick=()=>{ selDay=el.dataset.d; render(); scrollTo({top:0}); });
+  $('days').querySelectorAll('.day').forEach(el=>el.onclick=()=>{ selDay=el.dataset.d; render(); scrollTo({top:0}); if(typeof updateSchCnt==='function') updateSchCnt(false); });
   if(!window.__daysScrolled){ window.__daysScrolled = 1; const td = $('days').querySelector('.day.today'); if(td) $('days').scrollLeft = Math.max(0, td.offsetLeft - 16); }
 }
 
@@ -1518,9 +1518,9 @@ async function getSched(d){
   return out;
 }
 let schDay = today();
-function schRows(list, love){
+function schParse(list, love){
   const seen = new Set();
-  const rows = (list||[]).map(it=>{
+  return (list||[]).map(it=>{
     const t = String(it.t||'').replace(/\s+/g,' ').trim(); if(!t || (love && LOVE_SKIP.test(t))) return null;
     const mm = /(\d{1,2}):(\d{2})/.exec(it.s||''); const time = mm ? String(+mm[1]).padStart(2,'0')+':'+mm[2] : '';
     const k = time+'|'+t; if(seen.has(k)) return null; seen.add(k);
@@ -1528,6 +1528,9 @@ function schRows(list, love){
     const g = String(it.g||'').replace(/<[^>]+>/g,' ').replace(/^\s*(\[?\s*(보는\s*라디오|보라)\s*\]?\s*[:：·|,]?\s*)+/,'').replace(/\s+/g,' ').trim();
     return {time, t, bora, live: bora || /생방|뉴스/.test(t), g, mine: progs.find(p=>p.slug===it.c || p.name===t)};
   }).filter(Boolean);
+}
+function schRows(list, love){
+  const rows = schParse(list, love);
   const now = new Date(Date.now()+9*36e5).toISOString().slice(11,16);
   return rows.map((r,i)=>{
     const next = rows[i+1] ? rows[i+1].time : '99:99';
@@ -1551,9 +1554,11 @@ async function drawSched(){
   $('schP').innerHTML = schRows(s.Power, false);
   $('schL').innerHTML = schRows(s.Love, true);
   getSched(addDays(d,1)); getSched(addDays(d,-1));   // 앞뒤 날짜 미리
+  updateSchCnt(false);
 }
 function openSched(){
   schDay = /^\d{4}-/.test(selDay) ? selDay : today();
+  if(schDay===today()) delete schCache[schDay];
   $('sch').classList.add('on'); document.body.style.overflow='hidden';
   try{ history.pushState({sch:1},''); }catch(_){}
   drawSched();
@@ -1571,11 +1576,19 @@ $('schdate').onchange = ()=>{ if($('schdate').value){ schDay = $('schdate').valu
 addEventListener('popstate', ()=>closeSched(true));
 document.addEventListener('keydown', e=>{ if(!$('sch').classList.contains('on')) return; if(e.key==='Escape') closeSched(); else if(e.key==='ArrowLeft' && e.target.tagName!=='INPUT') $('schp').click(); else if(e.key==='ArrowRight' && e.target.tagName!=='INPUT') $('schn').click(); });
 // 미리 받아 두고, 버튼에 '오늘 출연 N' 숫자 표시
-setTimeout(async()=>{
-  const s = await getSched(today()); if(!s) return;
-  const n = [...(s.Power||[]), ...(s.Love||[])].filter(it=>String(it.g||'').replace(/<[^>]+>/g,'').trim().length>1).length;
-  if(n){ $('schcnt').textContent = `출연 ${n}`; $('schcnt').title = `오늘 출연자가 있는 프로그램 ${n}개`; }
-}, 2000);
+// 편성표 화면과 똑같은 방식으로 셈 (보고 있는 날짜 기준, 10분마다 새로)
+async function updateSchCnt(fresh){
+  const d = /^\d{4}-/.test(selDay) ? selDay : today();
+  if(fresh) delete schCache[d];
+  const s = await getSched(d); if(!s) return;
+  const cur = /^\d{4}-/.test(selDay) ? selDay : today(); if(cur !== d) return;
+  const n = [...schParse(s.Power,false), ...schParse(s.Love,true)].filter(r=>r.g.length>1).length;
+  $('schcnt').textContent = n ? `출연 ${n}` : '';
+  $('schcnt').title = n ? `${+d.slice(5,7)}/${+d.slice(8)} 출연자가 있는 프로그램 ${n}개` : '';
+}
+setTimeout(()=>updateSchCnt(false), 2000);
+setInterval(()=>updateSchCnt(true), 10*60*1000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 addEventListener('popstate', ()=>closeSearch(true));
 
