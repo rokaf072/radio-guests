@@ -99,7 +99,12 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .tabs{display:flex;gap:4px;padding:6px 8px;background:color-mix(in srgb,var(--pc) 14%,#0f1116);border-bottom:1px solid rgba(255,255,255,.06);align-items:center;min-height:42px}
 .pcb{position:relative;container-type:inline-size}
 /* ★ 메인 게스트 탭: 광택 + 심장박동 */
-.tabs.multi .pt.hot{position:relative;overflow:hidden;color:#fff;border-color:transparent;background:linear-gradient(135deg,#ff2d7a,#ff6a3d 55%,#ffb13d);box-shadow:0 0 0 0 rgba(255,60,120,.7);animation:beat 1.3s ease-in-out infinite;z-index:1}
+.tabs.multi .pt.hot{position:relative;overflow:visible;color:#fff;border-color:transparent;background:linear-gradient(135deg,#ff2d7a,#ff6a3d 55%,#ffb13d);box-shadow:0 0 0 0 rgba(255,60,120,.7);animation:beat 1.3s ease-in-out infinite;z-index:1}
+.tabs.multi .pt.hot .tabhint{position:absolute;left:50%;bottom:calc(100% + 3px);transform:translateX(-50%);white-space:nowrap;font-size:10.5px;font-weight:800;letter-spacing:-.2px;pointer-events:none;
+  background:linear-gradient(100deg,#ffd978 0%,#ffd978 40%,#fff 50%,#ffd978 60%,#ffd978 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:hintgloss 2s linear infinite;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}
+@keyframes hintgloss{0%{background-position:120% 0}100%{background-position:-120% 0}}
+.tabs.multi .pt.hot{animation-name:beat}
+.tabs{overflow:visible}
 .tabs.multi .pt.hot .hs{font-style:normal;font-size:12px;margin-right:2px;animation:spin3 2.6s linear infinite;display:inline-block}
 .tabs.multi .pt.hot .gl{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit}
 .tabs.multi .pt.hot .gl::after{content:"";position:absolute;top:-30%;bottom:-30%;width:45%;left:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7) 50%,transparent);transform:translateX(-160%) skewX(-18deg);animation:gloss 2s ease-in-out infinite}
@@ -937,7 +942,7 @@ function storyHTML(es, a){
   if(es.length<2 || !(es[a].weekly || es[a].post._yt)) return '';
   const xs = es.map((e,j)=>({e,j})).filter(o=>!o.e.weekly && !o.e.post._yt && o.e.slides && o.e.slides.length);
   if(!xs.length) return '';
-  return `<div class="story">${xs.slice(0,2).map(o=>`<button class="sty" data-j="${o.j}" title="메인 게스트 게시물 보기"><span class="ring"><img src="${esc(o.e.slides[0].url)}" alt=""></span><b>${esc(shortLabel(postLabel(o.e)).replace(/^추가 게시물$/,'메인 게스트'))}</b></button>`).join('')}</div>`;
+  return `<div class="story">${xs.slice(0,2).map(o=>`<button class="sty" data-j="${o.j}" title="추가 게시물 보기"><span class="ring"><img src="${esc(o.e.slides[0].url)}" alt=""></span><b>${esc(shortLabel(postLabel(o.e)))}</b></button>`).join('')}</div>`;
 }
 function cardHTML(p, es, isUnknown){
   const ks = es.map(e=>viewList.push(e)-1);
@@ -949,7 +954,7 @@ function cardHTML(p, es, isUnknown){
       <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
         <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${p.ch?`<span class="ch">${p.ch}</span>`:''}${pills}</div></div>
     </div>
-    <div class="tabs ${es.length>1?'multi':''}">${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${hot?'<i class="hs">★</i>':''}<span>${esc(hot && /^추가/.test(lb) ? '메인 게스트' : lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
+    <div class="tabs ${es.length>1?'multi':''}">${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${hot?'<i class="hs">★</i><span class="tabhint">👇 눌러서 추가 게시물 보기</span>':''}<span>${esc(lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
     <div class="pcb">${bodyHTML(viewList[ks[a]], ks[a], isUnknown)}${storyHTML(es, a)}</div>
   </section>`;
 }
@@ -1165,7 +1170,20 @@ function buildSlides(e){
 }
 const toPos = wi => vIns>=0 && wi>vIns ? wi + vSl.filter(s=>s.ex).length : wi;
 function openView(k, at){
-  vK = k; const e = viewList[k]; if(!e) return;
+  let e = viewList[k]; if(!e) return;
+  // 추가 게시물을 열면: 같은 날 주간표와 합쳐서 (요일별로 바로 이동 가능), 추가 게시물 위치에서 시작
+  if(!e.weekly && e.date && selDay!=='unknown'){
+    const wk = viewList.findIndex(x=>x.weekly && x.prog===e.prog && x.date===e.date);
+    if(wk>=0){
+      vK = wk; buildSlides(viewList[wk]);
+      const p0 = vSl.findIndex(s=>s.ex===e);
+      if(p0>=0){ vI = p0 + (at||0);
+        if(!vw.classList.contains('on')){ try{ history.pushState({vw:1},''); }catch(_){} }
+        vw.classList.add('on'); document.body.style.overflow='hidden';
+        drawSide(); drawStage(); return; }
+    }
+  }
+  vK = k;
   buildSlides(e);
   vI = toPos(at!=null ? at : Math.min(e.start||0, Math.max(0, e.slides.length-1)));
   if(!vw.classList.contains('on')){ try{ history.pushState({vw:1},''); }catch(_){} }
