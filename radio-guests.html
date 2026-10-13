@@ -325,7 +325,7 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
 .sr2.onair{background:rgba(229,48,75,.14);opacity:1}
 .sr2[style*="--pc"] .ti b{color:color-mix(in srgb,var(--pc) 45%,#fff)}
 .schfab{display:none;position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:120;border:0;border-radius:999px;background:#e5304b;color:#fff;font-size:15px;font-weight:900;padding:13px 20px;box-shadow:0 10px 26px rgba(229,48,75,.5);cursor:pointer}
-@media (max-width:820px){ .schfab{display:block} .schcols{padding-bottom:84px} }
+@media (max-width:820px){ .sch.on ~ .schfab{display:block} .schcols{padding-bottom:84px} }
 .schempty{padding:30px;text-align:center;color:var(--faint)}
 @media (max-width:820px){ .schcols{grid-template-columns:1fr} .sch{padding:0} .schbox{border-radius:0;min-height:100%} .sr2{grid-template-columns:48px 1fr;row-gap:2px} .sr2 .gu{grid-column:2} .schhead h2{font-size:16px} .schbtn{font-size:12px} }
 @media (max-width:600px){
@@ -339,6 +339,7 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
   .iconbtn{white-space:nowrap;height:32px;font-size:12px;padding:0 10px}
   .bar{padding-bottom:14px}
 }
+html:not(.admin) #info,html:not(.admin) #add{display:none!important}
 .addbtn{position:fixed;right:18px;bottom:18px;z-index:30;border:0;border-radius:999px;background:var(--acc);color:#fff;font-weight:800;font-size:14px;padding:12px 18px;box-shadow:0 10px 26px rgba(123,140,255,.35);cursor:pointer}
 
 /* ---------- 크게 보기 (상세 화면) ---------- */
@@ -451,10 +452,10 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
       <button class="x" id="schx" aria-label="닫기">×</button>
     </div>
     <div class="schmsg" id="schmsg"></div>
-    <button class="schfab" id="schfab" aria-label="닫기">✕ 닫기</button>
     <div class="schcols"><section class="pw"><h3>SBS 파워FM <small>107.7MHz</small></h3><div id="schP"></div></section><section class="lv"><h3>SBS 러브FM <small>103.5MHz</small></h3><div id="schL"></div></section></div>
   </div>
 </div>
+<button class="schfab" id="schfab" aria-label="닫기">✕ 닫기</button>
 <div class="sr" id="sr" role="dialog" aria-modal="true">
   <div class="srbox">
     <div class="srhead">
@@ -1601,6 +1602,21 @@ setTimeout(()=>updateSchCnt(false), 2000);
 setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
+/* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
+const BUILD = '2026-10-13a';
+const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
+  && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
+async function autoTick(){
+  if(!idle()) return;
+  try{
+    const t = await (await fetch(location.pathname+'?v='+Date.now(), {cache:'no-store'})).text();
+    const m = /const BUILD = '([^']+)'/.exec(t);
+    if(m && m[1]!==BUILD && idle()){ location.reload(); return; }
+  }catch(_){}
+  if(progs.length && idle() && await pullSync() && idle()){ buildAll(false); saveSnap(); }
+}
+setInterval(autoTick, 10*60*1000);
+
 addEventListener('popstate', ()=>closeSearch(true));
 
 /* 2019년 이전 채우기: 오래된 장수 프로그램 7개의 다시듣기에서 2016.10 ~ 2019.12 기간만 */
@@ -1692,10 +1708,15 @@ window.addEventListener('message', e=>{
 $('reload').onclick = loadAll;
 
 /* 📷 인스타 수집 — 집 PC 크롬(확장 프로그램 설치된 곳)에서만 버튼이 보이고, 누를 때만 수집 */
+/* ⚙·링크 추가는 관리자 기기(수집 확장 설치된 집 PC·폰 파이어폭스, 또는 ?admin=1로 연 기기)에서만 보임 */
+try{ const a = /[?&]admin=([01])/.exec(location.search); if(a){ a[1]==='1' ? localStorage.setItem('rgAdmin','1') : localStorage.removeItem('rgAdmin'); history.replaceState(history.state,'',location.pathname); } }catch(_){}
 function igBtnInit(){
-  if(document.documentElement.dataset.igCollector) $('igc').style.display = '';
+  const ext = !!document.documentElement.dataset.igCollector;
+  if(ext) $('igc').style.display = '';
+  let adm = false; try{ adm = localStorage.getItem('rgAdmin')==='1'; }catch(_){}
+  if(ext || adm) document.documentElement.classList.add('admin');
 }
-igBtnInit(); setTimeout(igBtnInit, 500);
+igBtnInit(); setTimeout(igBtnInit, 500); setTimeout(igBtnInit, 2000);
 $('igc').onclick = () => {
   const b = $('igc'); b.disabled = true; b.textContent = '📷 수집 준비…';
   // 인스타 계정이 등록된 모든 프로그램을 수집 (프로필 화면을 직접 여는 방식이라 막히지 않음)
