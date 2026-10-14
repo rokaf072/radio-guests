@@ -371,8 +371,15 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .brow.v{background:linear-gradient(90deg,rgba(255,196,40,.24),rgba(255,140,30,.10));border-color:rgba(255,190,40,.6)}
 .brow .r1{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:12.5px}
 .brow .r1 b{font-weight:900;color:#fff}
-.brow .bv{font-weight:900;color:#ffd27a}
-.brow .bs,.brow .br{font-size:11.5px;color:var(--sub);font-weight:700}
+.brow .bv,.brow .bs,.brow .br{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;padding:3px 10px;border-radius:9px;font-size:13px;font-weight:900;line-height:1.3}
+.brow .bv{background:linear-gradient(90deg,#ffc428,#ff8c1e);color:#1a1000}
+.brow .bs{background:linear-gradient(90deg,#ffe28a,#ffb84d);color:#2a1700}
+.brow .br{background:linear-gradient(90deg,#8b5cf6,#d946ef);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.brow .br small{font-size:11.5px;font-weight:800;color:#fff;opacity:.92}
+.brow .vgl{position:absolute;top:-20%;bottom:-20%;left:0;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55) 50%,transparent);transform:translateX(-160%) skewX(-18deg);animation:gloss 2.2s ease-in-out infinite;pointer-events:none}
+.brow .ic{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.brow .ic button{font:inherit;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;cursor:pointer}
+.brow .ic button:hover{background:rgba(255,255,255,.2)}
 .brow.dn{opacity:.62}
 .brow .bdone{font-style:normal;font-size:11px;font-weight:900;color:#ff8a8a;border:1px solid rgba(236,64,64,.6);border-radius:6px;padding:0 5px}
 .brow .up{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-size:11.5px;font-weight:700;color:#e9ecf5;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:1px 7px}
@@ -1251,13 +1258,14 @@ function bentoHTML(p, es){
 function browHTML(e, k, isBig){
   const nm = shortLabel(postLabel(e)), d = doneDate(e);
   let info = '';
-  if(e.atV && e.visit){ const o = bcOther(e); info = `<span class="bv">🚪 ${e.visit.d===today()?'오늘':fmd(e.visit.d)} ${e.visit.tm||'시간 미정'}${o?'':' 방문'}</span>${o?`<span class="bs">녹음 · 방송은 ${o}</span>`:''}`; }
-  else if(e.visit) info = `<span class="br">🎙 녹음 방송 · 이날은 안 와요 (방문 ${visitTxt(e.visit)})</span>`;
+  if(e.atV && e.visit){ const o = bcOther(e); info = `<span class="bv">🚪 ${e.visit.d===today()?'오늘':fmd(e.visit.d)} ${e.visit.tm||'시간 미정'}${o?'':' 방문'}<i class="vgl"></i></span>${o?`<span class="bs">🎙 녹음 · 방송은 ${o}<i class="vgl"></i></span>`:''}`; }
+  else if(e.visit) info = `<span class="br">🎙 녹음 방송 · 이날은 안 와요<small>방문 ${visitTxt(e.visit)}</small><i class="vgl"></i></span>`;
   else if(e.weekly && e.range && e.range[0]!==e.range[1]) info = `<span class="bs">📅 ${fmd(e.range[0])} ~ ${fmd(e.range[1])}</span>`;
   const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
   const s = e.slides && e.slides[0];
   const th = s ? `<img class="bth" src="${esc(s.url)}" loading="lazy" alt="" draggable="false">` : `<span class="bth bgn">${esc((e.guestName||nm).slice(0,3))}</span>`;
-  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0">${th}<div class="bx"><div class="r1"><b>${esc(nm)}</b>${info}${d?'<em class="bdone">완료</em>':''}</div>${up?`<div class="r2">${upChip(up)}</div>`:''}</div></div>`;
+  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0">${th}<div class="bx"><div class="r1"><b>${esc(nm)}</b>${info}${d?'<em class="bdone">완료</em>':''}</div>${up?`<div class="r2">${upChip(up)}</div>`:''}
+    <div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date">날짜</button>`}${doneBtn(e)}${e.guestName?'<button data-a="del" class="adm">삭제</button>':''}</div></div></div>`;
 }
 function tileGo(tile, d){
   const e = viewList[+tile.dataset.k], n = e.slides.length, i = tileIdx(e) + d;
@@ -1316,6 +1324,7 @@ function bindCards(){
       bindBody(pc);
     });
     if(pc.querySelector('.tile')) bindBody(pc);
+    pc.querySelectorAll('.brow .ic').forEach(ic=>{ ic.onclick = ev => ev.stopPropagation(); ic.onkeydown = ev => ev.stopPropagation(); ic.querySelectorAll('button[data-a]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); doAct(ic.dataset.id, b.dataset.a, b.dataset.g); }); });
     pc.querySelectorAll('.bp, .brow, .bs1').forEach(el=>{
       el.onclick = () => { const k = +el.dataset.k; openView(k, tileIdx(viewList[k])); };
       el.onkeydown = ev => { if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); el.click(); } };
@@ -1895,7 +1904,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14k';
+const BUILD = '2026-10-14l';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
