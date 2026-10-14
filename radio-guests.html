@@ -350,13 +350,11 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 @media (max-width:600px){.vrib{flex-wrap:wrap;gap:1px 6px;padding:6px 8px;font-size:11px}.vrib b{font-size:11.5px}.vrib span{white-space:normal}}
 .pc{position:relative}
 /* 콜라주 카드 */
-.bento{position:relative;display:grid;gap:3px;aspect-ratio:1/1;background:#000;overflow:hidden}
+.bento{position:relative}
 .bento.n2{grid-template-columns:1.6fr 1fr}
 .bento.n2.eq{grid-template-columns:1fr 1fr}
 .bento.n3{grid-template-columns:1.6fr 1fr;grid-template-rows:1fr 1fr}
 .bento.n4{grid-template-columns:1.6fr 1fr;grid-template-rows:1fr 1fr 1fr}
-.bento .bbig{grid-row:1/-1;min-width:0;min-height:0;position:relative}
-.bento .bbig .tile,.bento .bbig .tile .pic{height:100%;aspect-ratio:auto}
 .bp{position:relative;border:0;padding:0;margin:0;overflow:hidden;cursor:pointer;background:#111;min-width:0;min-height:0;display:block}
 .bp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transition:transform .3s}
 .bp:hover img{transform:scale(1.06)}
@@ -368,7 +366,7 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .bp .bmore{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.62);color:#fff;font-size:24px;font-weight:900}
 .blabel{position:absolute;left:8px;top:8px;z-index:4;font-size:12px;font-weight:900;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.62);color:#fff;border:1px solid rgba(255,255,255,.3);pointer-events:none}
 .bft{padding:9px 10px 11px;display:flex;flex-direction:column;gap:6px}
-.brow{display:flex;flex-direction:column;gap:4px;padding:6px 9px;border-radius:10px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);cursor:pointer;outline:none}
+.brow{display:flex;flex-direction:row;align-items:center;gap:10px;padding:6px 9px;border-radius:10px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);cursor:pointer;outline:none}
 .brow:hover,.brow:focus-visible{background:rgba(255,255,255,.09)}
 .brow.v{background:linear-gradient(90deg,rgba(255,196,40,.24),rgba(255,140,30,.10));border-color:rgba(255,190,40,.6)}
 .brow .r1{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:12.5px}
@@ -380,6 +378,10 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .brow .up{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-size:11.5px;font-weight:700;color:#e9ecf5;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:1px 7px}
 .brow .up b{font-weight:900;color:#fff;background:none;padding:0}
 .brow .up i{font-style:normal;font-weight:800;color:#ffd27a}
+.brow .bx{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.brow .bth{flex:none;width:46px;height:46px;border-radius:9px;object-fit:cover;object-position:top center;background:#111;border:1px solid rgba(255,255,255,.18)}
+.brow .bth.bgn{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;background:color-mix(in srgb,var(--pc) 55%,#222)}
+.brow.dn .bth{filter:grayscale(.7)}
 .pill.bcn{background:rgba(255,255,255,.14);color:#fff}
 @media (max-width:600px){.bp .bl{font-size:11px;padding:12px 5px 4px}.bp .bl i{font-size:10px}.blabel{font-size:11px;left:5px;top:5px}.bp .bgn{font-size:13px}}
 .ft .dl1 .up{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#e9ecf5;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:2px 7px}
@@ -1190,7 +1192,7 @@ function bodyHTML(e, k, isUnknown, opts){
     ? `<div class="sn">${sn.lines.slice(0,3).map(l=>{const m=/^(\d{1,2}:\d{2})\s*(.*)$/.exec(l); return `<div>${m?`<b>${m[1]}</b>${esc(m[2])}`:esc(l)}</div>`;}).join('')}</div>`
     : e.guestName ? '' : `<div class="cp">${esc((e.post.caption||'').replace(/\s+/g,' ').trim())}</div>`;
   const bento = !!(opts && opts.bento);
-  const tileHTML = `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${bento?'':ribbon(e)}${pic}${bento?`<span class="blabel">${e.atV?'🚪 ':''}${esc(shortLabel(postLabel(e)))}</span>`:''}</div>`;
+  const tileHTML = `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${bento?'':ribbon(e)}${pic}</div>`;
   if(bento) return tileHTML;
   return `${tileHTML}
     <div class="ft">
@@ -1210,17 +1212,10 @@ function bodyHTML(e, k, isUnknown, opts){
 /* 한 프로그램에 게시물이 여러 개면: 카드는 1장, 사진 칸은 콜라주(큰 칸 + 작은 칸들) + 아래에 게시물별 한 줄 정보 */
 function bentoHTML(p, es){
   const ks = es.map(e=>viewList.push(e)-1);
-  const bi = Math.max(0, es.findIndex(e=>e.weekly));            // 큰 칸: 주간표가 있으면 주간표
-  const order = [bi, ...es.map((_,i)=>i).filter(i=>i!==bi)];
-  const shown = order.slice(0, 4), hidden = order.length - shown.length;
-  const eq = !es.some(e=>e.weekly) && shown.length===2;
+  const bi = Math.max(0, es.findIndex(e=>e.weekly));            // 큰 사진: 주간표가 있으면 주간표
   const big = bodyHTML(es[bi], ks[bi], false, {bento:true});
-  const small = shown.slice(1).map((i,idx)=>{
-    const e = es[i], k = ks[i], s = e.slides && e.slides[0], last = idx===shown.length-2 && hidden>0;
-    const nm = shortLabel(postLabel(e));
-    return `<button class="bp ${doneDate(e)?'dn':''} ${e.atV?'v':''}" data-k="${k}" title="${esc(nm)}">${s?`<img src="${esc(s.url)}" loading="lazy" alt="" draggable="false">`:`<span class="bgn">${esc(e.guestName||nm)}</span>`}<span class="bl">${e.atV?'🚪 ':''}${esc(nm)}${e.atV&&e.visit?`<i>${esc(e.visit.tm||'시간 미정')}</i>`:''}</span>${last?`<span class="bmore">+${hidden}</span>`:''}</button>`;
-  }).join('');
-  const rows = es.map((e,i)=>browHTML(e, ks[i])).join('');
+  const order = [bi, ...es.map((_,i)=>i).filter(i=>i!==bi)];
+  const rows = order.map(i=>browHTML(es[i], ks[i], i===bi)).join('');
   const allDone = es.every(e=>doneDate(e));
   const stamp = allDone ? (()=>{ const d = doneDate(es[0]); return `<div class="dnx" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="-10" y1="88" x2="88" y2="-10"/><line x1="12" y1="110" x2="110" y2="12"/></svg><div class="stamp"><b>완료</b><small>${fmd(d)} 방송</small></div></div>`; })() : '';
   return `<section class="pc grp bentocard ${allDone?'done':''}" id="p-${p.slug}" data-slug="${p.slug}" style="--pc:${p.color}" data-ks="${ks.join(',')}" data-key="${esc(p.slug+'|'+selDay)}" data-u="">
@@ -1228,18 +1223,20 @@ function bentoHTML(p, es){
       <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
         <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${p.ch?`<span class="ch">${p.ch}</span>`:''}${progPills(p, es)}<span class="pill bcn" title="이 프로그램 게시물 ${es.length}개">${es.length}개</span></div></div>
     </div>
-    <div class="pcb"><div class="bento n${shown.length} ${eq?'eq':''}"><div class="bbig">${big}</div>${small}</div>
+    <div class="pcb"><div class="bento"><div class="bbig">${big}</div></div>
       <div class="bft">${rows}</div></div>${stamp}
   </section>`;
 }
-function browHTML(e, k){
+function browHTML(e, k, isBig){
   const nm = shortLabel(postLabel(e)), d = doneDate(e);
   let info = '';
   if(e.atV && e.visit){ const o = bcOther(e); info = `<span class="bv">🚪 ${e.visit.d===today()?'오늘':fmd(e.visit.d)} ${e.visit.tm||'시간 미정'}${o?'':' 방문'}</span>${o?`<span class="bs">녹음 · 방송은 ${o}</span>`:''}`; }
   else if(e.visit) info = `<span class="br">🎙 녹음 방송 · 이날은 안 와요 (방문 ${visitTxt(e.visit)})</span>`;
   else if(e.weekly && e.range && e.range[0]!==e.range[1]) info = `<span class="bs">📅 ${fmd(e.range[0])} ~ ${fmd(e.range[1])}</span>`;
   const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
-  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="r1"><b>${esc(nm)}</b>${info}${d?'<em class="bdone">완료</em>':''}</div>${up?`<div class="r2">${upChip(up)}</div>`:''}</div>`;
+  const s = e.slides && e.slides[0];
+  const th = s ? `<img class="bth" src="${esc(s.url)}" loading="lazy" alt="" draggable="false">` : `<span class="bth bgn">${esc((e.guestName||nm).slice(0,3))}</span>`;
+  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0">${th}<div class="bx"><div class="r1"><b>${esc(nm)}</b>${info}${d?'<em class="bdone">완료</em>':''}</div>${up?`<div class="r2">${upChip(up)}</div>`:''}</div></div>`;
 }
 function tileGo(tile, d){
   const e = viewList[+tile.dataset.k], n = e.slides.length, i = tileIdx(e) + d;
@@ -1877,7 +1874,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14i';
+const BUILD = '2026-10-14j';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
