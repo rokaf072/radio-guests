@@ -379,9 +379,20 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .brow .up b{font-weight:900;color:#fff;background:none;padding:0}
 .brow .up i{font-style:normal;font-weight:800;color:#ffd27a}
 .brow .bx{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
-.brow .bth{flex:none;width:46px;height:46px;border-radius:9px;object-fit:cover;object-position:top center;background:#111;border:1px solid rgba(255,255,255,.18)}
+.brow .bth{flex:none;width:64px;height:64px;border-radius:9px;object-fit:cover;object-position:top center;background:#111;border:1px solid rgba(255,255,255,.18)}
 .brow .bth.bgn{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;background:color-mix(in srgb,var(--pc) 55%,#222)}
 .brow.dn .bth{filter:grayscale(.7)}
+.bsplit{display:grid;gap:3px;aspect-ratio:1/1;background:#000;overflow:hidden}
+.bsplit.n1{grid-template-columns:1fr}.bsplit.n2{grid-template-columns:1fr 1fr}.bsplit.n3{grid-template-columns:1fr 1fr 1fr}.bsplit.n4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.bs1{position:relative;border:0;padding:0;margin:0;overflow:hidden;cursor:pointer;background:#111;min-width:0;min-height:0;display:block}
+.bs1 img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform .3s}
+.bs1:hover img{transform:scale(1.05)}
+.bs1 .bn{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 8px;background:linear-gradient(transparent,rgba(0,0,0,.9));color:#fff;font-size:18px;font-weight:900;text-align:center;text-shadow:0 1px 5px #000}
+.bs1 .bn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bsplit.n3 .bn{font-size:14px;padding-left:4px;padding-right:4px}.bsplit.n4 .bn{font-size:15px}
+.bs1.v{outline:3px solid #ffb21c;outline-offset:-3px}
+.bs1.dn{filter:grayscale(.6) brightness(.7)}
+.bs1 .bmore{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);color:#fff;font-size:26px;font-weight:900}
 .pill.bcn{background:rgba(255,255,255,.14);color:#fff}
 @media (max-width:600px){.bp .bl{font-size:11px;padding:12px 5px 4px}.bp .bl i{font-size:10px}.blabel{font-size:11px;left:5px;top:5px}.bp .bgn{font-size:13px}}
 .ft .dl1 .up{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#e9ecf5;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:2px 7px}
@@ -1212,10 +1223,20 @@ function bodyHTML(e, k, isUnknown, opts){
 /* 한 프로그램에 게시물이 여러 개면: 카드는 1장, 사진 칸은 콜라주(큰 칸 + 작은 칸들) + 아래에 게시물별 한 줄 정보 */
 function bentoHTML(p, es){
   const ks = es.map(e=>viewList.push(e)-1);
-  const bi = Math.max(0, es.findIndex(e=>e.weekly));            // 큰 사진: 주간표가 있으면 주간표
-  const big = bodyHTML(es[bi], ks[bi], false, {bento:true});
-  const order = [bi, ...es.map((_,i)=>i).filter(i=>i!==bi)];
-  const rows = order.map(i=>browHTML(es[i], ks[i], i===bi)).join('');
+  const wi = es.findIndex(e=>e.weekly);                            // 주간표가 있으면 큰 사진 = 주간표
+  let media, rows;
+  if(wi>=0){
+    media = `<div class="bbig">${bodyHTML(es[wi], ks[wi], false, {bento:true})}</div>`;
+    rows = es.map((e,i)=>i===wi?'':browHTML(e, ks[i])).join('');   // 주간표는 중복이라 목록에서 뺌
+  } else {
+    // 주간표가 없으면: 출연자 전원을 같은 크기로 나란히 (한 명만 나오는 것처럼 보이지 않게)
+    const sh = es.slice(0,4), more = es.length - sh.length;
+    media = `<div class="bsplit n${sh.length}">${sh.map((e,i)=>{
+      const s = e.slides && e.slides[0], nm = e.guestName || shortLabel(postLabel(e));
+      return `<button class="bs1 ${doneDate(e)?'dn':''} ${e.atV?'v':''}" data-k="${ks[i]}">${s?`<img src="${esc(s.url)}" loading="lazy" alt="" draggable="false">`:''}<span class="bn">${e.atV?'🚪 ':''}${esc(nm)}</span>${i===3&&more>0?`<span class="bmore">+${more}</span>`:''}</button>`;
+    }).join('')}</div>`;
+    rows = es.map((e,i)=>browHTML(e, ks[i])).join('');
+  }
   const allDone = es.every(e=>doneDate(e));
   const stamp = allDone ? (()=>{ const d = doneDate(es[0]); return `<div class="dnx" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="-10" y1="88" x2="88" y2="-10"/><line x1="12" y1="110" x2="110" y2="12"/></svg><div class="stamp"><b>완료</b><small>${fmd(d)} 방송</small></div></div>`; })() : '';
   return `<section class="pc grp bentocard ${allDone?'done':''}" id="p-${p.slug}" data-slug="${p.slug}" style="--pc:${p.color}" data-ks="${ks.join(',')}" data-key="${esc(p.slug+'|'+selDay)}" data-u="">
@@ -1223,7 +1244,7 @@ function bentoHTML(p, es){
       <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
         <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${p.ch?`<span class="ch">${p.ch}</span>`:''}${progPills(p, es)}<span class="pill bcn" title="이 프로그램 게시물 ${es.length}개">${es.length}개</span></div></div>
     </div>
-    <div class="pcb"><div class="bento"><div class="bbig">${big}</div></div>
+    <div class="pcb"><div class="bento">${media}</div>
       <div class="bft">${rows}</div></div>${stamp}
   </section>`;
 }
@@ -1294,8 +1315,8 @@ function bindCards(){
       pc.querySelector('.pcb').innerHTML = bodyHTML(ev, ks[j], isU) + storyHTML(es2, j);
       bindBody(pc);
     });
-    bindBody(pc);
-    pc.querySelectorAll('.bp, .brow').forEach(el=>{
+    if(pc.querySelector('.tile')) bindBody(pc);
+    pc.querySelectorAll('.bp, .brow, .bs1').forEach(el=>{
       el.onclick = () => { const k = +el.dataset.k; openView(k, tileIdx(viewList[k])); };
       el.onkeydown = ev => { if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); el.click(); } };
     });
@@ -1874,7 +1895,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14j';
+const BUILD = '2026-10-14k';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
