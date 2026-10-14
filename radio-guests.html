@@ -1335,7 +1335,7 @@ function bindCards(){
     });
     if(pc.querySelector('.tile')) bindBody(pc);
     pc.querySelectorAll('.brow .ic').forEach(ic=>{ ic.onclick = ev => ev.stopPropagation(); ic.onkeydown = ev => ev.stopPropagation(); ic.querySelectorAll('button[data-a]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); doAct(ic.dataset.id, b.dataset.a, b.dataset.g); }); });
-    pc.querySelectorAll('.brow .bth, .bs1').forEach(hoverPreview);   // 사진에 댔을 때만
+    pc.querySelectorAll('.brow, .bs1').forEach(hoverPreview);   // 추가 게시물 칸 어디든 (주간표 제외)
     pc.querySelectorAll('.bp, .brow, .bs1').forEach(el=>{
       el.onclick = () => { const k = +el.dataset.k; openView(k, tileIdx(viewList[k])); };
       el.onkeydown = ev => { if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); el.click(); } };
@@ -1943,7 +1943,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14s';
+const BUILD = '2026-10-14t';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
