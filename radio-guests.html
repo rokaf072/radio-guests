@@ -339,7 +339,7 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
   .iconbtn{white-space:nowrap;height:32px;font-size:12px;padding:0 10px}
   .bar{padding-bottom:14px}
 }
-html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) .adm{display:none!important}
+html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.admin) .adm{display:none!important}
 /* 🚪 방문 예정 (작가에게 들은 실제 방문일) */
 .day{position:relative}
 .day .vb{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:900;line-height:1;padding:3px 5px;border-radius:6px;background:linear-gradient(135deg,#ffd54a,#ff9f1c);color:#1a1000;box-shadow:0 0 10px rgba(255,190,40,.6);white-space:nowrap;z-index:2}
@@ -348,9 +348,55 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) .adm{display:none!
 .vrib b{font-weight:900;font-size:13.5px;white-space:nowrap}
 .vrib span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:600px){.vrib{flex-wrap:wrap;gap:1px 6px;padding:6px 8px;font-size:11px}.vrib b{font-size:11.5px}.vrib span{white-space:normal}}
+.pc{position:relative}
+.ft .dl1 .up{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#e9ecf5;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:2px 7px}
+.ic button.dn{color:#ffb4b4;border-color:rgba(236,64,64,.5)}
+.ft .dl1 .up{white-space:nowrap}
+.ft .dl1 .up b{font-weight:900;color:#fff;background:none;padding:0;border-radius:0}
+.ft .dl1 .up i{font-style:normal;font-weight:800;color:#ffd27a}
+.vw .dl .up{display:inline-flex;gap:5px;align-items:center;color:#e9ecf5;font-weight:700;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:2px 8px}
+.vw .dl .up b{background:none;padding:0;color:#fff}
+.vw .dl .up i{font-style:normal;font-weight:800;color:#ffd27a}
+/* 이미 끝난 방송: 큰 X 두 줄 + 완료 도장 */
+.pc.done .tabs,.pc.done .pcb{filter:grayscale(.5) brightness(.72)}
+.dnx{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden;border-radius:inherit}
+.dnx svg{position:absolute;inset:0;width:100%;height:100%}
+.dnx line{stroke:rgba(236,64,64,.82);stroke-width:7;stroke-linecap:round;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 6px rgba(236,64,64,.55))}
+.dnx .stamp{position:absolute;left:50%;top:50%;display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 22px 4px;border:7px double rgba(236,64,64,.95);border-radius:16px;color:rgba(236,64,64,.96);background:rgba(18,0,0,.58);text-shadow:0 0 14px rgba(236,64,64,.45);transform:translate(-50%,-50%) rotate(-14deg);animation:slam .55s cubic-bezier(.2,1.4,.4,1) both;white-space:nowrap}
+.dnx .stamp b{font-size:clamp(48px,6.5vw,84px);font-weight:900;letter-spacing:6px;line-height:1.05;padding-left:6px}
+.dnx .stamp small{font-size:13px;font-weight:900;letter-spacing:1px}
+@keyframes slam{0%{transform:translate(-50%,-50%) rotate(-14deg) scale(3);opacity:0}55%{transform:translate(-50%,-50%) rotate(-14deg) scale(.9);opacity:1}75%{transform:translate(-50%,-50%) rotate(-14deg) scale(1.06)}100%{transform:translate(-50%,-50%) rotate(-14deg) scale(1);opacity:1}}
+@media (max-width:600px){.dnx .stamp b{font-size:44px;letter-spacing:3px}.dnx line{stroke-width:5}}
+@media (prefers-reduced-motion:reduce){.dnx .stamp{animation:none!important}}
+.addbtn.g{bottom:70px;background:linear-gradient(135deg,#ffd54a,#ff9f1c);color:#1a1000;box-shadow:0 10px 26px rgba(255,170,40,.35)}
+.tile .pic.gst{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--pc) 60%,#222) 0,#12141a 78%)}
+.tile .pic.gst .gi{font-size:34px;filter:drop-shadow(0 0 10px rgba(255,255,255,.35))}
+.tile .pic.gst .gn{font-size:clamp(26px,11cqw,46px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;text-shadow:0 2px 16px rgba(0,0,0,.5);word-break:keep-all}
+.tile .pic.gst .gp{font-size:12.5px;font-weight:700;color:rgba(255,255,255,.7)}
+.tile .pic.gst .gm{margin-top:4px;font-size:12.5px;font-weight:700;color:#ffe08a;background:rgba(0,0,0,.28);border-radius:9px;padding:4px 9px}
+.vw .gstbig{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:min(90%,520px);aspect-ratio:1/1;border-radius:22px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--pc,#7b8cff) 60%,#222) 0,#12141a 78%);color:#fff;text-align:center;padding:24px;cursor:pointer}
+.vw .gstbig span{font-size:56px}.vw .gstbig b{font-size:clamp(34px,7vw,64px);font-weight:900;letter-spacing:-1.5px;line-height:1.1}.vw .gstbig i{font-style:normal;font-weight:700;opacity:.75}.vw .gstbig em{font-style:normal;font-weight:800;color:#ffe08a}
+.gdlg{position:fixed;inset:0;z-index:140;background:rgba(5,6,9,.78);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:14px;overflow:auto}
+.gdlg.on{display:flex}
+.gbox{width:min(460px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:11px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.gbox h3{margin:0 0 2px;font-size:17px}
+.gbox label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:800;color:var(--ink)}
+.gbox label small{font-weight:600;color:var(--faint);margin-left:4px}
+.gbox input,.gbox select{height:40px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);padding:0 10px;font:inherit;font-size:14px;font-weight:600;color-scheme:dark;min-width:0}
+.gbox .gr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gbox label.gck{flex-direction:row;align-items:center;gap:8px;font-weight:700}
+.gbox label.gck input{width:18px;height:18px}
+.gbox [hidden]{display:none!important}
+.gbt{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.gbt button{height:40px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);font-weight:800;font-size:14px;cursor:pointer}
+.gbt button.pri{background:linear-gradient(135deg,#ffd54a,#ff9f1c);color:#1a1000;border:0}
+.tile .vrib{position:relative;left:auto;right:auto;top:auto;box-shadow:none}
+.tabs:not(.multi) .pt.ex{color:#fff}
+.tabs:not(.multi) .pt.ex::before{content:"★";color:#ffb13d;font-size:12px}
+.tabs:not(.multi) .pt.vis::before{content:none}
 .vrib.rec{background:linear-gradient(90deg,rgba(124,58,237,.95),rgba(76,29,149,.92));color:#fff}
 .vrib{overflow:hidden;flex-direction:column;align-items:flex-start;gap:1px}.vrib span{white-space:normal!important;font-weight:700;opacity:.95}
-.vrib .vgl{position:absolute;top:-20%;bottom:-20%;left:0;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75) 50%,transparent);transform:translateX(-160%) skewX(-18deg);animation:gloss 2s ease-in-out infinite;pointer-events:none}
+.vrib .vgl{position:absolute;top:-20%;bottom:-20%;left:0;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4) 50%,transparent);transform:translateX(-160%) skewX(-18deg);animation:gloss 2s ease-in-out infinite;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.vrib .vgl,.vrib.now{animation:none!important}}
 .vrib.now{animation:vpulse 1.6s ease-in-out infinite}
 @keyframes vpulse{0%,100%{box-shadow:0 6px 18px rgba(0,0,0,.35)}50%{box-shadow:0 0 26px 4px rgba(255,190,40,.75)}}
@@ -453,6 +499,18 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) .adm{display:none!
 <div class="htoast" id="htoast"><i class="spin"></i><div><b>지난 출연 기록 가져오는 중</b><span id="htxt"></span><em><i id="hbar"></i></em></div></div>
 
 <button class="addbtn" id="add">＋ 링크 추가</button>
+<button class="addbtn g" id="addg">🎤 출연자 입력</button>
+<div class="gdlg" id="gdlg" role="dialog" aria-modal="true"><form class="gbox" id="gxform" autocomplete="off">
+  <h3 id="gxh">🎤 출연자 직접 입력</h3>
+  <label>프로그램<select id="gxp" required></select></label>
+  <label>출연자 이름 <small>여러 명이면 쉼표(,)로 구분</small><input id="gxn" required placeholder="예: 성한빈, 크러쉬"></label>
+  <div class="gr"><label>방송 날짜<input type="date" id="gxd" required></label><label>오는 시간 <small>모르면 비워두세요</small><input type="time" id="gxt"></label></div>
+  <label class="gck"><input type="checkbox" id="gxr"> 녹음 방송이라 실제로 오는 날이 달라요</label>
+  <label id="gxvw" hidden>실제로 오는 날<input type="date" id="gxv"></label>
+  <label>메모 <small>선택</small><input id="gxm" placeholder="예: 신곡 홍보, 방청 가능"></label>
+  <label>인스타 링크 <small>선택</small><input id="gxl" type="url" placeholder="https://www.instagram.com/p/…"></label>
+  <div class="gbt"><button type="button" id="gxc">취소</button><button type="submit" class="pri">저장</button></div>
+</form></div>
 <div class="vw" id="vw" role="dialog" aria-modal="true">
   <div class="stage" id="vstage">
     <span class="scount" id="vcount"></span>
@@ -848,11 +906,11 @@ function rebuild(queue, force){
   for(const p of progs) for(const post of p.posts) classify(p, post, t, queue);
   for(const k in overrides){
     const v = overrides[k];
-    if(!v || !v.link) continue;
+    if(!v || !(v.link || v.guest)) continue;
     const p = progs.find(x=>x.slug===v.slug); if(!p) continue;
     for(const d of ovDates(v)){
       const x = diffDays(d, t); if(d < weekStart(t) || x>FAR_DAYS) continue;
-      const e = {prog:p, post:{id:k, caption:v.note||'직접 추가한 게시물', permalink:v.link, timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:d, start:0, link:true};
+      const e = {prog:p, post:{id:k, caption:v.note||(v.guest?'':'직접 추가한 게시물'), permalink:v.link||v.url||'', timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:d, start:0, link:true, guestName:v.guest||''};
       if(x<=DAYS_AHEAD) entries.push(e); else unknown.push({...e, guess:d, far:true, confirmed:true});
     }
   }
@@ -876,6 +934,7 @@ const keepSent = {};
 /* 오늘부터의 출연 기록을 저장소에 영구 보관 (검색용) */
 const histSent = store.get('histSent', {});
 function histText(e){
+  if(e.guestName) return (e.guestName + ' ' + (e.post.caption||'')).trim().slice(0,260);
   const lines = (e.post.caption||'').split('\n');
   let txt = '';
   if(e.weekly && e.date){
@@ -1009,23 +1068,25 @@ function storyHTML(es, a){
   if(!xs.length) return '';
   return `<div class="story">${xs.slice(0,2).map(o=>`<button class="sty" data-j="${o.j}" title="추가 게시물 보기"><span class="ring"><img src="${esc(o.e.slides[0].url)}" alt=""></span><b>${esc(shortLabel(postLabel(o.e)))}</b></button>`).join('')}</div>`;
 }
-function cardHTML(p, es, isUnknown){
+function cardHTML(p, es, isUnknown, nth){
   const ks = es.map(e=>viewList.push(e)-1);
   const key = (isUnknown ? 'u:'+es[0].post.id : p.slug) + '|' + selDay;
   const a = Math.min(postPos[key]||0, es.length-1);
   const pills = isUnknown ? (es[0].replaced?'<span class="pill">대체됨</span>':'') : progPills(p, es);
-  return `<section class="pc grp" id="${isUnknown?'u-'+esc(es[0].post.id):'p-'+p.slug}" style="--pc:${p.color}" data-ks="${ks.join(',')}" data-key="${esc(key)}" data-u="${isUnknown?1:''}">
+  const dn = doneDate(es[0]);
+  const stamp = dn ? `<div class="dnx" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="-10" y1="88" x2="88" y2="-10"/><line x1="12" y1="110" x2="110" y2="12"/></svg><div class="stamp"><b>완료</b><small>${fmd(dn)} 방송</small></div></div>` : '';
+  return `<section class="pc grp ${dn?'done':''}" id="${isUnknown?'u-'+esc(es[0].post.id):'p-'+p.slug+(nth?'-'+(nth+1):'')}" data-slug="${isUnknown?'':p.slug}" style="--pc:${p.color}" data-ks="${ks.join(',')}" data-key="${esc(key)}" data-u="${isUnknown?1:''}">
     <div class="pch">${p.logo?`<img class="lg" src="${p.logo}" alt="">`:''}
       <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
         <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${p.ch?`<span class="ch">${p.ch}</span>`:''}${pills}</div></div>
     </div>
-    <div class="tabs ${es.length>1?'multi':''}">${es.length>1 && es.some(e=>!e.weekly && !e.post._yt) ? '<span class="tabhint">👇 눌러서 추가 게시물 보기</span>' : ''}${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt; const vis = !!e.atV; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''} ${vis?'vis':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${vis?'<i class="hs">🚪</i>':hot?'<i class="hs">★</i>':''}<span>${esc(lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
-    <div class="pcb">${bodyHTML(viewList[ks[a]], ks[a], isUnknown)}${storyHTML(es, a)}</div>
+    <div class="tabs ${es.length>1?'multi':''}">${es.length>1 && es.some(e=>!e.weekly && !e.post._yt) ? '<span class="tabhint">👇 눌러서 추가 게시물 보기</span>' : ''}${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt; const vis = !!e.atV; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''} ${vis?'vis':''} ${es.length===1&&!e.weekly&&!e.post._yt&&(!e.link||e.guestName)?'ex':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${vis?'<i class="hs">🚪</i>':hot?'<i class="hs">★</i>':''}<span>${esc(lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
+    <div class="pcb">${bodyHTML(viewList[ks[a]], ks[a], isUnknown)}${storyHTML(es, a)}</div>${stamp}
   </section>`;
 }
 // 게시물 탭 이름: 주간 편성표 / 출연자 이름 / 유튜브 일정 …
 function postLabel(e){
-  if(e.atV) return '방문 ' + (e.visit.tm || '예정');
+  if(e.guestName) return e.guestName;
   if(e.link) return '직접 추가';
   if(e.weekly) return '주간 편성표';
   if(e.post._yt) return '유튜브 일정';
@@ -1052,11 +1113,31 @@ function ribbon(e){
   return `<div class="vrib rec"><b>${head}</b><span>${sub}</span><i class="vgl"></i></div>`;
 }
 const bcOther = e => (e.bc||[]).filter(d=>d!==e.visit.d).map(fmd).join(', ');
+// 올린 날: 눈에 띄게 + 며칠 전인지
+function upChip(up){
+  if(!up) return '';
+  const n = diffDays(today(), up), ago = n<=0 ? '오늘' : n===1 ? '어제' : `${n}일 전`;
+  return `<span class="up" title="인스타(유튜브)에 올라온 날짜">📤 올린 날 <b>${fmd(up)}</b> <i>${ago}</i></span>`;
+}
+// 방송이 이미 끝난 게시물: 날짜가 확실하고(자동 확정·수동 지정·예정) 오늘보다 이전
+function doneDate(e){
+  const d = e.date || (e.confirmed && e.guess ? e.guess : '');
+  if(d && d < today()) return d;
+  const d2 = e.date || e.guess, ov = e.post && overrides[e.post.id];     // 직접 '완료'를 누른 것
+  return d2 && ov && ov.dn && ov.dn[d2] ? d2 : '';
+}
+const doneAuto = e => { const d = e.date || (e.confirmed && e.guess ? e.guess : ''); return !!(d && d < today()); };
+// 카드·크게보기 아래 '완료' 버튼 (관리자 기기에서만 보임)
+function doneBtn(e){
+  const d = e.date || e.guess; if(!d || !e.post || doneAuto(e)) return '';
+  const ov = overrides[e.post.id], on = ov && ov.dn && ov.dn[d];
+  return on ? `<button class="adm" data-a="undone" data-g="${d}" title="완료 표시 지우기">↺ 완료 취소</button>` : `<button class="adm dn" data-a="done" data-g="${d}" title="이 방송이 끝났다고 표시">✔ 완료</button>`;
+}
 const visitTxt = v => v ? `${fmd(v.d)}${v.tm?' '+v.tm:''}` : '';
 const shortLabel = l => ({'주간 편성표':'주간표','유튜브 일정':'유튜브 일정','방청 안내':'방청','직접 추가':'직접 추가'})[l] || l;
 function bodyHTML(e, k, isUnknown){
   const n = e.slides.length, si = tileIdx(e), s = e.slides[si];
-  const up = e.post.timestamp ? tsYmd(e.post.timestamp) : '';
+  const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
   let rg = '';
   if(isUnknown) rg = e.guess ? `${e.confirmed?'예정':'찾은 날짜'} ${fmd(e.guess)}` : '날짜 없음';
   else if(e.range && e.range[0]!==e.range[1]) rg = `${fmd(e.range[0])} ~ ${fmd(e.range[1])}`;
@@ -1064,25 +1145,28 @@ function bodyHTML(e, k, isUnknown){
   const bdg = (e.post._kept?'<span class="pill kp" title="원본이 삭제돼서 보관해 둔 내용">보관본</span>':'') + (isUnknown && isBanchung(e)?'<span class="pill hot">방청</span>':'');
   const g = isUnknown && e.guess && !e.confirmed ? (e.guessAll&&e.guessAll.length?e.guessAll:[e.guess]) : null;
   const short = d => `${+d.slice(5,7)}/${+d.slice(8)}`;
-  const pic = e.link
+  const pic = e.guestName
+    ? `<div class="pic gst"><span class="gi">🎤</span><div class="gn">${esc(e.guestName)}</div><div class="gp">${esc(e.prog.name)}</div>${e.post.caption?`<div class="gm">${esc(e.post.caption)}</div>`:''}</div>`
+    : e.link
     ? `<div class="pic link"><span>📷</span>직접 추가한 게시물<small>눌러서 보기</small></div>`
     : `<div class="pic">${s?`<img class="bg" src="${esc(s.url)}" alt="" aria-hidden="true"><img class="fg" loading="lazy" src="${esc(s.url)}" alt="" draggable="false">`:''}
         ${n>1?`<span class="cnt"><b>${si+1}</b>/${n}</span><button class="tnav prev" data-d="-1" aria-label="이전 사진" ${si<=0?'disabled':''}>‹</button><button class="tnav next" data-d="1" aria-label="다음 사진" ${si>=n-1?'disabled':''}>›</button>`:''}
         ${bdg?`<span class="bdg">${bdg}</span>`:''}
-        <span class="zoom">${ZOOM}<em>크게 보기</em></span>${ribbon(e)}</div>`;
+        <span class="zoom">${ZOOM}<em>크게 보기</em></span></div>`;
   const text = sn
     ? `<div class="sn">${sn.lines.slice(0,3).map(l=>{const m=/^(\d{1,2}:\d{2})\s*(.*)$/.exec(l); return `<div>${m?`<b>${m[1]}</b>${esc(m[2])}`:esc(l)}</div>`;}).join('')}</div>`
-    : `<div class="cp">${esc((e.post.caption||'').replace(/\s+/g,' ').trim())}</div>`;
-  return `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${pic}</div>
+    : e.guestName ? '' : `<div class="cp">${esc((e.post.caption||'').replace(/\s+/g,' ').trim())}</div>`;
+  return `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${ribbon(e)}${pic}</div>
     <div class="ft">
-      <div class="dl1">${e.atV?`<b class="vis">🚪 방문 ${visitTxt(e.visit)}</b>`:e.visit?`<b class="vis2" title="이 날은 미리 녹음한 방송이라 출연자가 오지 않아요">🎙 실제 방문 ${visitTxt(e.visit)}</b>`:''}${rg?`<b>📅 ${rg}</b>`:''}${up?`<span>올린 날 ${short(up)}</span>`:''}</div>
+      <div class="dl1">${e.atV?`<b class="vis">🚪 방문 ${visitTxt(e.visit)}</b>`:e.visit?`<b class="vis2" title="이 날은 미리 녹음한 방송이라 출연자가 오지 않아요">🎙 실제 방문 ${visitTxt(e.visit)}</b>`:''}${rg?`<b>📅 ${rg}</b>`:''}${upChip(up)}</div>
       ${text}
       <div class="ic" data-id="${esc(e.post.id)}">
         ${g?`<button class="ok" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${short(g[0])}~${short(g[g.length-1])}`:short(g[0])} 맞음</button>`:''}
         ${e.post.permalink?`<a href="${esc(e.post.permalink)}" target="_blank" rel="noopener" title="${e.post._yt?'유튜브':'인스타'}에서 보기">${e.post._yt?'유튜브':'인스타'} ↗</a>`:''}
-        ${g?'':`<button data-a="date" title="날짜 수정">날짜</button>`}
-        <button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button>
-        ${e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" title="숨기기">숨기기</button>'}
+        ${e.guestName?'<button data-a="edit" class="adm" title="출연자 정보 고치기">✏ 수정</button>':`${g?'':`<button data-a="date" title="날짜 수정">날짜</button>`}
+        <button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button>`}
+        ${doneBtn(e)}
+        ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" title="숨기기">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset" title="자동으로 되돌리기">↺</button>':''}
       </div>
     </div>`;
@@ -1118,9 +1202,11 @@ function renderMain(){
   const on = progs.filter(p=>list.some(e=>e.prog===p));
   $('jump').innerHTML = on.length>1 ? on.map(p=>`<button data-j="${p.slug}" style="--pc:${p.color}">${p.logo?`<img src="${p.logo}" alt="">`:''}${esc(p.name)}${list.some(e=>e.prog===p&&e.atV)?'<i class="jv">방문</i>':''}</button>`).join('') : '';
   // 주간 편성표를 먼저, 그다음 최근에 올린 순
-  const html = on.map(p=>cardHTML(p, list.filter(e=>e.prog===p).sort((a,b)=>(b.atV?1:0)-(a.atV?1:0) || (b.weekly?1:0)-(a.weekly?1:0) || (a.post.timestamp<b.post.timestamp?1:-1)))).join('');
+  let nCards = 0;
+  const html = on.map(p=>list.filter(e=>e.prog===p).sort((a,b)=>(b.atV?1:0)-(a.atV?1:0) || (b.weekly?1:0)-(a.weekly?1:0) || (a.post.timestamp<b.post.timestamp?1:-1))
+    .map((e,i)=>{ nCards++; return cardHTML(p, [e], false, i); }).join('')).join('');
   const ten = progs.find(p=>p.youtube);
-  const cols = Math.max(4, Math.min(5, Math.ceil(on.length/2)));   // 두 줄에 맞게 (4~5개씩)
+  const cols = Math.max(4, Math.min(5, Math.ceil(nCards/2)));   // 두 줄에 맞게 (4~5개씩)
   m.innerHTML = (html ? `<div class="board" style="--cols:${cols}">${html}</div>` : `<div class="empty-msg">${selDay===t?'오늘':'이 날'} 올라온 출연 정보가 없어요</div>`) +
     (ten && !(ten.ytAt && !ten.ytErr) ? `<div class="side" style="margin-top:24px"><h3>배성재의 텐 · 유튜브 <span class="pill yt">생.녹</span></h3><p>유튜브 게시판을 자동으로 읽지 못했어요. <a href="${ten.youtube}" target="_blank" rel="noopener">유튜브 게시판 직접 열기 →</a></p></div>` : '');
   $('jump').querySelectorAll('button').forEach(b=>b.onclick=()=>{ setHH(); document.getElementById('p-'+b.dataset.j).scrollIntoView({behavior:'smooth', block:'nearest'}); });
@@ -1189,7 +1275,7 @@ function dateLine(e){
   if(e.range && e.range[0] !== e.range[1]) parts.push(`<b>📅 ${fmd(e.range[0])} ~ ${fmd(e.range[1])}</b>`);
   else if(e.date) parts.push(`<b>📅 ${fmd(e.date)}</b>`);
   else if(e.guess) parts.push(`<b>${e.confirmed?'예정':'찾은 날짜'} ${fmd(e.guess)}</b>`);
-  if(up) parts.push(`올린 날 ${fmd(up)}`);
+  if(up) parts.push(upChip(up));
   return parts.length ? `<div class="dl">${parts.join('<span style="opacity:.4">·</span>')}</div>` : '';
 }
 
@@ -1208,8 +1294,16 @@ function parseVisit(v){
 // 숨기기·날짜 수정 등 (어느 기기에서 해도 연동)
 function doAct(id, a, g){
   const now = Date.now();
+  if(a==='edit'){ openGuest(id); return false; }
+  if(a==='done' || a==='undone'){
+    const o = {...(overrides[id]||{})}, dn = {...(o.dn||{})};
+    if(a==='done') dn[g] = 1; else delete dn[g];
+    if(Object.keys(dn).length) o.dn = dn; else delete o.dn;
+    o.t = now; overrides[id] = o;
+    if(Object.keys(o).every(k=>k==='t')) delete overrides[id];
+  }
   if(a==='hide') overrides[id]={hide:true, t:now};
-  if(a==='ok'){ const o = overrides[id]; overrides[id]={dates:g.split(','), t:now, ...(o&&o.visit?{visit:o.visit, vdKeep:true}:{})}; }
+  if(a==='ok'){ const o = overrides[id]; overrides[id]={dates:g.split(','), t:now, ...(o&&o.visit?{visit:o.visit, vdKeep:true}:{}), ...(o&&o.dn?{dn:o.dn}:{})}; }
   if(a==='reset' || a==='del') delete overrides[id];
   if(a==='visit'){
     const old = overrides[id] || {};
@@ -1232,7 +1326,7 @@ function doAct(id, a, g){
     const ds = findDates(v.replace(/[,，、]/g,' , '), today());
     if(!ds.length){ alert('날짜 형식을 확인해 주세요 (예: 10/14 또는 11/9~11/14)'); return false; }
     const old = overrides[id];
-    overrides[id] = old && old.link ? {...old, date:undefined, dates:ds, t:now} : {dates:ds, t:now, ...(old&&old.visit?{visit:old.visit, vdKeep:true}:{})};
+    overrides[id] = old && (old.link||old.guest) ? {...old, date:undefined, dates:ds, t:now} : {dates:ds, t:now, ...(old&&old.visit?{visit:old.visit, vdKeep:true}:{})};
   }
   pushSync(overrides[id] ? {set:{[id]:overrides[id]}, ...(a==='hide'?{unkeep:[id]}:{})} : {del:[id]});
   store.set('overrides', overrides); rebuild(false, true);
@@ -1243,10 +1337,10 @@ function doAct(id, a, g){
 function setHH(){ document.documentElement.style.setProperty('--hh', (document.querySelector('header').offsetHeight + 12) + 'px'); }
 function spy(){
   const secs = [...document.querySelectorAll('.grp')], hh = document.querySelector('header').offsetHeight + 20;
-  let curId = secs.length ? secs[0].id : '';
-  for(const s of secs) if(s.getBoundingClientRect().top - hh <= 0) curId = s.id;
+  let curId = secs.length ? secs[0].dataset.slug : '';
+  for(const s of secs) if(s.getBoundingClientRect().top - hh <= 0) curId = s.dataset.slug;
   $('jump').querySelectorAll('button').forEach(b=>{
-    const on = 'p-'+b.dataset.j === curId; b.classList.toggle('on', on);
+    const on = b.dataset.j === curId; b.classList.toggle('on', on);
     if(on && !b._shown){ b.scrollIntoView({block:'nearest', inline:'nearest'}); }
     b._shown = on;
   });
@@ -1304,7 +1398,10 @@ function hideView(){ vw.classList.remove('on'); document.body.style.overflow='';
 function closeView(){ if(!vw.classList.contains('on')) return; hideView(); if(history.state && history.state.vw){ try{ history.back(); }catch(_){} } }
 function drawStage(){
   const e = viewList[vK], n = vSl.length, wrap = $('vstage').querySelector('.imgwrap'), cur = vSl[vI] || {};
-  if(e.link || !n){
+  if(e.guestName){
+    wrap.innerHTML = `<div class="gstbig"><span>🎤</span><b>${esc(e.guestName)}</b><i>${esc(e.prog.name)}</i>${e.post.caption?`<em>${esc(e.post.caption)}</em>`:''}</div>`;
+    wrap.firstChild.onclick = ev => { ev.stopPropagation(); closeView(); };
+  } else if(e.link || !n){
     wrap.innerHTML = `<a class="linkbig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener"><span>📷</span>직접 추가한 게시물<br>눌러서 인스타에서 보기</a>`;
   } else {
     wrap.innerHTML = `${cur.ex?`<span class="exbadge">➕ 추가 게시물 · ${esc(postLabel(cur.ex))}</span>`:''}<img class="big" src="${esc(cur.url)}" alt="" draggable="false">`;
@@ -1338,8 +1435,9 @@ function drawSide(){
       <div class="act">
         ${e.post.permalink?`<a class="ig ${e.post._yt?'ytb':''}" href="${esc(e.post.permalink)}" target="_blank" rel="noopener">${e.post._yt?'유튜브에서 보기':'인스타에서 보기'}</a>`:''}
         ${g?`<button class="pri" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${fmd(g[0])}~${fmd(g[g.length-1])}`:fmd(g[0])} 출연 맞음</button>`:''}
-        <button data-a="date">${isU?'날짜 지정':'날짜 수정'}</button>
-        ${e.link?'<button data-a="del">삭제</button>':'<button data-a="hide">숨기기</button>'}
+        ${doneBtn(e)}
+        ${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="date">${isU?'날짜 지정':'날짜 수정'}</button>`}
+        ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset">자동으로 되돌리기</button>':''}
       </div>
       <div class="cap">${capLinks(e)}</div>
@@ -1391,6 +1489,7 @@ $('vprev').onclick = ev=>{ ev.stopPropagation(); slideGo(-1); };
 $('vnext').onclick = ev=>{ ev.stopPropagation(); slideGo(1); };
 $('vstage').onclick = ev=>{ if(ev.target.id==='vstage' || ev.target.classList.contains('imgwrap')) closeView(); };
 document.addEventListener('keydown', ev=>{
+  if($('gdlg').classList.contains('on')){ if(ev.key==='Escape') closeGuest(); return; }
   if(!vw.classList.contains('on')) return;
   if(ev.key==='ArrowLeft') slideGo(-1); else if(ev.key==='ArrowRight') slideGo(1);
   else if(ev.key==='ArrowUp'){ ev.preventDefault(); postGo(-1); } else if(ev.key==='ArrowDown'){ ev.preventDefault(); postGo(1); }
@@ -1701,7 +1800,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14d';
+const BUILD = '2026-10-14h';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
@@ -1839,6 +1938,50 @@ window.addEventListener('message', async e => {
     if(r.sent){ await loadAll(); setStatus(msg); }
   }
 });
+/* 🎤 출연자 직접 입력 (집 PC·폰 관리자 기기에서만 버튼이 보임) */
+let gEdit = null;
+const gSet = () => { $('gxvw').hidden = !$('gxr').checked; };
+function openGuest(id){
+  gEdit = id || null;
+  const ov = id ? overrides[id] : null;
+  $('gxp').innerHTML = '<option value="">프로그램 고르기</option>' + progs.map(p=>`<option value="${esc(p.slug)}">${esc(p.name)} (${fmtTime(p.start)})</option>`).join('');
+  const base = /^\d{4}-/.test(selDay) ? selDay : today();
+  $('gxh').textContent = ov ? '🎤 출연자 고치기' : '🎤 출연자 직접 입력';
+  if(ov){
+    const bd = ovDates(ov)[0] || base, v = ov.visit || {};
+    $('gxp').value = ov.slug; $('gxn').value = ov.guest || ''; $('gxd').value = bd; $('gxt').value = v.tm || '';
+    $('gxr').checked = !!(v.d && v.d!==bd); $('gxv').value = v.d && v.d!==bd ? v.d : '';
+    $('gxm').value = ov.note || ''; $('gxl').value = ov.url || ov.link || '';
+  } else {
+    $('gxp').value = store.get('lastGuestProg', '') || ''; if($('gxp').selectedIndex<0) $('gxp').value = '';
+    $('gxn').value = ''; $('gxd').value = base; $('gxt').value = ''; $('gxr').checked = false; $('gxv').value = ''; $('gxm').value = ''; $('gxl').value = '';
+  }
+  gSet(); $('gdlg').classList.add('on'); setTimeout(()=>{ try{ ($('gxp').value ? $('gxn') : $('gxp')).focus(); }catch(_){} }, 50);
+}
+function closeGuest(){ $('gdlg').classList.remove('on'); gEdit = null; }
+$('addg').onclick = () => openGuest(null);
+$('gxc').onclick = closeGuest;
+$('gdlg').addEventListener('mousedown', ev=>{ if(ev.target===$('gdlg')) closeGuest(); });
+$('gxr').onchange = ()=>{ gSet(); if($('gxr').checked && !$('gxv').value) $('gxv').value = $('gxd').value; };
+$('gxform').onsubmit = ev => {
+  ev.preventDefault();
+  const slug = $('gxp').value, names = $('gxn').value.split(/[,，、\n]/).map(s=>s.trim()).filter(Boolean);
+  const bd = $('gxd').value, tm = $('gxt').value, vd = $('gxr').checked ? $('gxv').value : bd;
+  if(!slug || !names.length || !bd || !vd){ alert('프로그램, 출연자 이름, 날짜를 모두 넣어 주세요'); return; }
+  const note = $('gxm').value.trim(), url = $('gxl').value.trim();
+  const sets = {}, now = Date.now();
+  names.forEach((nm, i)=>{
+    const id = (gEdit && i===0) ? gEdit : 'guest_' + now.toString(36) + i;
+    const old = (gEdit && i===0) ? overrides[gEdit] : null;
+    overrides[id] = {...(old||{}), guest:nm, slug, dates:[bd], visit:{d:vd, tm}, note, url, t:now + (names.length-1-i)};
+    delete overrides[id].hide; sets[id] = overrides[id];
+  });
+  pushSync({set:sets}); store.set('overrides', overrides); store.set('lastGuestProg', slug);
+  const t = today(), inW = d => d >= weekStart(t) && diffDays(d,t) <= DAYS_AHEAD;
+  selDay = inW(vd) ? vd : inW(bd) ? bd : 'unknown';
+  closeGuest(); rebuild(false, true);
+  setStatus(`출연자 ${names.length}명 저장했어요 — ${fmd(vd)}${tm?' '+tm:''}`);
+};
 $('add').onclick = () => {
   const link = (prompt('인스타(또는 유튜브) 게시물 링크를 붙여넣으세요') || '').trim();
   if(!/^https?:\/\//.test(link)) return;
