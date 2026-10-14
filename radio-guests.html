@@ -407,6 +407,10 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .bs1.v{outline:3px solid #ffb21c;outline-offset:-3px}
 .bs1.dn{filter:grayscale(.6) brightness(.7)}
 .bs1 .bmore{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);color:#fff;font-size:26px;font-weight:900}
+#hpv{position:fixed;z-index:60;pointer-events:none;opacity:0;transform:scale(.92);transform-origin:left center;transition:opacity .14s,transform .14s;background:#0d0f16;border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:6px;box-shadow:0 18px 50px rgba(0,0,0,.7);max-width:min(380px,44vw)}
+#hpv.on{opacity:1;transform:none}
+#hpv img{display:block;max-width:100%;max-height:min(70vh,520px);width:auto;border-radius:9px}
+#hpv b{display:block;text-align:center;color:#fff;font-size:15px;font-weight:900;padding:6px 4px 2px}
 .pill.bcn{background:rgba(255,255,255,.14);color:#fff}
 @media (max-width:600px){.bp .bl{font-size:11px;padding:12px 5px 4px}.bp .bl i{font-size:10px}.blabel{font-size:11px;left:5px;top:5px}.bp .bgn{font-size:13px}}
 .ft .dl1 .up{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#e9ecf5;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:2px 7px}
@@ -1331,11 +1335,36 @@ function bindCards(){
     });
     if(pc.querySelector('.tile')) bindBody(pc);
     pc.querySelectorAll('.brow .ic').forEach(ic=>{ ic.onclick = ev => ev.stopPropagation(); ic.onkeydown = ev => ev.stopPropagation(); ic.querySelectorAll('button[data-a]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); doAct(ic.dataset.id, b.dataset.a, b.dataset.g); }); });
+    pc.querySelectorAll('.brow, .bs1').forEach(hoverPreview);
     pc.querySelectorAll('.bp, .brow, .bs1').forEach(el=>{
       el.onclick = () => { const k = +el.dataset.k; openView(k, tileIdx(viewList[k])); };
       el.onkeydown = ev => { if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); el.click(); } };
     });
   });
+}
+/* 마우스를 올리면(클릭 없이) 사진이 크게 떠서 보이고, 마우스가 벗어나면 사라짐 (PC 전용) */
+let hpv = null, hpvT = 0;
+function hoverPreview(el){
+  if(!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  el.addEventListener('mouseenter', () => {
+    const e = viewList[+el.dataset.k], s = e && e.slides && e.slides[0]; if(!s || e.weekly) return;   // 주간표는 호버 없이 클릭해서 확대
+    clearTimeout(hpvT);
+    hpvT = setTimeout(() => {
+      if(!hpv){ hpv = document.createElement('div'); hpv.id = 'hpv'; document.body.appendChild(hpv); }
+      const nm = e.guestName || shortLabel(postLabel(e));
+      hpv.innerHTML = `<img src="${esc(s.url)}" alt=""><b>${esc(nm)}</b>`;
+      hpv.classList.add('on');
+      const img = hpv.firstChild, place = () => {
+        const r = el.getBoundingClientRect(), w = hpv.offsetWidth, hh = hpv.offsetHeight, m = 12;
+        let x = r.right + m; if(x + w > innerWidth - 8) x = Math.max(8, r.left - w - m);
+        let y = r.top + r.height/2 - hh/2; y = Math.max(8, Math.min(y, innerHeight - hh - 8));
+        hpv.style.left = x + 'px'; hpv.style.top = y + 'px';
+      };
+      place(); img.onload = place;
+    }, 90);
+  });
+  el.addEventListener('mouseleave', () => { clearTimeout(hpvT); if(hpv) hpv.classList.remove('on'); });
+  el.addEventListener('mousedown', () => { clearTimeout(hpvT); if(hpv) hpv.classList.remove('on'); });
 }
 function bindBody(pc){
   pc.querySelectorAll('.sty').forEach(s=>s.onclick=ev=>{ ev.stopPropagation(); const t = pc.querySelector(`.tabs .pt[data-j="${s.dataset.j}"]`); if(t) t.click(); });
@@ -1910,7 +1939,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14p';
+const BUILD = '2026-10-14r';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
