@@ -1227,7 +1227,7 @@ function doAct(id, a, g){
     const ds = findDates(v.replace(/[,，、]/g,' , '), today());
     if(!ds.length){ alert('날짜 형식을 확인해 주세요 (예: 10/14 또는 11/9~11/14)'); return false; }
     const old = overrides[id];
-    overrides[id] = old && old.link ? {...old, date:undefined, dates:ds, t:now} : {dates:ds, t:now};
+    overrides[id] = old && old.link ? {...old, date:undefined, dates:ds, t:now} : {dates:ds, t:now, ...(old&&old.visit?{visit:old.visit, vdKeep:true}:{})};
   }
   pushSync(overrides[id] ? {set:{[id]:overrides[id]}, ...(a==='hide'?{unkeep:[id]}:{})} : {del:[id]});
   store.set('overrides', overrides); rebuild(false, true);
@@ -1696,7 +1696,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14b';
+const BUILD = '2026-10-14c';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
