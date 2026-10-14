@@ -339,7 +339,22 @@ table.st .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
   .iconbtn{white-space:nowrap;height:32px;font-size:12px;padding:0 10px}
   .bar{padding-bottom:14px}
 }
-html:not(.admin) #info,html:not(.admin) #add{display:none!important}
+html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) .adm{display:none!important}
+/* 🚪 방문 예정 (작가에게 들은 실제 방문일) */
+.day{position:relative}
+.day .vb{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:900;line-height:1;padding:3px 5px;border-radius:6px;background:linear-gradient(135deg,#ffd54a,#ff9f1c);color:#1a1000;box-shadow:0 0 10px rgba(255,190,40,.6);white-space:nowrap;z-index:2}
+.days{padding-top:14px}
+.vrib{position:absolute;left:0;right:0;top:0;z-index:3;display:flex;align-items:center;gap:8px;padding:9px 12px;background:linear-gradient(90deg,rgba(255,196,40,.96),rgba(255,140,30,.92));color:#1a1000;font-size:13px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none}
+.vrib b{font-weight:900;font-size:13.5px;white-space:nowrap}
+.vrib span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:600px){.vrib{flex-wrap:wrap;gap:1px 6px;padding:6px 8px;font-size:11px}.vrib b{font-size:11.5px}.vrib span{white-space:normal}}
+.vrib.now{animation:vpulse 1.6s ease-in-out infinite}
+@keyframes vpulse{0%,100%{box-shadow:0 6px 18px rgba(0,0,0,.35)}50%{box-shadow:0 0 26px 4px rgba(255,190,40,.75)}}
+.ft .dl1 b.vis{background:linear-gradient(135deg,#ffd54a,#ff9f1c);color:#1a1000}
+.tabs.multi .pt.vis{background:linear-gradient(135deg,#ffd54a,#ff9f1c 60%,#ff7a1c)!important;color:#1a1000!important;box-shadow:0 0 12px rgba(255,180,40,.55)}
+.tabs:not(.multi) .pt.vis{color:#ffc93d}
+.jump .jv,#jump .jv{font-style:normal;font-size:10px;font-weight:900;margin-left:5px;padding:2px 5px;border-radius:5px;background:#ffb21c;color:#1a1000}
+.pc .pic .cnt{z-index:4}
 .addbtn{position:fixed;right:18px;bottom:18px;z-index:30;border:0;border-radius:999px;background:var(--acc);color:#fff;font-weight:800;font-size:14px;padding:12px 18px;box-shadow:0 10px 26px rgba(123,140,255,.35);cursor:pointer}
 
 /* ---------- 크게 보기 (상세 화면) ---------- */
@@ -733,8 +748,9 @@ function classify(p, post, t, queue){
   const base = {prog:p, post, posted, slides};
   if(ov && ovDates(ov).length){
     for(const d of ovDates(ov)){
-      if(inWin(d)) entries.push({...base, date:d, start:0, manual:true});
-      else if(inFar(d)) unknown.push({...base, guess:d, far:true, confirmed:true});
+      const vi = ov.visit && ov.visit.d===d ? ov.visit : null;
+      if(inWin(d)) entries.push({...base, date:d, start:0, manual:true, visit:vi});
+      else if(inFar(d)) unknown.push({...base, guess:d, far:true, confirmed:true, visit:vi});
     }
     return;
   }
@@ -800,7 +816,7 @@ function rebuild(queue, force){
     const p = progs.find(x=>x.slug===v.slug); if(!p) continue;
     for(const d of ovDates(v)){
       const x = diffDays(d, t); if(d < weekStart(t) || x>FAR_DAYS) continue;
-      const e = {prog:p, post:{id:k, caption:v.note||'직접 추가한 게시물', permalink:v.link, timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:d, start:0, link:true};
+      const e = {prog:p, post:{id:k, caption:v.note||'직접 추가한 게시물', permalink:v.link, timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:d, start:0, link:true, visit: v.visit && v.visit.d===d ? v.visit : null};
       if(x<=DAYS_AHEAD) entries.push(e); else unknown.push({...e, guess:d, far:true, confirmed:true});
     }
   }
@@ -930,7 +946,7 @@ function renderDays(){
   $('days').innerHTML = days.map(d=>{
     const ps = progsOn(d), w = wdIdx(d);
     return `<div class="day ${d===selDay?'on':''} ${d===t?'today':''} ${d<t?'past':''} ${ps.length?'':'empty'} ${w===0?'sun':w===6?'sat':''}" data-d="${d}">
-      <div class="wd">${d===t?'오늘':WD[w]}</div><div class="dn">${+d.slice(8)}</div>
+      ${entries.some(e=>e.date===d && e.visit)?`<span class="vb" title="방문 예정 출연자가 있어요">방문</span>`:''}<div class="wd">${d===t?'오늘':WD[w]}</div><div class="dn">${+d.slice(8)}</div>
       <div class="dots">${ps.slice(0,6).map(p=>`<i style="background:${p.color}"></i>`).join('')}</div></div>`;
   }).join('') + `<div class="day chk ${selDay==='unknown'?'on':''} ${unknown.length?'':'empty'}" data-d="unknown"><div class="wd">확인 필요</div><div class="dn">${unknown.length}</div><div class="dots"></div></div>`;
   $('days').querySelectorAll('.day').forEach(el=>el.onclick=()=>{ selDay=el.dataset.d; render(); scrollTo({top:0}); if(typeof updateSchCnt==='function') updateSchCnt(false); });
@@ -966,12 +982,13 @@ function cardHTML(p, es, isUnknown){
       <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
         <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${p.ch?`<span class="ch">${p.ch}</span>`:''}${pills}</div></div>
     </div>
-    <div class="tabs ${es.length>1?'multi':''}">${es.length>1 && es.some(e=>!e.weekly && !e.post._yt) ? '<span class="tabhint">👇 눌러서 추가 게시물 보기</span>' : ''}${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${hot?'<i class="hs">★</i>':''}<span>${esc(lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
+    <div class="tabs ${es.length>1?'multi':''}">${es.length>1 && es.some(e=>!e.weekly && !e.post._yt) ? '<span class="tabhint">👇 눌러서 추가 게시물 보기</span>' : ''}${es.length>1?`<span class="tn">${es.length}개</span>`:''}${es.map((e,j)=>{ const hot = es.length>1 && !e.weekly && !e.post._yt; const vis = !!e.visit; const lb = es.length>1?shortLabel(postLabel(e)):postLabel(e); return `<button class="pt ${j===a?'on':''} ${hot?'hot':''} ${vis?'vis':''}" data-j="${j}" ${es.length>1?'':'tabindex="-1"'}>${vis?'<i class="hs">🚪</i>':hot?'<i class="hs">★</i>':''}<span>${esc(lb)}</span><span class="gl"></span></button>`; }).join('')}</div>
     <div class="pcb">${bodyHTML(viewList[ks[a]], ks[a], isUnknown)}${storyHTML(es, a)}</div>
   </section>`;
 }
 // 게시물 탭 이름: 주간 편성표 / 출연자 이름 / 유튜브 일정 …
 function postLabel(e){
+  if(e.visit) return '방문 ' + (e.visit.tm || '예정');
   if(e.link) return '직접 추가';
   if(e.weekly) return '주간 편성표';
   if(e.post._yt) return '유튜브 일정';
@@ -983,6 +1000,7 @@ function postLabel(e){
   const up = e.post.timestamp ? tsYmd(e.post.timestamp) : '';
   return '추가 게시물';
 }
+const visitTxt = v => v ? `${fmd(v.d)}${v.tm?' '+v.tm:''}` : '';
 const shortLabel = l => ({'주간 편성표':'주간표','유튜브 일정':'유튜브 일정','방청 안내':'방청','직접 추가':'직접 추가'})[l] || l;
 function bodyHTML(e, k, isUnknown){
   const n = e.slides.length, si = tileIdx(e), s = e.slides[si];
@@ -999,18 +1017,19 @@ function bodyHTML(e, k, isUnknown){
     : `<div class="pic">${s?`<img class="bg" src="${esc(s.url)}" alt="" aria-hidden="true"><img class="fg" loading="lazy" src="${esc(s.url)}" alt="" draggable="false">`:''}
         ${n>1?`<span class="cnt"><b>${si+1}</b>/${n}</span><button class="tnav prev" data-d="-1" aria-label="이전 사진" ${si<=0?'disabled':''}>‹</button><button class="tnav next" data-d="1" aria-label="다음 사진" ${si>=n-1?'disabled':''}>›</button>`:''}
         ${bdg?`<span class="bdg">${bdg}</span>`:''}
-        <span class="zoom">${ZOOM}<em>크게 보기</em></span></div>`;
+        <span class="zoom">${ZOOM}<em>크게 보기</em></span>${e.visit?`<div class="vrib ${e.visit.d===today()?'now':''}"><b>🚪 ${e.visit.d===today()?'오늘 방문':'방문 예정'}</b><span>${visitTxt(e.visit)}${e.visit.tm?'':' · 시간 미정'}</span></div>`:''}</div>`;
   const text = sn
     ? `<div class="sn">${sn.lines.slice(0,3).map(l=>{const m=/^(\d{1,2}:\d{2})\s*(.*)$/.exec(l); return `<div>${m?`<b>${m[1]}</b>${esc(m[2])}`:esc(l)}</div>`;}).join('')}</div>`
     : `<div class="cp">${esc((e.post.caption||'').replace(/\s+/g,' ').trim())}</div>`;
   return `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${pic}</div>
     <div class="ft">
-      <div class="dl1">${rg?`<b>📅 ${rg}</b>`:''}${up?`<span>올린 날 ${short(up)}</span>`:''}</div>
+      <div class="dl1">${e.visit?`<b class="vis">🚪 방문 ${visitTxt(e.visit)}</b>`:''}${rg?`<b>📅 ${rg}</b>`:''}${up?`<span>올린 날 ${short(up)}</span>`:''}</div>
       ${text}
       <div class="ic" data-id="${esc(e.post.id)}">
         ${g?`<button class="ok" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${short(g[0])}~${short(g[g.length-1])}`:short(g[0])} 맞음</button>`:''}
         ${e.post.permalink?`<a href="${esc(e.post.permalink)}" target="_blank" rel="noopener" title="${e.post._yt?'유튜브':'인스타'}에서 보기">${e.post._yt?'유튜브':'인스타'} ↗</a>`:''}
         ${g?'':`<button data-a="date" title="날짜 수정">날짜</button>`}
+        <button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button>
         ${e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" title="숨기기">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset" title="자동으로 되돌리기">↺</button>':''}
       </div>
@@ -1045,9 +1064,9 @@ function renderMain(){
   $('when').textContent = `${+selDay.slice(5,7)}월 ${+selDay.slice(8)}일 (${WD[w]})${selDay===t?' · 오늘':''}`;
   const list = entries.filter(e=>e.date===selDay);
   const on = progs.filter(p=>list.some(e=>e.prog===p));
-  $('jump').innerHTML = on.length>1 ? on.map(p=>`<button data-j="${p.slug}" style="--pc:${p.color}">${p.logo?`<img src="${p.logo}" alt="">`:''}${esc(p.name)}</button>`).join('') : '';
+  $('jump').innerHTML = on.length>1 ? on.map(p=>`<button data-j="${p.slug}" style="--pc:${p.color}">${p.logo?`<img src="${p.logo}" alt="">`:''}${esc(p.name)}${list.some(e=>e.prog===p&&e.visit)?'<i class="jv">방문</i>':''}</button>`).join('') : '';
   // 주간 편성표를 먼저, 그다음 최근에 올린 순
-  const html = on.map(p=>cardHTML(p, list.filter(e=>e.prog===p).sort((a,b)=>(b.weekly?1:0)-(a.weekly?1:0) || (a.post.timestamp<b.post.timestamp?1:-1)))).join('');
+  const html = on.map(p=>cardHTML(p, list.filter(e=>e.prog===p).sort((a,b)=>(b.visit?1:0)-(a.visit?1:0) || (b.weekly?1:0)-(a.weekly?1:0) || (a.post.timestamp<b.post.timestamp?1:-1)))).join('');
   const ten = progs.find(p=>p.youtube);
   const cols = Math.max(4, Math.min(5, Math.ceil(on.length/2)));   // 두 줄에 맞게 (4~5개씩)
   m.innerHTML = (html ? `<div class="board" style="--cols:${cols}">${html}</div>` : `<div class="empty-msg">${selDay===t?'오늘':'이 날'} 올라온 출연 정보가 없어요</div>`) +
@@ -1122,12 +1141,36 @@ function dateLine(e){
   return parts.length ? `<div class="dl">${parts.join('<span style="opacity:.4">·</span>')}</div>` : '';
 }
 
+// "10/16 14:00", "10월 16일 오후 2시", "10/16" → {d, tm}
+function parseVisit(v){
+  const m = /(\d{1,2})\s*[\/.월-]\s*(\d{1,2})\s*일?/.exec(v); if(!m) return null;
+  const ds = findDates(`${+m[1]}/${+m[2]}`, today()); if(!ds.length) return null;
+  const rest = v.slice(m.index + m[0].length);
+  const t = /(오전|오후|밤|저녁|아침)?\s*(\d{1,2})\s*(?::|시)\s*(\d{1,2})?\s*(분|반)?/.exec(rest);
+  let tm = '';
+  if(t){ let H = +t[2], M = t[4]==='반' ? 30 : +(t[3]||0);
+    if(/오후|밤|저녁/.test(t[1]||'') && H<12) H += 12;
+    if(H<24 && M<60) tm = `${String(H).padStart(2,'0')}:${String(M).padStart(2,'0')}`; }
+  return {d:ds[0], tm};
+}
 // 숨기기·날짜 수정 등 (어느 기기에서 해도 연동)
 function doAct(id, a, g){
   const now = Date.now();
   if(a==='hide') overrides[id]={hide:true, t:now};
   if(a==='ok') overrides[id]={dates:g.split(','), t:now};
   if(a==='reset' || a==='del') delete overrides[id];
+  if(a==='visit'){
+    const old = overrides[id] || {};
+    const cur = old.visit ? `${+old.visit.d.slice(5,7)}/${+old.visit.d.slice(8)}${old.visit.tm?' '+old.visit.tm:''}` : '';
+    const v = prompt('출연자가 실제로 오는 날짜와 시간을 입력하세요\n· 예: 10/16 14:00\n· 시간을 모르면: 10/16\n· 방문일 지우기: 삭제', cur);
+    if(v==null || !v.trim()) return false;
+    if(/삭제|지우|없음/.test(v)){ if(!old.visit) return false; const n = {...old}; delete n.visit; overrides[id] = {...n, t:now}; }
+    else{
+      const r = parseVisit(v); if(!r){ alert('날짜 형식을 확인해 주세요 (예: 10/16 14:00)'); return false; }
+      overrides[id] = {...old, hide:undefined, date:undefined, dates:[r.d], visit:r, t:now};
+      selDay = diffDays(r.d, today())<=DAYS_AHEAD && r.d>=weekStart(today()) ? r.d : 'unknown';
+    }
+  }
   if(a==='date'){
     const v = prompt('방송 날짜를 입력하세요\n· 하루: 10/14\n· 여러 날: 10/14, 10/16\n· 기간: 11/9~11/14', '');
     if(!v) return false;
@@ -1751,8 +1794,10 @@ $('add').onclick = () => {
   if(!ds.length){ alert('날짜 형식을 확인해 주세요 (예: 10/14 또는 11/9~11/14)'); return; }
   const d = ds[0];
   const note = prompt('메모 (출연자 이름 등, 비워도 돼요)', '') || '';
+  const vt = ds.length===1 ? prompt('출연자가 실제로 오는 날이면 시간을 입력하세요 (예: 14:00)\n· 시간 모르면: 그냥 확인\n· 방문일이 아니면: 취소', '') : null;
+  const vr = vt==null ? null : (parseVisit(`${+d.slice(5,7)}/${+d.slice(8)} ${vt}`) || {d, tm:''});
   const id = 'link_' + Date.now().toString(36);
-  overrides[id] = {link, slug:p.slug, dates:ds, note, t:Date.now()};
+  overrides[id] = {link, slug:p.slug, dates:ds, note, t:Date.now(), ...(vr?{visit:vr}:{})};
   pushSync({set:{[id]:overrides[id]}}); store.set('overrides', overrides);
   selDay = diffDays(d, today())<=DAYS_AHEAD ? d : 'unknown';
   rebuild(false, true);
