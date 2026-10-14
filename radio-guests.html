@@ -366,6 +366,7 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .bp .bmore{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.62);color:#fff;font-size:24px;font-weight:900}
 .blabel{position:absolute;left:8px;top:8px;z-index:4;font-size:12px;font-weight:900;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.62);color:#fff;border:1px solid rgba(255,255,255,.3);pointer-events:none}
 .bft{padding:9px 10px 11px;display:flex;flex-direction:column;gap:6px}
+.brow,.bs1{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .brow{display:flex;flex-direction:column;align-items:stretch;gap:6px;container-type:inline-size;padding:6px 9px;border-radius:10px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);cursor:pointer;outline:none}
 .brow:hover,.brow:focus-visible{background:rgba(255,255,255,.09)}
 .brow.v{background:linear-gradient(90deg,rgba(255,196,40,.24),rgba(255,140,30,.10));border-color:rgba(255,190,40,.6)}
@@ -407,7 +408,7 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .bs1.v{outline:3px solid #ffb21c;outline-offset:-3px}
 .bs1.dn{filter:grayscale(.6) brightness(.7)}
 .bs1 .bmore{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);color:#fff;font-size:26px;font-weight:900}
-#hpv{position:fixed;z-index:60;pointer-events:none;opacity:0;transform:scale(.92);transform-origin:center;transition:opacity .14s,transform .14s;background:#0d0f16;border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:6px;box-shadow:0 18px 50px rgba(0,0,0,.7);}
+#hpv{-webkit-touch-callout:none;user-select:none;position:fixed;z-index:60;pointer-events:none;opacity:0;transform:scale(.92);transform-origin:center;transition:opacity .14s,transform .14s;background:#0d0f16;border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:6px;box-shadow:0 18px 50px rgba(0,0,0,.7);}
 #hpv.on{opacity:1;transform:none}
 #hpv img{display:block;width:100%;object-fit:contain;border-radius:9px}
 #hpv b{display:block;text-align:center;color:#fff;font-size:15px;font-weight:900;padding:6px 4px 2px}
@@ -1337,7 +1338,7 @@ function bindCards(){
     pc.querySelectorAll('.brow .ic').forEach(ic=>{ ic.onclick = ev => ev.stopPropagation(); ic.onkeydown = ev => ev.stopPropagation(); ic.querySelectorAll('button[data-a]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); doAct(ic.dataset.id, b.dataset.a, b.dataset.g); }); });
     pc.querySelectorAll('.brow, .bs1').forEach(hoverPreview);   // 추가 게시물 칸 어디든 (주간표 제외)
     pc.querySelectorAll('.bp, .brow, .bs1').forEach(el=>{
-      el.onclick = () => { const k = +el.dataset.k; openView(k, tileIdx(viewList[k])); };
+      el.onclick = () => { if(el._lp && Date.now()-el._lp<700) return; const k = +el.dataset.k; openView(k, tileIdx(viewList[k])); };
       el.onkeydown = ev => { if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); el.click(); } };
     });
   });
@@ -1345,9 +1346,9 @@ function bindCards(){
 /* 마우스를 올리면(클릭 없이) 사진이 크게 떠서 보이고, 마우스가 벗어나면 사라짐 (PC 전용) */
 let hpv = null, hpvT = 0;
 function hoverPreview(el){
-  if(!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  const canHover = matchMedia('(hover:hover) and (pointer:fine)').matches;
   const host = el.closest('[data-k]');
-  const show = () => {
+  const show = (now) => {
     const e = viewList[+host.dataset.k], s = e && e.slides && e.slides[0]; if(!s || e.weekly) return;   // 주간표는 호버 없이 클릭해서 확대
     clearTimeout(hpvT);
     hpvT = setTimeout(() => {
@@ -1369,13 +1370,27 @@ function hoverPreview(el){
         hpv.style.left = x + 'px'; hpv.style.top = y + 'px';
       };
       place(); img.onload = place;
-    }, 90);
+    }, now===true ? 0 : 90);
   };
   const hide = () => { clearTimeout(hpvT); if(hpv) hpv.classList.remove('on'); };
   // 버튼(숨기기·방문일 등) 위에서는 미리보기를 접어서 버튼이 가려지지 않게
-  el.addEventListener('mouseover', ev => { if(ev.target.closest('.ic')) hide(); else if(!hpv || !hpv.classList.contains('on')) show(); });
-  el.addEventListener('mouseleave', hide);
-  el.addEventListener('mousedown', () => { clearTimeout(hpvT); if(hpv) hpv.classList.remove('on'); });
+  if(canHover){
+    el.addEventListener('mouseover', ev => { if(ev.target.closest('.ic')) hide(); else if(!hpv || !hpv.classList.contains('on')) show(); });
+    el.addEventListener('mouseleave', hide);
+    el.addEventListener('mousedown', () => { clearTimeout(hpvT); if(hpv) hpv.classList.remove('on'); });
+  }
+  // 터치(폰): 길게 누르고 있는 동안 크게 보이고, 손을 떼면 사라짐. 짧게 누르면 기존처럼 크게 보기 화면이 열림
+  let lpT = 0, sx = 0, sy = 0, lpOn = false;
+  const lpCancel = () => { clearTimeout(lpT); lpT = 0; };
+  el.addEventListener('touchstart', ev => {
+    if(ev.target.closest('.ic')) return;
+    const t = ev.touches[0]; sx = t.clientX; sy = t.clientY; lpCancel();
+    lpOn = false; lpT = setTimeout(() => { lpT = 0; lpOn = true; el._lp = Date.now(); show(true); if(navigator.vibrate) try{ navigator.vibrate(12); }catch(_){} }, 420);
+  }, {passive:true});
+  el.addEventListener('touchmove', ev => { const t = ev.touches[0]; if(Math.abs(t.clientX-sx)>10 || Math.abs(t.clientY-sy)>10){ lpCancel(); } }, {passive:true});
+  el.addEventListener('touchend', () => { lpCancel(); if(lpOn){ lpOn = false; el._lp = Date.now(); hide(); } });
+  el.addEventListener('touchcancel', () => { lpCancel(); hide(); });
+  el.addEventListener('contextmenu', ev => { if(el._lp && Date.now()-el._lp<1500) ev.preventDefault(); });
 }
 function bindBody(pc){
   pc.querySelectorAll('.sty').forEach(s=>s.onclick=ev=>{ ev.stopPropagation(); const t = pc.querySelector(`.tabs .pt[data-j="${s.dataset.j}"]`); if(t) t.click(); });
@@ -1950,7 +1965,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14w';
+const BUILD = '2026-10-15a';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
