@@ -409,7 +409,7 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .bs1 .bmore{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);color:#fff;font-size:26px;font-weight:900}
 #hpv{position:fixed;z-index:60;pointer-events:none;opacity:0;transform:scale(.92);transform-origin:center;transition:opacity .14s,transform .14s;background:#0d0f16;border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:6px;box-shadow:0 18px 50px rgba(0,0,0,.7);}
 #hpv.on{opacity:1;transform:none}
-#hpv img{display:block;width:100%;max-height:calc(100vh - 90px);object-fit:contain;border-radius:9px}
+#hpv img{display:block;width:100%;object-fit:contain;border-radius:9px}
 #hpv b{display:block;text-align:center;color:#fff;font-size:15px;font-weight:900;padding:6px 4px 2px}
 .pill.bcn{background:rgba(255,255,255,.14);color:#fff}
 @media (max-width:600px){.bp .bl{font-size:11px;padding:12px 5px 4px}.bp .bl i{font-size:10px}.blabel{font-size:11px;left:5px;top:5px}.bp .bgn{font-size:13px}}
@@ -1359,9 +1359,13 @@ function hoverPreview(el){
       hpv.innerHTML = `<img src="${esc(s.url)}" alt=""><b>${esc(nm)}</b>`;
       hpv.classList.add('on');
       const img = hpv.firstChild, place = () => {
+        // 마우스를 올린 칸(과 그 버튼들)을 절대 가리지 않도록, 그 칸의 위쪽 또는 아래쪽 빈 공간에만 띄운다
+        const r = host.getBoundingClientRect(), up = r.top - 10, down = innerHeight - r.bottom - 10, above = up >= down;
+        const room = Math.max(160, (above ? up : down) - 8);
+        img.style.maxHeight = Math.max(120, room - 44) + 'px';
         const hh = hpv.offsetHeight;
         let x = cr.left + cr.width/2 - W/2; x = Math.max(8, Math.min(x, innerWidth - W - 8));
-        let y = cr.top + cr.height/2 - hh/2; y = Math.max(8, Math.min(y, innerHeight - hh - 8));
+        let y = above ? r.top - 10 - hh : r.bottom + 10; y = Math.max(8, Math.min(y, innerHeight - hh - 8));
         hpv.style.left = x + 'px'; hpv.style.top = y + 'px';
       };
       place(); img.onload = place;
@@ -1946,7 +1950,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14v';
+const BUILD = '2026-10-14w';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
