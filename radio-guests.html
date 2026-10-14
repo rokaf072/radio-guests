@@ -1347,7 +1347,7 @@ let hpv = null, hpvT = 0;
 function hoverPreview(el){
   if(!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
   const host = el.closest('[data-k]');
-  el.addEventListener('mouseenter', () => {
+  const show = () => {
     const e = viewList[+host.dataset.k], s = e && e.slides && e.slides[0]; if(!s || e.weekly) return;   // 주간표는 호버 없이 클릭해서 확대
     clearTimeout(hpvT);
     hpvT = setTimeout(() => {
@@ -1366,8 +1366,11 @@ function hoverPreview(el){
       };
       place(); img.onload = place;
     }, 90);
-  });
-  el.addEventListener('mouseleave', () => { clearTimeout(hpvT); if(hpv) hpv.classList.remove('on'); });
+  };
+  const hide = () => { clearTimeout(hpvT); if(hpv) hpv.classList.remove('on'); };
+  // 버튼(숨기기·방문일 등) 위에서는 미리보기를 접어서 버튼이 가려지지 않게
+  el.addEventListener('mouseover', ev => { if(ev.target.closest('.ic')) hide(); else if(!hpv || !hpv.classList.contains('on')) show(); });
+  el.addEventListener('mouseleave', hide);
   el.addEventListener('mousedown', () => { clearTimeout(hpvT); if(hpv) hpv.classList.remove('on'); });
 }
 function bindBody(pc){
@@ -1943,7 +1946,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14u';
+const BUILD = '2026-10-14v';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
