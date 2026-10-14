@@ -349,6 +349,39 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .vrib span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:600px){.vrib{flex-wrap:wrap;gap:1px 6px;padding:6px 8px;font-size:11px}.vrib b{font-size:11.5px}.vrib span{white-space:normal}}
 .pc{position:relative}
+/* 콜라주 카드 */
+.bento{position:relative;display:grid;gap:3px;aspect-ratio:1/1;background:#000;overflow:hidden}
+.bento.n2{grid-template-columns:1.6fr 1fr}
+.bento.n2.eq{grid-template-columns:1fr 1fr}
+.bento.n3{grid-template-columns:1.6fr 1fr;grid-template-rows:1fr 1fr}
+.bento.n4{grid-template-columns:1.6fr 1fr;grid-template-rows:1fr 1fr 1fr}
+.bento .bbig{grid-row:1/-1;min-width:0;min-height:0;position:relative}
+.bento .bbig .tile,.bento .bbig .tile .pic{height:100%;aspect-ratio:auto}
+.bp{position:relative;border:0;padding:0;margin:0;overflow:hidden;cursor:pointer;background:#111;min-width:0;min-height:0;display:block}
+.bp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transition:transform .3s}
+.bp:hover img{transform:scale(1.06)}
+.bp .bl{position:absolute;left:0;right:0;bottom:0;padding:16px 7px 5px;background:linear-gradient(transparent,rgba(0,0,0,.88));color:#fff;font-size:12.5px;font-weight:900;text-align:left;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.bp .bl i{display:block;font-style:normal;font-size:11px;color:#ffd27a}
+.bp.v{outline:3px solid #ffb21c;outline-offset:-3px}
+.bp.dn,.bento .bbig .tile.dnt{filter:grayscale(.6) brightness(.7)}
+.bp .bgn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:6px 6px 22px;text-align:center;font-weight:900;font-size:16px;color:#fff;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--pc) 60%,#222),#12141a 80%)}
+.bp .bmore{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.62);color:#fff;font-size:24px;font-weight:900}
+.blabel{position:absolute;left:8px;top:8px;z-index:4;font-size:12px;font-weight:900;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.62);color:#fff;border:1px solid rgba(255,255,255,.3);pointer-events:none}
+.bft{padding:9px 10px 11px;display:flex;flex-direction:column;gap:6px}
+.brow{display:flex;flex-direction:column;gap:4px;padding:6px 9px;border-radius:10px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);cursor:pointer;outline:none}
+.brow:hover,.brow:focus-visible{background:rgba(255,255,255,.09)}
+.brow.v{background:linear-gradient(90deg,rgba(255,196,40,.24),rgba(255,140,30,.10));border-color:rgba(255,190,40,.6)}
+.brow .r1{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:12.5px}
+.brow .r1 b{font-weight:900;color:#fff}
+.brow .bv{font-weight:900;color:#ffd27a}
+.brow .bs,.brow .br{font-size:11.5px;color:var(--sub);font-weight:700}
+.brow.dn{opacity:.62}
+.brow .bdone{font-style:normal;font-size:11px;font-weight:900;color:#ff8a8a;border:1px solid rgba(236,64,64,.6);border-radius:6px;padding:0 5px}
+.brow .up{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-size:11.5px;font-weight:700;color:#e9ecf5;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:1px 7px}
+.brow .up b{font-weight:900;color:#fff;background:none;padding:0}
+.brow .up i{font-style:normal;font-weight:800;color:#ffd27a}
+.pill.bcn{background:rgba(255,255,255,.14);color:#fff}
+@media (max-width:600px){.bp .bl{font-size:11px;padding:12px 5px 4px}.bp .bl i{font-size:10px}.blabel{font-size:11px;left:5px;top:5px}.bp .bgn{font-size:13px}}
 .ft .dl1 .up{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#e9ecf5;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:2px 7px}
 .ic button.dn{color:#ffb4b4;border-color:rgba(236,64,64,.5)}
 .ft .dl1 .up{white-space:nowrap}
@@ -1135,7 +1168,7 @@ function doneBtn(e){
 }
 const visitTxt = v => v ? `${fmd(v.d)}${v.tm?' '+v.tm:''}` : '';
 const shortLabel = l => ({'주간 편성표':'주간표','유튜브 일정':'유튜브 일정','방청 안내':'방청','직접 추가':'직접 추가'})[l] || l;
-function bodyHTML(e, k, isUnknown){
+function bodyHTML(e, k, isUnknown, opts){
   const n = e.slides.length, si = tileIdx(e), s = e.slides[si];
   const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
   let rg = '';
@@ -1156,7 +1189,10 @@ function bodyHTML(e, k, isUnknown){
   const text = sn
     ? `<div class="sn">${sn.lines.slice(0,3).map(l=>{const m=/^(\d{1,2}:\d{2})\s*(.*)$/.exec(l); return `<div>${m?`<b>${m[1]}</b>${esc(m[2])}`:esc(l)}</div>`;}).join('')}</div>`
     : e.guestName ? '' : `<div class="cp">${esc((e.post.caption||'').replace(/\s+/g,' ').trim())}</div>`;
-  return `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${ribbon(e)}${pic}</div>
+  const bento = !!(opts && opts.bento);
+  const tileHTML = `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${bento?'':ribbon(e)}${pic}${bento?`<span class="blabel">${e.atV?'🚪 ':''}${esc(shortLabel(postLabel(e)))}</span>`:''}</div>`;
+  if(bento) return tileHTML;
+  return `${tileHTML}
     <div class="ft">
       <div class="dl1">${e.atV?`<b class="vis">🚪 방문 ${visitTxt(e.visit)}</b>`:e.visit?`<b class="vis2" title="이 날은 미리 녹음한 방송이라 출연자가 오지 않아요">🎙 실제 방문 ${visitTxt(e.visit)}</b>`:''}${rg?`<b>📅 ${rg}</b>`:''}${upChip(up)}</div>
       ${text}
@@ -1170,6 +1206,40 @@ function bodyHTML(e, k, isUnknown){
         ${e.manual&&!e.link?'<button data-a="reset" title="자동으로 되돌리기">↺</button>':''}
       </div>
     </div>`;
+}
+/* 한 프로그램에 게시물이 여러 개면: 카드는 1장, 사진 칸은 콜라주(큰 칸 + 작은 칸들) + 아래에 게시물별 한 줄 정보 */
+function bentoHTML(p, es){
+  const ks = es.map(e=>viewList.push(e)-1);
+  const bi = Math.max(0, es.findIndex(e=>e.weekly));            // 큰 칸: 주간표가 있으면 주간표
+  const order = [bi, ...es.map((_,i)=>i).filter(i=>i!==bi)];
+  const shown = order.slice(0, 4), hidden = order.length - shown.length;
+  const eq = !es.some(e=>e.weekly) && shown.length===2;
+  const big = bodyHTML(es[bi], ks[bi], false, {bento:true});
+  const small = shown.slice(1).map((i,idx)=>{
+    const e = es[i], k = ks[i], s = e.slides && e.slides[0], last = idx===shown.length-2 && hidden>0;
+    const nm = shortLabel(postLabel(e));
+    return `<button class="bp ${doneDate(e)?'dn':''} ${e.atV?'v':''}" data-k="${k}" title="${esc(nm)}">${s?`<img src="${esc(s.url)}" loading="lazy" alt="" draggable="false">`:`<span class="bgn">${esc(e.guestName||nm)}</span>`}<span class="bl">${e.atV?'🚪 ':''}${esc(nm)}${e.atV&&e.visit?`<i>${esc(e.visit.tm||'시간 미정')}</i>`:''}</span>${last?`<span class="bmore">+${hidden}</span>`:''}</button>`;
+  }).join('');
+  const rows = es.map((e,i)=>browHTML(e, ks[i])).join('');
+  const allDone = es.every(e=>doneDate(e));
+  const stamp = allDone ? (()=>{ const d = doneDate(es[0]); return `<div class="dnx" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="-10" y1="88" x2="88" y2="-10"/><line x1="12" y1="110" x2="110" y2="12"/></svg><div class="stamp"><b>완료</b><small>${fmd(d)} 방송</small></div></div>`; })() : '';
+  return `<section class="pc grp bentocard ${allDone?'done':''}" id="p-${p.slug}" data-slug="${p.slug}" style="--pc:${p.color}" data-ks="${ks.join(',')}" data-key="${esc(p.slug+'|'+selDay)}" data-u="">
+    <div class="pch">${p.logo?`<img class="lg" src="${p.logo}" alt="">`:''}
+      <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
+        <div class="l1"><span class="tm">${fmtTime(p.start)}</span>${p.ch?`<span class="ch">${p.ch}</span>`:''}${progPills(p, es)}<span class="pill bcn" title="이 프로그램 게시물 ${es.length}개">${es.length}개</span></div></div>
+    </div>
+    <div class="pcb"><div class="bento n${shown.length} ${eq?'eq':''}"><div class="bbig">${big}</div>${small}</div>
+      <div class="bft">${rows}</div></div>${stamp}
+  </section>`;
+}
+function browHTML(e, k){
+  const nm = shortLabel(postLabel(e)), d = doneDate(e);
+  let info = '';
+  if(e.atV && e.visit){ const o = bcOther(e); info = `<span class="bv">🚪 ${e.visit.d===today()?'오늘':fmd(e.visit.d)} ${e.visit.tm||'시간 미정'}${o?'':' 방문'}</span>${o?`<span class="bs">녹음 · 방송은 ${o}</span>`:''}`; }
+  else if(e.visit) info = `<span class="br">🎙 녹음 방송 · 이날은 안 와요 (방문 ${visitTxt(e.visit)})</span>`;
+  else if(e.weekly && e.range && e.range[0]!==e.range[1]) info = `<span class="bs">📅 ${fmd(e.range[0])} ~ ${fmd(e.range[1])}</span>`;
+  const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
+  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="r1"><b>${esc(nm)}</b>${info}${d?'<em class="bdone">완료</em>':''}</div>${up?`<div class="r2">${upChip(up)}</div>`:''}</div>`;
 }
 function tileGo(tile, d){
   const e = viewList[+tile.dataset.k], n = e.slides.length, i = tileIdx(e) + d;
@@ -1203,8 +1273,10 @@ function renderMain(){
   $('jump').innerHTML = on.length>1 ? on.map(p=>`<button data-j="${p.slug}" style="--pc:${p.color}">${p.logo?`<img src="${p.logo}" alt="">`:''}${esc(p.name)}${list.some(e=>e.prog===p&&e.atV)?'<i class="jv">방문</i>':''}</button>`).join('') : '';
   // 주간 편성표를 먼저, 그다음 최근에 올린 순
   let nCards = 0;
-  const html = on.map(p=>list.filter(e=>e.prog===p).sort((a,b)=>(b.atV?1:0)-(a.atV?1:0) || (b.weekly?1:0)-(a.weekly?1:0) || (a.post.timestamp<b.post.timestamp?1:-1))
-    .map((e,i)=>{ nCards++; return cardHTML(p, [e], false, i); }).join('')).join('');
+  const html = on.map(p=>{
+    const es = list.filter(e=>e.prog===p).sort((a,b)=>(b.atV?1:0)-(a.atV?1:0) || (b.weekly?1:0)-(a.weekly?1:0) || (a.post.timestamp<b.post.timestamp?1:-1));
+    nCards++; return es.length>1 ? bentoHTML(p, es) : cardHTML(p, es, false, 0);
+  }).join('');
   const ten = progs.find(p=>p.youtube);
   const cols = Math.max(4, Math.min(5, Math.ceil(nCards/2)));   // 두 줄에 맞게 (4~5개씩)
   m.innerHTML = (html ? `<div class="board" style="--cols:${cols}">${html}</div>` : `<div class="empty-msg">${selDay===t?'오늘':'이 날'} 올라온 출연 정보가 없어요</div>`) +
@@ -1226,6 +1298,10 @@ function bindCards(){
       bindBody(pc);
     });
     bindBody(pc);
+    pc.querySelectorAll('.bp, .brow').forEach(el=>{
+      el.onclick = () => { const k = +el.dataset.k; openView(k, tileIdx(viewList[k])); };
+      el.onkeydown = ev => { if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); el.click(); } };
+    });
   });
 }
 function bindBody(pc){
@@ -1436,6 +1512,7 @@ function drawSide(){
         ${e.post.permalink?`<a class="ig ${e.post._yt?'ytb':''}" href="${esc(e.post.permalink)}" target="_blank" rel="noopener">${e.post._yt?'유튜브에서 보기':'인스타에서 보기'}</a>`:''}
         ${g?`<button class="pri" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${fmd(g[0])}~${fmd(g[g.length-1])}`:fmd(g[0])} 출연 맞음</button>`:''}
         ${doneBtn(e)}
+        ${e.guestName?'':'<button data-a="visit" class="adm">🚪 방문일</button>'}
         ${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="date">${isU?'날짜 지정':'날짜 수정'}</button>`}
         ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset">자동으로 되돌리기</button>':''}
@@ -1800,7 +1877,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14h';
+const BUILD = '2026-10-14i';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
