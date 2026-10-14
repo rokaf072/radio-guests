@@ -1275,7 +1275,7 @@ function browHTML(e, k, isBig){
   const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
   const s = e.slides && e.slides[0];
   const th = s ? `<img class="bth" src="${esc(s.url)}" loading="lazy" alt="" draggable="false">` : `<span class="bth bgn">${esc((e.guestName||nm).slice(0,3))}</span>`;
-  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${d?'<em class="bdone">완료</em>':''}</div>${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${doneBtn(e)}${e.guestName?'<button data-a="del" class="adm">삭제</button>':''}</div></div>`;
+  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${d?'<em class="bdone">완료</em>':''}</div>${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${doneBtn(e)}${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="이 게시물 숨기기 (중복일 때)">숨기기</button>'}</div></div>`;
 }
 function tileGo(tile, d){
   const e = viewList[+tile.dataset.k], n = e.slides.length, i = tileIdx(e) + d;
@@ -1943,7 +1943,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14t';
+const BUILD = '2026-10-14u';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
