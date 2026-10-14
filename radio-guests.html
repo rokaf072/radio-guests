@@ -1170,7 +1170,7 @@ const bcOther = e => (e.bc||[]).filter(d=>d!==e.visit.d).map(fmd).join(', ');
 function upChip(up){
   if(!up) return '';
   const n = diffDays(today(), up), ago = n<=0 ? '오늘' : n===1 ? '어제' : `${n}일 전`;
-  return `<span class="up" title="인스타(유튜브)에 올라온 날짜">📤 올린 날 <b>${fmd(up)}</b> <i>${ago}</i></span>`;
+  return `<span class="up" title="작가님이 인스타(유튜브)에 올린 날">✍ 작가 업로드 <b>${fmd(up)}</b> <i>${ago}</i></span>`;
 }
 // 방송이 이미 끝난 게시물: 날짜가 확실하고(자동 확정·수동 지정·예정) 오늘보다 이전
 function doneDate(e){
@@ -1219,11 +1219,11 @@ function bodyHTML(e, k, isUnknown, opts){
       <div class="ic" data-id="${esc(e.post.id)}">
         ${g?`<button class="ok" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${short(g[0])}~${short(g[g.length-1])}`:short(g[0])} 맞음</button>`:''}
         ${e.post.permalink?`<a href="${esc(e.post.permalink)}" target="_blank" rel="noopener" title="${e.post._yt?'유튜브':'인스타'}에서 보기">${e.post._yt?'유튜브':'인스타'} ↗</a>`:''}
-        ${e.guestName?'<button data-a="edit" class="adm" title="출연자 정보 고치기">✏ 수정</button>':`${g?'':`<button data-a="date" title="날짜 수정">날짜</button>`}
+        ${e.guestName?'<button data-a="edit" class="adm" title="출연자 정보 고치기">✏ 수정</button>':`${g?'':`<button data-a="date" class="adm" title="날짜 수정">날짜</button>`}
         <button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button>`}
         ${doneBtn(e)}
-        ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" title="숨기기">숨기기</button>'}
-        ${e.manual&&!e.link?'<button data-a="reset" title="자동으로 되돌리기">↺</button>':''}
+        ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm" title="숨기기">숨기기</button>'}
+        ${e.manual&&!e.link?'<button data-a="reset" class="adm" title="자동으로 되돌리기">↺</button>':''}
       </div>
     </div>`;
 }
@@ -1265,7 +1265,7 @@ function browHTML(e, k, isBig){
   const s = e.slides && e.slides[0];
   const th = s ? `<img class="bth" src="${esc(s.url)}" loading="lazy" alt="" draggable="false">` : `<span class="bth bgn">${esc((e.guestName||nm).slice(0,3))}</span>`;
   return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0">${th}<div class="bx"><div class="r1"><b>${esc(nm)}</b>${info}${d?'<em class="bdone">완료</em>':''}</div>${up?`<div class="r2">${upChip(up)}</div>`:''}
-    <div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date">날짜</button>`}${doneBtn(e)}${e.guestName?'<button data-a="del" class="adm">삭제</button>':''}</div></div></div>`;
+    <div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${doneBtn(e)}${e.guestName?'<button data-a="del" class="adm">삭제</button>':''}</div></div></div>`;
 }
 function tileGo(tile, d){
   const e = viewList[+tile.dataset.k], n = e.slides.length, i = tileIdx(e) + d;
@@ -1540,9 +1540,9 @@ function drawSide(){
         ${g?`<button class="pri" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${fmd(g[0])}~${fmd(g[g.length-1])}`:fmd(g[0])} 출연 맞음</button>`:''}
         ${doneBtn(e)}
         ${e.guestName?'':'<button data-a="visit" class="adm">🚪 방문일</button>'}
-        ${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="date">${isU?'날짜 지정':'날짜 수정'}</button>`}
-        ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide">숨기기</button>'}
-        ${e.manual&&!e.link?'<button data-a="reset">자동으로 되돌리기</button>':''}
+        ${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="date" class="adm">${isU?'날짜 지정':'날짜 수정'}</button>`}
+        ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm">숨기기</button>'}
+        ${e.manual&&!e.link?'<button data-a="reset" class="adm">자동으로 되돌리기</button>':''}
       </div>
       <div class="cap">${capLinks(e)}</div>
     </div>
@@ -1904,7 +1904,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-14l';
+const BUILD = '2026-10-14m';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
