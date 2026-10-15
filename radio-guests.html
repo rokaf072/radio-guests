@@ -141,7 +141,10 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .pill.ch{background:transparent;border:1px solid var(--line);color:var(--faint);padding:1px 6px}
 
 .tile{position:relative;cursor:zoom-in;outline:none}
-.tile .pic{position:relative;aspect-ratio:1/1;background:#000;overflow:hidden}
+.tile .pic{position:relative;aspect-ratio:1/1;background:#000;overflow:hidden;touch-action:pan-y}
+.tile .pic .pgh{position:absolute;inset:0;pointer-events:none;will-change:transform}
+.tile .pic .pgh img.fg{transition:none!important;transform:none!important}
+.tile .pic img{will-change:transform}
 .tile .pic img.bg{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;filter:blur(18px) brightness(.55) saturate(1.2)}
 .tile .pic img.fg{position:relative;width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s ease}
 .tile:hover .pic img.fg{transform:scale(1.025)}
@@ -388,6 +391,7 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .brow .ri{display:flex;flex-wrap:wrap;gap:4px 6px}
 .brow .r2{min-width:0}
 .up .ls{display:none}
+@media (max-width:600px){.up .lf{display:none}.up .ls{display:inline}}
 @media (max-width:600px){.bft{padding:7px 5px 9px}.brow{padding:6px 6px}.brow .up{padding:1px 5px;gap:3px}}
 @container (max-width:290px){.brow .up .lf{display:none}.brow .up .ls{display:inline}}
 .brow .up{display:flex;align-items:center;gap:4px;white-space:nowrap;max-width:100%;font-size:clamp(9.5px,4.2cqw,12px);font-weight:700;color:#e9ecf5;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:1px 7px}
@@ -1278,13 +1282,36 @@ function browHTML(e, k, isBig){
   const th = s ? `<img class="bth" src="${esc(s.url)}" loading="lazy" alt="" draggable="false">` : `<span class="bth bgn">${esc((e.guestName||nm).slice(0,3))}</span>`;
   return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${d?'<em class="bdone">완료</em>':''}</div>${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${doneBtn(e)}${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="이 게시물 숨기기 (중복일 때)">숨기기</button>'}</div></div>`;
 }
-function tileGo(tile, d){
+function tileGo(tile, d, from){
   const e = viewList[+tile.dataset.k], n = e.slides.length, i = tileIdx(e) + d;
   if(i<0 || i>=n) return;
+  from = from || 0;
+  const pic = tile.querySelector('.pic'), imgs = [...pic.querySelectorAll('img')];
+  const W = pic.offsetWidth || 300, dur = matchMedia('(prefers-reduced-motion:reduce)').matches ? 0 : 320;
+  // 지금 보이던 장을 복사해 두었다가 옆으로 밀어내고, 새 장이 그 자리로 미끄러져 들어오게 한다
+  let ghost = null;
+  if(dur){
+    pic.querySelectorAll('.pgh').forEach(g=>g.remove());
+    ghost = document.createElement('div'); ghost.className = 'pgh';
+    imgs.forEach(im=>ghost.appendChild(im.cloneNode(true)));
+    pic.insertBefore(ghost, pic.firstChild);
+  }
   pos[tileKey(e)] = i;
-  tile.querySelectorAll('.pic img').forEach(img=>img.src = e.slides[i].url);
+  const url = e.slides[i].url;
   tile.querySelector('.cnt b').textContent = i+1;
   tile.querySelector('.tnav.prev').disabled = i<=0; tile.querySelector('.tnav.next').disabled = i>=n-1;
+  const go = () => {
+    imgs.forEach(im=>{ im.style.transition=''; im.style.transform=''; });
+    if(ghost){
+      const ease = 'cubic-bezier(.22,.8,.26,1)';
+      ghost.animate([{transform:`translateX(${from}px)`},{transform:`translateX(${-d*W}px)`}], {duration:dur, easing:ease, fill:'forwards'}).onfinish = () => ghost.remove();
+      imgs.forEach(im=>im.animate([{transform:`translateX(${d*W + from}px)`},{transform:'translateX(0)'}], {duration:dur, easing:ease}));
+    }
+  };
+  const pre = new Image(); let done = false;
+  const fire = () => { if(done) return; done = true; imgs.forEach(im=>im.src = url); go(); };
+  pre.onload = pre.onerror = fire; pre.src = url;
+  if(pre.complete) fire(); else setTimeout(fire, 350);   // 아직 못 받았어도 너무 오래 기다리지 않음
   if(e.slides[i+1]) new Image().src = e.slides[i+1].url;   // 다음 장 미리 받아두기
 }
 
@@ -1405,10 +1432,33 @@ function bindBody(pc){
     if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); openView(k, tileIdx(viewList[k])); }
     else if(ev.key==='ArrowLeft' || ev.key==='ArrowRight'){ ev.preventDefault(); tileGo(tile, ev.key==='ArrowLeft'?-1:1); }
   };
-  let sx=null, sy=null;
-  tile.addEventListener('touchstart', ev=>{ sx=ev.touches[0].clientX; sy=ev.touches[0].clientY; }, {passive:true});
-  tile.addEventListener('touchend', ev=>{ if(sx==null) return; const dx=ev.changedTouches[0].clientX-sx, dy=ev.changedTouches[0].clientY-sy; sx=null;
-    if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.5){ tile._swiped=Date.now(); tileGo(tile, dx<0?1:-1); } }, {passive:true});
+  // 손가락을 따라 사진이 같이 움직이고, 떼면 부드럽게 다음 장으로 미끄러짐
+  let sx=null, sy=null, dx=0, lock=null;
+  const dragImgs = () => [...tile.querySelectorAll('.pic img')];
+  tile.addEventListener('touchstart', ev=>{ if(ev.target.closest('.tnav')) return; sx=ev.touches[0].clientX; sy=ev.touches[0].clientY; dx=0; lock=null; }, {passive:true});
+  tile.addEventListener('touchmove', ev=>{
+    if(sx==null) return;
+    const mx = ev.touches[0].clientX-sx, my = ev.touches[0].clientY-sy;
+    if(!lock && (Math.abs(mx)>8 || Math.abs(my)>8)) lock = Math.abs(mx) > Math.abs(my)*1.2 ? 'x' : 'y';
+    if(lock!=='x') return;
+    const e = viewList[k], i = tileIdx(e);
+    dx = ((mx<0 && i>=e.slides.length-1) || (mx>0 && i<=0)) ? mx*0.3 : mx;   // 처음/끝에서는 저항감
+    dragImgs().forEach(im=>{ im.style.transition='none'; im.style.transform=`translateX(${dx}px)`; });
+    tile._swiped = Date.now();
+  }, {passive:true});
+  const endDrag = () => {
+    if(sx==null) return; sx=null;
+    if(lock!=='x'){ return; }
+    tile._swiped = Date.now();
+    const e = viewList[k], i = tileIdx(e), dir = dx<0 ? 1 : -1;
+    if(Math.abs(dx)>45 && i+dir>=0 && i+dir<e.slides.length){ tileGo(tile, dir, dx); }
+    else{   // 제자리로 부드럽게 복귀
+      dragImgs().forEach(im=>{ im.style.transition=''; im.style.transform=''; im.animate([{transform:`translateX(${dx}px)`},{transform:'translateX(0)'}], {duration:220, easing:'ease-out'}); });
+    }
+    dx=0; lock=null;
+  };
+  tile.addEventListener('touchend', endDrag);
+  tile.addEventListener('touchcancel', endDrag);
   const fg = tile.querySelector('.pic img.fg');
   if(fg) fg.onerror = () => { tile.querySelectorAll('.pic img').forEach(i=>i.remove()); tile.querySelector('.pic').insertAdjacentHTML('afterbegin', '<div class="noimg"><span style="font-size:26px">📷</span>사진을 불러오지 못했어요<br>눌러서 보기</div>'); };
   pc.querySelectorAll('.ic button[data-a]').forEach(b=>b.onclick=()=>doAct(b.parentNode.dataset.id, b.dataset.a, b.dataset.g));
@@ -1965,7 +2015,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-15a';
+const BUILD = '2026-10-15b';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
