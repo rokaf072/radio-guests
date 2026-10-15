@@ -19,7 +19,7 @@
   --acc:#7b8cff; --acc-ink:#fff; --warn:#f5b13d; --hot:#ff5a73; --chip:#232733; --shadow:0 10px 30px rgba(0,0,0,.45);
 }
 *{box-sizing:border-box}
-html,body{margin:0}
+html,body{margin:0;overflow-x:clip;overscroll-behavior-x:none}
 body{background:radial-gradient(1200px 600px at 10% -10%,rgba(123,140,255,.10),transparent 60%),radial-gradient(900px 500px at 100% 0%,rgba(221,42,123,.08),transparent 60%),var(--bg);background-attachment:fixed;color:var(--ink);font-family:"Pretendard","Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:15px;-webkit-font-smoothing:antialiased;min-height:100vh}
 button{font:inherit;color:inherit}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.32;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22460%22%20height%3D%22460%22%20viewBox%3D%220%200%20460%20460%22%20fill%3D%22none%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%20%3Cdefs%3E%3Cfilter%20id%3D%22n%22%20x%3D%22-50%25%22%20y%3D%22-50%25%22%20width%3D%22200%25%22%20height%3D%22200%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%223.2%22%20result%3D%22b%22/%3E%3CfeMerge%3E%3CfeMergeNode%20in%3D%22b%22/%3E%3CfeMergeNode%20in%3D%22b%22/%3E%3CfeMergeNode%20in%3D%22SourceGraphic%22/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%20%3Cg%20filter%3D%22url%28%23n%29%22%3E%20%3Cg%20stroke%3D%22%233de0ff%22%20transform%3D%22translate%2870%2080%29%22%3E%3Crect%20x%3D%22-12%22%20y%3D%22-28%22%20width%3D%2224%22%20height%3D%2240%22%20rx%3D%2212%22/%3E%3Cpath%20d%3D%22M-20%200a20%2020%200%200%200%2040%200M0%2020v14M-11%2034h22%22/%3E%3C/g%3E%20%3Cg%20stroke%3D%22%23ff4fd8%22%20transform%3D%22translate%28330%2090%29%22%3E%3Cpath%20d%3D%22M-32%200a32%2032%200%200%201%2064%200%22/%3E%3Cpath%20d%3D%22M-19%200a19%2019%200%200%201%2038%200%22/%3E%3Ccircle%20cx%3D%220%22%20cy%3D%220%22%20r%3D%223%22/%3E%3C/g%3E%20%3Cg%20stroke%3D%22%23a78bff%22%20transform%3D%22translate%28220%20230%29%22%3E%3Crect%20x%3D%22-38%22%20y%3D%22-18%22%20width%3D%2276%22%20height%3D%2236%22%20rx%3D%2210%22/%3E%3Ccircle%20cx%3D%22-16%22%20cy%3D%220%22%20r%3D%227%22/%3E%3Cpath%20d%3D%22M5%20-6h20M5%206h13%22/%3E%3Cpath%20d%3D%22M-24%20-18l20%20-20%22/%3E%3C/g%3E%20%3Cg%20stroke%3D%22%23ffd36b%22%20transform%3D%22translate%28100%20330%29%22%3E%3Cpath%20d%3D%22M0%20-16v22%22/%3E%3Ccircle%20cx%3D%22-6%22%20cy%3D%228%22%20r%3D%226%22/%3E%3Cpath%20d%3D%22M0%20-16l13%205%22/%3E%3C/g%3E%20%3Cg%20stroke%3D%22%233de0ff%22%20transform%3D%22translate%28370%20350%29%22%3E%3Cpath%20d%3D%22M-15%20-13v22M11%20-17v22M-15%20-13l26%20-4%22/%3E%3Ccircle%20cx%3D%22-20%22%20cy%3D%2210%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%226%22%20cy%3D%226%22%20r%3D%225%22/%3E%3C/g%3E%20%3Cg%20stroke%3D%22%23ff4fd8%22%20transform%3D%22translate%28260%20410%29%22%3E%3Cpath%20d%3D%22M-44%200h9l5%20-11l7%2022l7%20-28l7%2032l6%20-20l5%209h9%22/%3E%3C/g%3E%20%3Cg%20stroke%3D%22%23a78bff%22%20transform%3D%22translate%28410%20220%29%22%3E%3Cpath%20d%3D%22M-10%20-10h20v14h-20z%22/%3E%3Cpath%20d%3D%22M-6%20-16h12%22/%3E%3C/g%3E%20%3C/g%3E%3C/svg%3E");background-size:460px 460px;-webkit-mask-image:radial-gradient(ellipse at 50% 45%,#000 35%,rgba(0,0,0,.35) 90%);mask-image:radial-gradient(ellipse at 50% 45%,#000 35%,rgba(0,0,0,.35) 90%);animation:neonflick 2s ease-in-out infinite}
@@ -144,7 +144,6 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .tile .pic{position:relative;aspect-ratio:1/1;background:#000;overflow:hidden;touch-action:pan-y}
 .tile .pic .pgh{position:absolute;inset:0;pointer-events:none;will-change:transform}
 .tile .pic .pgh img.fg{transition:none!important;transform:none!important}
-.tile .pic img{will-change:transform}
 .tile .pic img.bg{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;filter:blur(18px) brightness(.55) saturate(1.2)}
 .tile .pic img.fg{position:relative;width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s ease}
 .tile:hover .pic img.fg{transform:scale(1.025)}
@@ -1287,31 +1286,32 @@ function tileGo(tile, d, from){
   if(i<0 || i>=n) return;
   from = from || 0;
   const pic = tile.querySelector('.pic'), imgs = [...pic.querySelectorAll('img')];
-  const W = pic.offsetWidth || 300, dur = matchMedia('(prefers-reduced-motion:reduce)').matches ? 0 : 320;
-  // 지금 보이던 장을 복사해 두었다가 옆으로 밀어내고, 새 장이 그 자리로 미끄러져 들어오게 한다
-  let ghost = null;
-  if(dur){
-    pic.querySelectorAll('.pgh').forEach(g=>g.remove());
-    ghost = document.createElement('div'); ghost.className = 'pgh';
-    imgs.forEach(im=>ghost.appendChild(im.cloneNode(true)));
-    pic.insertBefore(ghost, pic.firstChild);
-  }
+  const W = pic.offsetWidth || 300, dur = matchMedia('(prefers-reduced-motion:reduce)').matches ? 0 : 520;
   pos[tileKey(e)] = i;
   const url = e.slides[i].url;
   tile.querySelector('.cnt b').textContent = i+1;
   tile.querySelector('.tnav.prev').disabled = i<=0; tile.querySelector('.tnav.next').disabled = i>=n-1;
-  const go = () => {
-    imgs.forEach(im=>{ im.style.transition=''; im.style.transform=''; });
+  const myRun = tile._run = (tile._run||0) + 1;
+  const run = () => {
+    if(tile._run !== myRun) return;
+    pic.querySelectorAll('.pgh').forEach(g=>g.remove());
+    let ghost = null;
+    if(dur){   // 지금 보이던 장을 복사해 두었다가 살짝만 밀어내며 사라지게 하고, 새 장은 끝까지 부드럽게 감속하며 들어옴
+      ghost = document.createElement('div'); ghost.className = 'pgh';
+      imgs.forEach(im=>{ const c = im.cloneNode(true); c.style.transform=''; c.style.transition='none'; ghost.appendChild(c); });
+      pic.insertBefore(ghost, pic.firstChild);
+    }
+    imgs.forEach(im=>{ im.style.transition=''; im.style.transform=''; im.src = url; });
     if(ghost){
-      const ease = 'cubic-bezier(.22,.8,.26,1)';
-      ghost.animate([{transform:`translateX(${from}px)`},{transform:`translateX(${-d*W}px)`}], {duration:dur, easing:ease, fill:'forwards'}).onfinish = () => ghost.remove();
-      imgs.forEach(im=>im.animate([{transform:`translateX(${d*W + from}px)`},{transform:'translateX(0)'}], {duration:dur, easing:ease}));
+      const ease = 'cubic-bezier(.22,1,.36,1)';   // easeOutQuint: 빠르게 출발해서 아주 부드럽게 멈춤
+      ghost.animate([{transform:`translate3d(${from}px,0,0)`,opacity:1},{transform:`translate3d(${-d*W*0.28}px,0,0)`,opacity:.15}], {duration:dur, easing:ease, fill:'forwards'}).onfinish = () => ghost.remove();
+      imgs.forEach(im=>im.animate([{transform:`translate3d(${d*W + from}px,0,0)`},{transform:'translate3d(0,0,0)'}], {duration:dur, easing:ease}));
     }
   };
-  const pre = new Image(); let done = false;
-  const fire = () => { if(done) return; done = true; imgs.forEach(im=>im.src = url); go(); };
-  pre.onload = pre.onerror = fire; pre.src = url;
-  if(pre.complete) fire(); else setTimeout(fire, 350);   // 아직 못 받았어도 너무 오래 기다리지 않음
+  // 새 사진을 미리 받아 디코딩까지 끝낸 뒤에 움직여야 끊김이 없다
+  const pre = new Image(); pre.src = url;
+  const ready = pre.decode ? pre.decode().catch(()=>{}) : new Promise(r=>{ pre.onload = pre.onerror = r; });
+  Promise.race([ready, new Promise(r=>setTimeout(r, 400))]).then(()=>requestAnimationFrame(run));
   if(e.slides[i+1]) new Image().src = e.slides[i+1].url;   // 다음 장 미리 받아두기
 }
 
@@ -1433,7 +1433,7 @@ function bindBody(pc){
     else if(ev.key==='ArrowLeft' || ev.key==='ArrowRight'){ ev.preventDefault(); tileGo(tile, ev.key==='ArrowLeft'?-1:1); }
   };
   // 손가락을 따라 사진이 같이 움직이고, 떼면 부드럽게 다음 장으로 미끄러짐
-  let sx=null, sy=null, dx=0, lock=null;
+  let sx=null, sy=null, dx=0, lock=null, raf=0;
   const dragImgs = () => [...tile.querySelectorAll('.pic img')];
   tile.addEventListener('touchstart', ev=>{ if(ev.target.closest('.tnav')) return; sx=ev.touches[0].clientX; sy=ev.touches[0].clientY; dx=0; lock=null; }, {passive:true});
   tile.addEventListener('touchmove', ev=>{
@@ -1443,17 +1443,18 @@ function bindBody(pc){
     if(lock!=='x') return;
     const e = viewList[k], i = tileIdx(e);
     dx = ((mx<0 && i>=e.slides.length-1) || (mx>0 && i<=0)) ? mx*0.3 : mx;   // 처음/끝에서는 저항감
-    dragImgs().forEach(im=>{ im.style.transition='none'; im.style.transform=`translateX(${dx}px)`; });
     tile._swiped = Date.now();
+    if(!raf) raf = requestAnimationFrame(()=>{ raf = 0; dragImgs().forEach(im=>{ im.style.transition='none'; im.style.transform=`translate3d(${dx}px,0,0)`; }); });
   }, {passive:true});
   const endDrag = () => {
     if(sx==null) return; sx=null;
     if(lock!=='x'){ return; }
+    if(raf){ cancelAnimationFrame(raf); raf = 0; }
     tile._swiped = Date.now();
     const e = viewList[k], i = tileIdx(e), dir = dx<0 ? 1 : -1;
     if(Math.abs(dx)>45 && i+dir>=0 && i+dir<e.slides.length){ tileGo(tile, dir, dx); }
     else{   // 제자리로 부드럽게 복귀
-      dragImgs().forEach(im=>{ im.style.transition=''; im.style.transform=''; im.animate([{transform:`translateX(${dx}px)`},{transform:'translateX(0)'}], {duration:220, easing:'ease-out'}); });
+      dragImgs().forEach(im=>{ im.style.transition=''; im.style.transform=''; im.animate([{transform:`translate3d(${dx}px,0,0)`},{transform:'translate3d(0,0,0)'}], {duration:380, easing:'cubic-bezier(.22,1,.36,1)'}); });
     }
     dx=0; lock=null;
   };
@@ -2015,7 +2016,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-15b';
+const BUILD = '2026-10-15c';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
