@@ -1526,6 +1526,12 @@ function bindBody(pc){
       });
     }, {passive:true});
     ['touchstart','wheel','pointerdown'].forEach(t=>trk.addEventListener(t, ()=>armRewind(tile), {passive:true}));
+    // PC: 마우스가 카드 밖으로 나가면 바로 첫 장으로
+    if(matchMedia('(hover:hover) and (pointer:fine)').matches) pc.onmouseleave = () => {
+      if(vw.classList.contains('on')) return;
+      const t = pc.querySelector('.tile'); if(!t || !t.querySelector('.trk')) return;
+      const i = tileIdx(viewList[+t.dataset.k]); if(i>0) tileGo(t, -i);
+    };
     if(i0>0) armRewind(tile);
     trk.querySelectorAll('img.fg').forEach(im => im.onerror = () => { const sl = im.parentNode; sl.innerHTML = '<div class="noimg"><span style="font-size:26px">📷</span>사진을 불러오지 못했어요<br>눌러서 보기</div>'; });
   } else {
@@ -2163,7 +2169,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-16b';
+const BUILD = '2026-10-16c';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
