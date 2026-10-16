@@ -146,12 +146,59 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .pc .pcb{touch-action:pan-y}
 .pc .tabs{position:relative}
 .pc .tabs .rw{display:none}
+.pc .tabs .rw i{font-style:normal}
+.pc.rwt.away .tabs:not(.multi) .rw::after{content:"";position:absolute;left:9px;right:9px;bottom:2px;height:2px;border-radius:2px;background:rgba(255,255,255,.85);transform-origin:left center;animation:rwbar 5s linear forwards}
+@keyframes rwbar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 .pc.away .tabs:not(.multi){cursor:pointer}
 .pc.away .tabs:not(.multi) .rw{display:inline-flex;align-items:center;gap:4px;position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:900;color:#fff;background:linear-gradient(90deg,#6d5cff,#b04dff);padding:3px 10px;border-radius:999px;box-shadow:0 2px 10px rgba(120,90,255,.5);animation:rwp 1.6s ease-in-out infinite;pointer-events:none}
 @media (max-width:600px){.pc .tabs .rw i{display:none}.pc.away .tabs:not(.multi) .rw{font-size:11px;padding:2px 8px;right:6px}}
 .ft{container-type:inline-size}
 .ft .up{font-size:clamp(9px,3.9cqw,12px);max-width:100%}
 @keyframes rwp{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
+.tile .pic.car{touch-action:auto}
+.tile .pic.car .trk{position:absolute;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
+.tile .pic.car .trk::-webkit-scrollbar{display:none}
+.tile .pic.car .sl{position:relative;flex:0 0 100%;width:100%;height:100%;overflow:hidden;scroll-snap-align:center;scroll-snap-stop:always;contain:paint}
+.tile .pic.car .sl .noimg{position:absolute;inset:0}
+.vw .stage .imgwrap{position:relative;align-self:stretch}
+.vtrk{position:absolute;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior:contain;scrollbar-width:none;touch-action:pan-x}
+.vtrk::-webkit-scrollbar{display:none}
+.vsl{flex:0 0 100%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;scroll-snap-stop:always}
+/* 메모 띠 */
+.memo{position:relative;overflow:hidden;display:flex;align-items:center;gap:8px;padding:9px 12px 9px 16px;font-size:14px;font-weight:900;line-height:1.3;letter-spacing:-.2px;color:#fff;background:linear-gradient(90deg,var(--m1),var(--m2));border-bottom:1px solid rgba(0,0,0,.35);text-shadow:0 1px 2px rgba(0,0,0,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.28)}
+.memo::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:repeating-linear-gradient(-45deg,#15161c 0 5px,var(--m3) 5px 10px)}
+.memo .mi{font-size:16px;flex:none;animation:mwig 3.2s ease-in-out infinite;transform-origin:50% 90%}
+.memo span{flex:1;min-width:0;word-break:keep-all}
+.memo .vgl{position:absolute;top:-20%;bottom:-20%;left:0;width:38%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45) 50%,transparent);transform:translateX(-160%) skewX(-18deg);animation:gloss 2.6s ease-in-out infinite;pointer-events:none}
+@keyframes mwig{0%,82%,100%{transform:rotate(0)}86%{transform:rotate(-14deg)}90%{transform:rotate(12deg)}94%{transform:rotate(-6deg)}}
+.memo.m-red{--m1:#e11d48;--m2:#9f1239;--m3:#fde047}
+.memo.m-amber{--m1:#fbbf24;--m2:#f59e0b;--m3:#fde68a;color:#1c1200;text-shadow:none}
+.memo.m-violet{--m1:#8b5cf6;--m2:#a21caf;--m3:#f0abfc}
+.memo.m-blue{--m1:#2563eb;--m2:#0e7490;--m3:#7dd3fc}
+.memo.m-green{--m1:#16a34a;--m2:#047857;--m3:#bbf7d0}
+.memo.sm{border-radius:9px;padding:6px 10px 6px 14px;font-size:12.5px;border:0}
+.memo.sm .mi{font-size:13px}
+.memo.big{border-radius:12px;font-size:15px;padding:11px 14px 11px 18px;margin-bottom:10px}
+#vmemo{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:4;width:min(560px,calc(100% - 140px));pointer-events:none}
+#vmemo .memo{border-radius:12px;box-shadow:0 8px 26px rgba(0,0,0,.5)}
+@media (max-width:820px){#vmemo{top:8px;width:calc(100% - 20px)}}
+@media (max-width:600px){.memo{font-size:12.5px;padding:7px 9px 7px 13px;gap:6px}.memo .mi{font-size:13px}}
+.pc .ic .mbtn,.brow .ic .mbtn,.vw .act .mbtn{border-color:rgba(253,224,71,.55)!important;color:#fde68a!important}
+/* 메모 입력창 */
+.msub{font-size:12px;color:var(--faint);margin-top:-6px}
+.mpre{display:flex;flex-wrap:wrap;gap:6px}
+.mpre button{font:inherit;font-size:12px;font-weight:800;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:var(--ink);cursor:pointer;text-align:left}
+.mpre button:hover{background:rgba(255,255,255,.14)}
+.gbox textarea{border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);padding:9px 10px;font:inherit;font-size:14px;font-weight:700;resize:vertical;min-height:52px}
+.mcol{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px;font-weight:800;color:var(--sub)}
+.mcol span{margin-right:2px}
+.mcol button{font:inherit;font-size:12px;font-weight:900;padding:5px 11px;border-radius:999px;border:2px solid transparent;color:#fff;cursor:pointer}
+.mcol button[data-c=red]{background:#e11d48}.mcol button[data-c=amber]{background:#f59e0b;color:#1c1200}.mcol button[data-c=violet]{background:#8b5cf6}.mcol button[data-c=blue]{background:#2563eb}.mcol button[data-c=green]{background:#16a34a}
+.mcol button.on{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.25)}
+.mprev .memo{border-radius:10px}
+.mprev .mnone{font-size:12.5px;color:var(--faint);padding:10px;border:1px dashed var(--line);border-radius:10px;text-align:center}
+.gbt .mdel{margin-right:auto;color:#fda4af!important}
+.gbt .mdel[hidden]{display:none}
 .tile .pic .pgh{position:absolute;inset:0;pointer-events:none;will-change:transform}
 .tile .pic .pgh img.fg{transition:none!important;transform:none!important}
 .tile .pic img.bg{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;filter:blur(18px) brightness(.55) saturate(1.2)}
@@ -181,7 +228,7 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .ft .sn{font-size:12px;line-height:1.5;color:var(--sub)}
 .ft .sn div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ft .sn b{color:#ffcf6b;font-weight:800;margin-right:5px}
-.ft .ic{display:flex;gap:5px;margin-top:auto;padding-top:3px}
+.ft .ic{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto;padding-top:3px}
 .ft .ic a,.ft .ic button{font-size:11.5px;font-weight:700;border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:8px;padding:4px 9px;cursor:pointer;color:var(--sub);text-decoration:none;white-space:nowrap}
 .ft .ic a{color:#f7a3c8;border-color:rgba(221,42,123,.35)}
 .ft .ic a:hover,.ft .ic button:hover{border-color:var(--acc);color:var(--ink)}
@@ -589,6 +636,15 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
   <label>메모 <small>선택</small><input id="gxm" placeholder="예: 신곡 홍보, 방청 가능"></label>
   <label>인스타 링크 <small>선택</small><input id="gxl" type="url" placeholder="https://www.instagram.com/p/…"></label>
   <div class="gbt"><button type="button" id="gxc">취소</button><button type="submit" class="pri">저장</button></div>
+</form></div>
+<div class="gdlg" id="mdlg" role="dialog" aria-modal="true"><form class="gbox" id="mform" autocomplete="off">
+  <h3>📝 직원들에게 보일 메모</h3>
+  <div class="msub">카드 사진 바로 위에 띠로 크게 붙어요. 쓰기는 집 PC·내 폰에서만, 보기는 모두.</div>
+  <div class="mpre" id="mpre"></div>
+  <label>메모 내용 <small>짧고 굵게 · 80자까지</small><textarea id="mtx" rows="2" maxlength="80" placeholder="예: 홍대 롤링홀 공연 · SBS로 오지 않아요"></textarea></label>
+  <div class="mcol" id="mcol"><span>띠 색깔</span><button type="button" data-c="red">경고</button><button type="button" data-c="amber">주의</button><button type="button" data-c="violet">녹음</button><button type="button" data-c="blue">안내</button><button type="button" data-c="green">확정</button></div>
+  <div class="mprev" id="mprev"></div>
+  <div class="gbt"><button type="button" id="mdel" class="mdel">메모 지우기</button><button type="button" id="mc">취소</button><button type="submit" class="pri">저장</button></div>
 </form></div>
 <div class="vw" id="vw" role="dialog" aria-modal="true">
   <div class="stage" id="vstage">
@@ -1228,6 +1284,11 @@ function bodyHTML(e, k, isUnknown, opts){
     ? `<div class="pic gst"><span class="gi">🎤</span><div class="gn">${esc(e.guestName)}</div><div class="gp">${esc(e.prog.name)}</div>${e.post.caption?`<div class="gm">${esc(e.post.caption)}</div>`:''}</div>`
     : e.link
     ? `<div class="pic link"><span>📷</span>직접 추가한 게시물<small>눌러서 보기</small></div>`
+    : n>1
+    ? `<div class="pic car"><div class="trk">${e.slides.map((x,j)=>`<div class="sl"><img class="bg" src="${esc(x.url)}" ${Math.abs(j-si)>1?'loading="lazy"':''} alt="" aria-hidden="true"><img class="fg" src="${esc(x.url)}" ${Math.abs(j-si)>1?'loading="lazy"':''} alt="" draggable="false"></div>`).join('')}</div>
+        <span class="cnt"><b>${si+1}</b>/${n}</span><button class="tnav prev" data-d="-1" aria-label="이전 사진" ${si<=0?'disabled':''}>‹</button><button class="tnav next" data-d="1" aria-label="다음 사진" ${si>=n-1?'disabled':''}>›</button>
+        ${bdg?`<span class="bdg">${bdg}</span>`:''}
+        <span class="zoom">${ZOOM}<em>크게 보기</em></span></div>`
     : `<div class="pic">${s?`<img class="bg" src="${esc(s.url)}" alt="" aria-hidden="true"><img class="fg" loading="lazy" src="${esc(s.url)}" alt="" draggable="false">`:''}
         ${n>1?`<span class="cnt"><b>${si+1}</b>/${n}</span><button class="tnav prev" data-d="-1" aria-label="이전 사진" ${si<=0?'disabled':''}>‹</button><button class="tnav next" data-d="1" aria-label="다음 사진" ${si>=n-1?'disabled':''}>›</button>`:''}
         ${bdg?`<span class="bdg">${bdg}</span>`:''}
@@ -1236,7 +1297,7 @@ function bodyHTML(e, k, isUnknown, opts){
     ? `<div class="sn">${sn.lines.slice(0,3).map(l=>{const m=/^(\d{1,2}:\d{2})\s*(.*)$/.exec(l); return `<div>${m?`<b>${m[1]}</b>${esc(m[2])}`:esc(l)}</div>`;}).join('')}</div>`
     : e.guestName ? '' : `<div class="cp">${esc((e.post.caption||'').replace(/\s+/g,' ').trim())}</div>`;
   const bento = !!(opts && opts.bento);
-  const tileHTML = `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${bento?'':ribbon(e)}${pic}</div>`;
+  const tileHTML = `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${memoBar(e)}${bento?'':ribbon(e)}${pic}</div>`;
   if(bento) return tileHTML;
   return `${tileHTML}
     <div class="ft">
@@ -1248,6 +1309,7 @@ function bodyHTML(e, k, isUnknown, opts){
         ${e.guestName?'<button data-a="edit" class="adm" title="출연자 정보 고치기">✏ 수정</button>':`${g?'':`<button data-a="date" class="adm" title="날짜 수정">날짜</button>`}
         <button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button>`}
         ${doneBtn(e)}
+        <button data-a="memo" class="adm mbtn" title="직원들에게 보일 메모">📝 메모</button>
         ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm" title="숨기기">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset" class="adm" title="자동으로 되돌리기">↺</button>':''}
       </div>
@@ -1290,41 +1352,42 @@ function browHTML(e, k, isBig){
   const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
   const s = e.slides && e.slides[0];
   const th = s ? `<img class="bth" src="${esc(s.url)}" loading="lazy" alt="" draggable="false">` : `<span class="bth bgn">${esc((e.guestName||nm).slice(0,3))}</span>`;
-  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${d?'<em class="bdone">완료</em>':''}</div>${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${doneBtn(e)}${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="이 게시물 숨기기 (중복일 때)">숨기기</button>'}</div></div>`;
+  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${d?'<em class="bdone">완료</em>':''}</div>${memoBar(e,'sm')}${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${doneBtn(e)}<button data-a="memo" class="adm mbtn">📝 메모</button>${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="이 게시물 숨기기 (중복일 때)">숨기기</button>'}</div></div>`;
 }
-function tileGo(tile, d, from){
-  const e = viewList[+tile.dataset.k], n = e.slides.length, i = tileIdx(e) + d;
-  if(i<0 || i>=n) return;
-  from = from || 0;
-  const pic = tile.querySelector('.pic'), imgs = [...pic.querySelectorAll('img')];
-  const W = pic.offsetWidth || 300, dur = matchMedia('(prefers-reduced-motion:reduce)').matches ? 0 : 520;
+const reducedMo = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
+// 카드 사진 넘기기: 휴대폰 자체 스크롤(스냅)로 움직여서 화면 주사율(120Hz) 그대로 부드럽게
+function tileGo(tile, d){
+  const trk = tile.querySelector('.trk'); if(!trk) return;
+  const e = viewList[+tile.dataset.k], n = e.slides.length, W = trk.clientWidth || 1;
+  const cur = trk._tgt!=null && Date.now()-trk._tgtT < 1200 ? trk._tgt : Math.round(trk.scrollLeft / W);
+  const i = Math.max(0, Math.min(n-1, cur + d)); if(i===cur) return;
+  trk._tgt = i; trk._tgtT = Date.now();
+  trk.scrollTo({left: i*W, behavior: reducedMo() ? 'auto' : 'smooth'});
+  tileSet(tile, i);
+}
+function tileSet(tile, i){
+  const e = viewList[+tile.dataset.k], n = e.slides.length;
   pos[tileKey(e)] = i;
-  const url = e.slides[i].url;
-  tile.querySelector('.cnt b').textContent = i+1;
-  tile.querySelector('.tnav.prev').disabled = i<=0; tile.querySelector('.tnav.next').disabled = i>=n-1;
+  const c = tile.querySelector('.cnt b'); if(c) c.textContent = i+1;
+  const pv = tile.querySelector('.tnav.prev'), nx = tile.querySelector('.tnav.next');
+  if(pv) pv.disabled = i<=0; if(nx) nx.disabled = i>=n-1;
   const pcEl = tile.closest('.pc'); if(pcEl) pcEl.classList.toggle('away', i>0);
-  const myRun = tile._run = (tile._run||0) + 1;
-  const run = () => {
-    if(tile._run !== myRun) return;
-    pic.querySelectorAll('.pgh').forEach(g=>g.remove());
-    let ghost = null;
-    if(dur){   // 지금 보이던 장을 복사해 두었다가 살짝만 밀어내며 사라지게 하고, 새 장은 끝까지 부드럽게 감속하며 들어옴
-      ghost = document.createElement('div'); ghost.className = 'pgh';
-      imgs.forEach(im=>{ const c = im.cloneNode(true); c.style.transform=''; c.style.transition='none'; ghost.appendChild(c); });
-      pic.insertBefore(ghost, pic.firstChild);
-    }
-    imgs.forEach(im=>{ im.style.transition=''; im.style.transform=''; im.src = url; });
-    if(ghost){
-      const ease = 'cubic-bezier(.22,1,.36,1)';   // easeOutQuint: 빠르게 출발해서 아주 부드럽게 멈춤
-      ghost.animate([{transform:`translate3d(${from}px,0,0)`,opacity:1},{transform:`translate3d(${-d*W*0.28}px,0,0)`,opacity:.15}], {duration:dur, easing:ease, fill:'forwards'}).onfinish = () => ghost.remove();
-      imgs.forEach(im=>im.animate([{transform:`translate3d(${d*W + from}px,0,0)`},{transform:'translate3d(0,0,0)'}], {duration:dur, easing:ease}));
-    }
-  };
-  // 새 사진을 미리 받아 디코딩까지 끝낸 뒤에 움직여야 끊김이 없다
-  const pre = new Image(); pre.src = url;
-  const ready = pre.decode ? pre.decode().catch(()=>{}) : new Promise(r=>{ pre.onload = pre.onerror = r; });
-  Promise.race([ready, new Promise(r=>setTimeout(r, 400))]).then(()=>requestAnimationFrame(run));
-  if(e.slides[i+1]) new Image().src = e.slides[i+1].url;   // 다음 장 미리 받아두기
+  armRewind(tile);
+}
+// 카드에서 넘겨본 뒤 5초 동안 가만히 두면 첫 장으로 스르륵 돌아감 (마우스를 올려두고 보는 중이면 기다림)
+function armRewind(tile){
+  clearTimeout(tile._rwT);
+  const pcEl = tile.closest('.pc'), e = viewList[+tile.dataset.k];
+  if(pcEl){ pcEl.classList.remove('rwt'); void pcEl.offsetWidth; }
+  if(!e || tileIdx(e)<=0) return;
+  if(pcEl) pcEl.classList.add('rwt');
+  tile._rwT = setTimeout(() => {
+    if(!document.body.contains(tile)) return;
+    if(tile.matches(':hover') || vw.classList.contains('on')) return armRewind(tile);
+    const i = tileIdx(viewList[+tile.dataset.k]);
+    if(pcEl) pcEl.classList.remove('rwt');
+    if(i>0) tileGo(tile, -i);
+  }, 5000);
 }
 
 function renderMain(){
@@ -1443,43 +1506,32 @@ function bindBody(pc){
   tile.onclick = ev => {
     const nv = ev.target.closest('.tnav');
     if(nv){ ev.stopPropagation(); tileGo(tile, +nv.dataset.d); return; }
-    if(tile._swiped && Date.now()-tile._swiped<400) return;
     openView(k, tileIdx(viewList[k]));
   };
   tile.onkeydown = ev => {
     if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); openView(k, tileIdx(viewList[k])); }
     else if(ev.key==='ArrowLeft' || ev.key==='ArrowRight'){ ev.preventDefault(); tileGo(tile, ev.key==='ArrowLeft'?-1:1); }
   };
-  // 손가락을 따라 사진이 같이 움직이고, 떼면 부드럽게 다음 장으로 미끄러짐
-  let sx=null, sy=null, dx=0, lock=null, raf=0;
-  const dragImgs = () => [...tile.querySelectorAll('.pic img')];
-  tile.addEventListener('touchstart', ev=>{ if(ev.target.closest('.tnav')) return; sx=ev.touches[0].clientX; sy=ev.touches[0].clientY; dx=0; lock=null; }, {passive:true});
-  tile.addEventListener('touchmove', ev=>{
-    if(sx==null) return;
-    const mx = ev.touches[0].clientX-sx, my = ev.touches[0].clientY-sy;
-    if(!lock && (Math.abs(mx)>8 || Math.abs(my)>8)) lock = Math.abs(mx) > Math.abs(my)*1.2 ? 'x' : 'y';
-    if(lock!=='x') return;
-    const e = viewList[k], i = tileIdx(e);
-    dx = ((mx<0 && i>=e.slides.length-1) || (mx>0 && i<=0)) ? mx*0.3 : mx;   // 처음/끝에서는 저항감
-    tile._swiped = Date.now();
-    if(!raf) raf = requestAnimationFrame(()=>{ raf = 0; dragImgs().forEach(im=>{ im.style.transition='none'; im.style.transform=`translate3d(${dx}px,0,0)`; }); });
-  }, {passive:true});
-  const endDrag = () => {
-    if(sx==null) return; sx=null;
-    if(lock!=='x'){ return; }
-    if(raf){ cancelAnimationFrame(raf); raf = 0; }
-    tile._swiped = Date.now();
-    const e = viewList[k], i = tileIdx(e), dir = dx<0 ? 1 : -1;
-    if(Math.abs(dx)>45 && i+dir>=0 && i+dir<e.slides.length){ tileGo(tile, dir, dx); }
-    else{   // 제자리로 부드럽게 복귀
-      dragImgs().forEach(im=>{ im.style.transition=''; im.style.transform=''; im.animate([{transform:`translate3d(${dx}px,0,0)`},{transform:'translate3d(0,0,0)'}], {duration:380, easing:'cubic-bezier(.22,1,.36,1)'}); });
-    }
-    dx=0; lock=null;
-  };
-  tile.addEventListener('touchend', endDrag);
-  tile.addEventListener('touchcancel', endDrag);
-  const fg = tile.querySelector('.pic img.fg');
-  if(fg) fg.onerror = () => { tile.querySelectorAll('.pic img').forEach(i=>i.remove()); tile.querySelector('.pic').insertAdjacentHTML('afterbegin', '<div class="noimg"><span style="font-size:26px">📷</span>사진을 불러오지 못했어요<br>눌러서 보기</div>'); };
+  const trk = tile.querySelector('.trk');
+  if(trk){
+    const i0 = tileIdx(viewList[k]);
+    trk.scrollLeft = i0 * trk.clientWidth;   // 보고 있던 장에서 시작 (애니메이션 없이)
+    let raf = 0;
+    trk.addEventListener('scroll', () => {
+      if(raf) return;
+      raf = requestAnimationFrame(() => { raf = 0;
+        const i = Math.round(trk.scrollLeft / (trk.clientWidth||1));
+        if(trk._tgt!=null && Date.now()-trk._tgtT < 1200 && i!==trk._tgt) return;   // 버튼으로 이동 중에는 목표 번호 유지
+        if(i !== tileIdx(viewList[k])) tileSet(tile, i);
+      });
+    }, {passive:true});
+    ['touchstart','wheel','pointerdown'].forEach(t=>trk.addEventListener(t, ()=>armRewind(tile), {passive:true}));
+    if(i0>0) armRewind(tile);
+    trk.querySelectorAll('img.fg').forEach(im => im.onerror = () => { const sl = im.parentNode; sl.innerHTML = '<div class="noimg"><span style="font-size:26px">📷</span>사진을 불러오지 못했어요<br>눌러서 보기</div>'; });
+  } else {
+    const fg = tile.querySelector('.pic img.fg');
+    if(fg) fg.onerror = () => { tile.querySelectorAll('.pic img').forEach(i=>i.remove()); tile.querySelector('.pic').insertAdjacentHTML('afterbegin', '<div class="noimg"><span style="font-size:26px">📷</span>사진을 불러오지 못했어요<br>눌러서 보기</div>'); };
+  }
   pc.querySelectorAll('.ic button[data-a]').forEach(b=>b.onclick=()=>doAct(b.parentNode.dataset.id, b.dataset.a, b.dataset.g));
 }
 
@@ -1524,10 +1576,48 @@ function parseVisit(v){
     if(H<24 && M<60) tm = `${String(H).padStart(2,'0')}:${String(M).padStart(2,'0')}`; }
   return {d:ds[0], tm};
 }
+/* 직원에게 보여줄 메모 띠 (집 PC·내 폰에서만 쓰기, 모두가 봄) */
+const MEMO_PRE = [
+  {t:'🏟 외부 공연장에서 진행 · SBS로 오지 않아요', c:'red'},
+  {t:'🎙 미리 녹음 · 방송 날엔 오지 않아요', c:'violet'},
+  {t:'❓ 날짜·시간 아직 미정 · 확인 중', c:'amber'},
+  {t:'🚫 출연 취소', c:'red'},
+  {t:'✅ 작가 확인 완료 · SBS로 와요', c:'green'}
+];
+const memoOf = e => { const o = e && e.post && (overrides[e.post.id] || (e.post._oid && overrides[e.post._oid])); return o && o.memo && o.memo.t ? o.memo : null; };
+function memoBar(e, cls){
+  const m = memoOf(e); if(!m) return '';
+  return `<div class="memo m-${m.c||'red'} ${cls||''}"><b class="mi">📌</b><span>${esc(m.t)}</span><i class="vgl"></i></div>`;
+}
+let memoId = null, memoCol = 'red';
+function openMemo(id){
+  memoId = id; const m = (overrides[id] && overrides[id].memo) || null;
+  $('mtx').value = m ? m.t : ''; memoCol = m ? (m.c||'red') : 'red';
+  $('mdel').hidden = !m; memoPaint(); $('mdlg').classList.add('on'); setTimeout(()=>$('mtx').focus(), 50);
+}
+function closeMemo(){ $('mdlg').classList.remove('on'); memoId = null; }
+function memoPaint(){
+  $('mcol').querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.c===memoCol));
+  const t = $('mtx').value.trim();
+  $('mprev').innerHTML = t ? `<div class="memo m-${memoCol}"><b class="mi">📌</b><span>${esc(t)}</span><i class="vgl"></i></div>` : '<div class="mnone">메모를 쓰면 여기에 미리 보여요</div>';
+}
+function saveMemo(t){
+  const id = memoId; if(!id) return;
+  const o = {...(overrides[id]||{})};
+  if(t) o.memo = {t, c:memoCol}; else delete o.memo;
+  o.t = Date.now();
+  if(Object.keys(o).every(k=>k==='t')){ delete overrides[id]; pushSync({del:[id]}); }
+  else { overrides[id] = o; pushSync({set:{[id]:o}}); }
+  store.set('overrides', overrides); closeMemo();
+  if(vw.classList.contains('on')) closeView();
+  rebuild(false, true);
+}
 // 숨기기·날짜 수정 등 (어느 기기에서 해도 연동)
 function doAct(id, a, g){
   const now = Date.now();
   if(a==='edit'){ openGuest(id); return false; }
+  if(a==='memo'){ openMemo(id); return false; }
+  const keepMemo = overrides[id] && overrides[id].memo ? {memo:overrides[id].memo} : {};
   if(a==='done' || a==='undone'){
     const o = {...(overrides[id]||{})}, dn = {...(o.dn||{})};
     if(a==='done') dn[g] = 1; else delete dn[g];
@@ -1536,7 +1626,7 @@ function doAct(id, a, g){
     if(Object.keys(o).every(k=>k==='t')) delete overrides[id];
   }
   if(a==='hide') overrides[id]={hide:true, t:now};
-  if(a==='ok'){ const o = overrides[id]; overrides[id]={dates:g.split(','), t:now, ...(o&&o.visit?{visit:o.visit, vdKeep:true}:{}), ...(o&&o.dn?{dn:o.dn}:{})}; }
+  if(a==='ok'){ const o = overrides[id]; overrides[id]={dates:g.split(','), t:now, ...(o&&o.visit?{visit:o.visit, vdKeep:true}:{}), ...(o&&o.dn?{dn:o.dn}:{}), ...keepMemo}; }
   if(a==='reset' || a==='del') delete overrides[id];
   if(a==='visit'){
     const old = overrides[id] || {};
@@ -1559,7 +1649,7 @@ function doAct(id, a, g){
     const ds = findDates(v.replace(/[,，、]/g,' , '), today());
     if(!ds.length){ alert('날짜 형식을 확인해 주세요 (예: 10/14 또는 11/9~11/14)'); return false; }
     const old = overrides[id];
-    overrides[id] = old && (old.link||old.guest) ? {...old, date:undefined, dates:ds, t:now} : {dates:ds, t:now, ...(old&&old.visit?{visit:old.visit, vdKeep:true}:{})};
+    overrides[id] = old && (old.link||old.guest) ? {...old, date:undefined, dates:ds, t:now} : {dates:ds, t:now, ...(old&&old.visit?{visit:old.visit, vdKeep:true}:{}), ...keepMemo};
   }
   pushSync(overrides[id] ? {set:{[id]:overrides[id]}, ...(a==='hide'?{unkeep:[id]}:{})} : {del:[id]});
   store.set('overrides', overrides); rebuild(false, true);
@@ -1580,6 +1670,7 @@ function spy(){
 }
 addEventListener('scroll', ()=>requestAnimationFrame(spy), {passive:true});
 addEventListener('resize', setHH);
+addEventListener('resize', () => { document.querySelectorAll('.tile').forEach(t=>{ const tr = t.querySelector('.trk'); if(tr) tr.scrollLeft = tileIdx(viewList[+t.dataset.k]) * tr.clientWidth; }); const vt = document.querySelector('.vtrk'); if(vt) vt.scrollLeft = vI * vt.clientWidth; });
 
 /* 카드 바깥 빈 곳을 누르면 모든 카드가 처음 모습(첫 장·첫 게시물)으로 */
 document.addEventListener('click', ev=>{
@@ -1627,7 +1718,7 @@ function openView(k, at){
   vw.classList.add('on'); document.body.style.overflow='hidden';
   drawSide(); drawStage();
 }
-function hideView(){ vw.classList.remove('on'); document.body.style.overflow=''; $('vstage').querySelector('.imgwrap').innerHTML=''; }
+function hideView(){ vw.classList.remove('on'); document.body.style.overflow=''; $('vstage').querySelector('.imgwrap').innerHTML=''; $('vthumbs')._sig = null; }
 function closeView(){ if(!vw.classList.contains('on')) return; hideView(); if(history.state && history.state.vw){ try{ history.back(); }catch(_){} } }
 function drawStage(){
   const e = viewList[vK], n = vSl.length, wrap = $('vstage').querySelector('.imgwrap'), cur = vSl[vI] || {};
@@ -1637,19 +1728,49 @@ function drawStage(){
   } else if(e.link || !n){
     wrap.innerHTML = `<a class="linkbig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener"><span>📷</span>직접 추가한 게시물<br>눌러서 인스타에서 보기</a>`;
   } else {
-    wrap.innerHTML = `${cur.ex?`<span class="exbadge">➕ 추가 게시물 · ${esc(postLabel(cur.ex))}</span>`:''}<img class="big" src="${esc(cur.url)}" alt="" draggable="false">`;
-    wrap.querySelector('img').onclick = ev => { ev.stopPropagation(); closeView(); };   // 한 번 더 누르면 원래 화면으로
-    wrap.querySelector('img').onerror = () => {
-      const link = (e.post.permalink||'').replace(/\/?$/,'/');
-      wrap.innerHTML = /instagram\.com/.test(link) ? `<iframe src="${link}embed/" loading="lazy"></iframe>` : `<a class="linkbig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener"><span>🖼</span>사진을 불러오지 못했어요<br>눌러서 원본 보기</a>`;
-    };
+    const sig = vK + '|' + n + '|' + vSl.map(s=>s.url).join(',').length;
+    let trk = wrap.querySelector('.vtrk');
+    if(!trk || trk._sig !== sig){
+      wrap.innerHTML = `<div class="vtrk">${vSl.map((s,i)=>`<div class="vsl"><img class="big" src="${esc(s.url)}" ${Math.abs(i-vI)>1?'loading="lazy"':''} alt="" draggable="false"></div>`).join('')}</div>`;
+      trk = wrap.querySelector('.vtrk'); trk._sig = sig;
+      trk.querySelectorAll('img.big').forEach(im=>{
+        im.onclick = ev => { ev.stopPropagation(); closeView(); };   // 한 번 더 누르면 원래 화면으로
+        im.onerror = () => { im.parentNode.innerHTML = `<a class="linkbig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener"><span>🖼</span>사진을 불러오지 못했어요<br>눌러서 원본 보기</a>`; };
+      });
+      trk.scrollLeft = vI * trk.clientWidth;
+      let raf = 0;
+      trk.addEventListener('scroll', () => {
+        if(raf) return;
+        raf = requestAnimationFrame(() => { raf = 0;
+          const i = Math.round(trk.scrollLeft / (trk.clientWidth||1));
+          if(trk._tgt!=null && Date.now()-trk._tgtT < 1200 && i!==trk._tgt) return;
+          if(i !== vI){ vI = i; stageUI(); }
+        });
+      }, {passive:true});
+    } else if(Math.round(trk.scrollLeft/(trk.clientWidth||1)) !== vI){
+      trk._tgt = vI; trk._tgtT = Date.now();
+      trk.scrollTo({left: vI*trk.clientWidth, behavior: reducedMo() ? 'auto' : 'smooth'});
+    }
   }
+  stageUI();
+}
+function stageUI(){
+  const n = vSl.length, cur = vSl[vI] || {};
+  let xb = $('vexb'); if(!xb){ xb = document.createElement('span'); xb.id = 'vexb'; xb.className = 'exbadge'; $('vstage').appendChild(xb); }
+  xb.style.display = cur.ex ? '' : 'none'; if(cur.ex) xb.textContent = `➕ 추가 게시물 · ${postLabel(cur.ex)}`;
+  let vm = $('vmemo'); if(!vm){ vm = document.createElement('div'); vm.id = 'vmemo'; $('vstage').appendChild(vm); }
+  vm.innerHTML = viewList[vK] ? memoBar(cur.ex || viewList[vK], 'ov') : '';
   $('vcount').style.display = n>1 ? '' : 'none';
   $('vcount').textContent = `${vI+1} / ${n}`;
   $('vprev').disabled = vI<=0; $('vnext').disabled = vI>=n-1;
-  $('vthumbs').innerHTML = n>1 ? vSl.map((s,i)=>`<img src="${esc(s.url)}" data-i="${i}" class="${i===vI?'on':''} ${s.ex?'ex':''}" alt="" title="${s.ex?'추가 게시물':''}">`).join('') : '';
-  $('vthumbs').querySelectorAll('img').forEach(im=>im.onclick=()=>{ vI=+im.dataset.i; drawStage(); });
-  const on = $('vthumbs').querySelector('.on'); if(on) on.scrollIntoView({block:'nearest', inline:'center'});
+  const th = $('vthumbs'), tsig = vK+'|'+n;
+  if(th._sig !== tsig){
+    th._sig = tsig;
+    th.innerHTML = n>1 ? vSl.map((s,i)=>`<img src="${esc(s.url)}" data-i="${i}" class="${s.ex?'ex':''}" alt="" title="${s.ex?'추가 게시물':''}">`).join('') : '';
+    th.querySelectorAll('img').forEach(im=>im.onclick=()=>{ vI=+im.dataset.i; drawStage(); });
+  }
+  th.querySelectorAll('img').forEach(im=>im.classList.toggle('on', +im.dataset.i===vI));
+  const on = th.querySelector('.on'); if(on) on.scrollIntoView({block:'nearest', inline:'center'});
 }
 function drawSide(){
   const e = viewList[vK], p = e.prog, isU = selDay==='unknown';
@@ -1660,6 +1781,7 @@ function drawSide(){
       <div class="m"><span class="tmv">${fmtTime(p.start)}</span>${p.ch?`<span class="pill ch" style="color:#fff;border-color:rgba(255,255,255,.35)">${p.ch}</span>`:''}${isBanchung(e)?'<span class="pill hot">방청</span>':''}${e.weekly?'<span class="pill week">주간표</span>':''}${e.post._yt?'<span class="pill yt">생.녹</span>':''}${e.post._kept?'<span class="pill kp">보관본</span>':''}</div></div>
       <button class="x" id="vx" aria-label="닫기">×</button></div>
     <div class="vb">
+      ${memoBar(e,'big')}
       ${dateLine(e)}
       ${vExtra.length?`<div class="exbox"><b>➕ 이날 추가 게시물 ${vExtra.length}개</b> <small>— 사진 목록에 그날 사진 바로 뒤로 넣었어요</small>${vExtra.map((x,j)=>`<div class="exi"><button class="exgo" data-x="${j}">${esc(postLabel(x))} 보기</button><span>${esc((x.post.caption||'').replace(/\s+/g,' ').slice(0,90))}</span>${x.post.permalink?`<a href="${esc(x.post.permalink)}" target="_blank" rel="noopener">↗</a>`:''}</div>`).join('')}</div>`:''}
       ${e.replaced?'<div class="kept">같은 날짜에 새 게시물이 올라와서 이 보관본은 확인 필요로 옮겼어요</div>':''}
@@ -1669,6 +1791,7 @@ function drawSide(){
         ${e.post.permalink?`<a class="ig ${e.post._yt?'ytb':''}" href="${esc(e.post.permalink)}" target="_blank" rel="noopener">${e.post._yt?'유튜브에서 보기':'인스타에서 보기'}</a>`:''}
         ${g?`<button class="pri" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${fmd(g[0])}~${fmd(g[g.length-1])}`:fmd(g[0])} 출연 맞음</button>`:''}
         ${doneBtn(e)}
+        <button data-a="memo" class="adm mbtn">📝 메모</button>
         ${e.guestName?'':'<button data-a="visit" class="adm">🚪 방문일</button>'}
         ${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="date" class="adm">${isU?'날짜 지정':'날짜 수정'}</button>`}
         ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm">숨기기</button>'}
@@ -1717,24 +1840,11 @@ function capLinks(e){
     return i>=0 ? `<a class="go" data-i="${i}" title="${i+1}번째 사진으로">${esc(line)}<span class="gi">${i+1}/${e.slides.length} ›</span></a>` : esc(line);
   }).join('\n');
 }
-function slideGo(d, from){
-  const n = vSl.length; if(vI+d<0 || vI+d>=n) return;
-  const stage = $('vstage'), wrap = stage.querySelector('.imgwrap'), old = wrap.querySelector('img.big');
-  const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
-  if(!old || reduced){ vI += d; drawStage(); return; }
-  from = from || 0;
-  const r = old.getBoundingClientRect(), W = wrap.offsetWidth || innerWidth, run0 = vRun = (vRun||0) + 1;
-  const pre = new Image(); pre.src = vSl[vI+d].url;
-  const ready = pre.decode ? pre.decode().catch(()=>{}) : new Promise(res=>{ pre.onload = pre.onerror = res; });
-  Promise.race([ready, new Promise(res=>setTimeout(res, 400))]).then(()=>requestAnimationFrame(()=>{
-    if(run0 !== vRun || vI+d<0 || vI+d>=vSl.length) { old.style.transform=''; return; }
-    const ghost = old.cloneNode(); ghost.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;max-width:none;max-height:none;pointer-events:none;z-index:5;transform:translate3d(${from}px,0,0)`;
-    document.body.appendChild(ghost);
-    vI += d; drawStage();
-    const nw = wrap.querySelector('img.big'), ease = 'cubic-bezier(.22,1,.36,1)', dur = 520;
-    ghost.animate([{transform:`translate3d(${from}px,0,0)`,opacity:1},{transform:`translate3d(${-d*W*0.28}px,0,0)`,opacity:.15}], {duration:dur, easing:ease, fill:'forwards'}).onfinish = () => ghost.remove();
-    if(nw) nw.animate([{transform:`translate3d(${d*W + from}px,0,0)`},{transform:'translate3d(0,0,0)'}], {duration:dur, easing:ease});
-  }));
+function slideGo(d){
+  const n = vSl.length, trk = $('vstage').querySelector('.vtrk');
+  const cur = trk && trk._tgt!=null && Date.now()-trk._tgtT < 1200 ? trk._tgt : vI;
+  const k = Math.max(0, Math.min(n-1, cur + d)); if(k===cur) return;
+  vI = k; drawStage();
 }
 let vRun = 0;
 function postGo(d){ const k = vK+d; if(k<0||k>=viewList.length) return; openView(k); }
@@ -1743,33 +1853,18 @@ $('vnext').onclick = ev=>{ ev.stopPropagation(); slideGo(1); };
 $('vstage').onclick = ev=>{ if(ev.target.id==='vstage' || ev.target.classList.contains('imgwrap')) closeView(); };
 document.addEventListener('keydown', ev=>{
   if($('gdlg').classList.contains('on')){ if(ev.key==='Escape') closeGuest(); return; }
+  if($('mdlg').classList.contains('on')){ if(ev.key==='Escape') closeMemo(); return; }
   if(!vw.classList.contains('on')) return;
   if(ev.key==='ArrowLeft') slideGo(-1); else if(ev.key==='ArrowRight') slideGo(1);
   else if(ev.key==='ArrowUp'){ ev.preventDefault(); postGo(-1); } else if(ev.key==='ArrowDown'){ ev.preventDefault(); postGo(1); }
   else if(ev.key==='Escape') closeView();
 });
-let tx=null, ty=null, vdx=0, vlock=null, vraf=0;
-$('vstage').addEventListener('touchstart', ev=>{ tx=ev.touches[0].clientX; ty=ev.touches[0].clientY; vdx=0; vlock=null; }, {passive:true});
-$('vstage').addEventListener('touchmove', ev=>{
-  if(tx==null) return;
-  const mx = ev.touches[0].clientX-tx, my = ev.touches[0].clientY-ty;
-  if(!vlock && (Math.abs(mx)>8 || Math.abs(my)>8)) vlock = Math.abs(mx) > Math.abs(my)*1.2 ? 'x' : 'y';
-  if(vlock!=='x') return;
-  vdx = ((mx<0 && vI>=vSl.length-1) || (mx>0 && vI<=0)) ? mx*0.3 : mx;
-  if(!vraf) vraf = requestAnimationFrame(()=>{ vraf = 0; const im = $('vstage').querySelector('img.big'); if(im) im.style.transform = `translate3d(${vdx}px,0,0)`; });
-}, {passive:true});
-const vEnd = ev=>{
-  if(tx==null) return; const dy = (ev.changedTouches?ev.changedTouches[0].clientY:ty)-ty, lock = vlock, dx = vdx; tx=null; vlock=null; vdx=0;
-  if(vraf){ cancelAnimationFrame(vraf); vraf = 0; }
-  const im = $('vstage').querySelector('img.big');
-  if(lock==='x'){
-    const d = dx<0 ? 1 : -1;
-    if(Math.abs(dx)>50 && vI+d>=0 && vI+d<vSl.length){ if(im) im.style.transform=''; slideGo(d, dx); }
-    else if(im){ im.style.transform=''; im.animate([{transform:`translate3d(${dx}px,0,0)`},{transform:'translate3d(0,0,0)'}], {duration:380, easing:'cubic-bezier(.22,1,.36,1)'}); }
-  } else if(dy>90 && lock!=='x') closeView();   // 아래로 쓸면 닫기
-};
-$('vstage').addEventListener('touchend', vEnd);
-$('vstage').addEventListener('touchcancel', vEnd);
+let tx=null, ty=null;
+$('vstage').addEventListener('touchstart', ev=>{ tx=ev.touches[0].clientX; ty=ev.touches[0].clientY; }, {passive:true});
+$('vstage').addEventListener('touchend', ev=>{
+  if(tx==null) return; const dx = ev.changedTouches[0].clientX-tx, dy = ev.changedTouches[0].clientY-ty; tx=null;
+  if(dy>90 && Math.abs(dy)>Math.abs(dx)*1.5) closeView();   // 아래로 쓸면 닫기 (옆으로 넘기기는 스크롤이 처리)
+});
 // 폰 '뒤로' 버튼으로 닫기
 addEventListener('popstate', ()=>{ if(vw.classList.contains('on')) hideView(); });
 
@@ -2068,7 +2163,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-15e';
+const BUILD = '2026-10-16b';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
@@ -2227,6 +2322,14 @@ function openGuest(id){
   gSet(); $('gdlg').classList.add('on'); setTimeout(()=>{ try{ ($('gxp').value ? $('gxn') : $('gxp')).focus(); }catch(_){} }, 50);
 }
 function closeGuest(){ $('gdlg').classList.remove('on'); gEdit = null; }
+$('mpre').innerHTML = MEMO_PRE.map((p,i)=>`<button type="button" data-i="${i}">${esc(p.t)}</button>`).join('');
+$('mpre').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const p = MEMO_PRE[+b.dataset.i]; $('mtx').value = p.t; memoCol = p.c; memoPaint(); });
+$('mcol').querySelectorAll('button').forEach(b=>b.onclick=()=>{ memoCol = b.dataset.c; memoPaint(); });
+$('mtx').addEventListener('input', memoPaint);
+$('mc').onclick = closeMemo;
+$('mdel').onclick = () => saveMemo('');
+$('mdlg').addEventListener('click', ev=>{ if(ev.target.id==='mdlg') closeMemo(); });
+$('mform').addEventListener('submit', ev=>{ ev.preventDefault(); saveMemo($('mtx').value.trim().replace(/\s+/g,' ')); });
 $('addg').onclick = () => openGuest(null);
 $('gxc').onclick = closeGuest;
 $('gdlg').addEventListener('mousedown', ev=>{ if(ev.target===$('gdlg')) closeGuest(); });
