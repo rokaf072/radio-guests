@@ -183,6 +183,8 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 #vmemo .memo{border-radius:12px;box-shadow:0 8px 26px rgba(0,0,0,.5)}
 @media (max-width:820px){#vmemo{top:8px;width:calc(100% - 20px)}}
 @media (max-width:600px){.memo{font-size:12.5px;padding:7px 9px 7px 13px;gap:6px}.memo .mi{font-size:13px}}
+.pill.sent{background:rgba(56,189,248,.18);color:#bae6fd;border-color:rgba(56,189,248,.5)}
+.pc .ic .ubtn,.brow .ic .ubtn,.vw .act .ubtn{border-color:rgba(56,189,248,.55)!important;color:#bae6fd!important}
 .pc .ic .mbtn,.brow .ic .mbtn,.vw .act .mbtn{border-color:rgba(253,224,71,.55)!important;color:#fde68a!important}
 /* 메모 입력창 */
 .msub{font-size:12px;color:var(--faint);margin-top:-6px}
@@ -930,6 +932,7 @@ function classify(p, post, t, queue){
   const posted = tsYmd(post.timestamp);
   if(post._kept){
     const ov0 = overrides[post.id]; if(ov0 && ov0.hide) return;
+    if(ov0 && ov0.unk){ const g = (ov0.unkD||[]).slice().sort(); unknown.push({prog:p, post, posted, slides:slidesOf(post), guess:g[0]||'', guessAll:g, sent:true}); return; }
     const sl = slidesOf(post), x = d => diffDays(d,t);
     for(const [d,st] of Object.entries(post._keepDates)){
       if(d>=weekStart(t) && x(d)<=DAYS_AHEAD) { const ks=Object.keys(post._keepDates).sort(); entries.push({prog:p, post, posted, slides:sl, date:d, start:st.s||0, weekly:!!st.w, manual:!!st.m, range: ks.length>1?[ks[0],ks[ks.length-1]]:null}); }
@@ -944,6 +947,8 @@ function classify(p, post, t, queue){
   const inWin = d => d >= weekStart(t) && diffDays(d,t) <= DAYS_AHEAD;   // 이번 주 월요일부터 2주 뒤까지
   const inFar = d => { const x=diffDays(d,t); return x>DAYS_AHEAD && x<=FAR_DAYS; };
   const base = {prog:p, post, posted, slides};
+  // 직접 '확인 필요로 보내기' 한 게시물: 달력에서 빼고 확인 필요에만 (원래 날짜는 '찾은 날짜'로 남겨서 ✓ 맞음으로 되돌릴 수 있게)
+  if(ov && ov.unk){ const g = (ov.unkD||[]).slice().sort(); unknown.push({...base, guess:g[0]||'', guessAll:g, sent:true}); return; }
   if(ov && bcDates(ov, post.id).length){
     for(const d of bcDates(ov, post.id)){
       if(inWin(d)) entries.push({...base, date:d, start:0, manual:true});
@@ -1011,7 +1016,7 @@ function bcDates(ov, id){
 /* 🚪 실제 방문일(녹음 등): 방송 날짜 칸은 그대로 두고, 방문 날짜 칸에도 같은 게시물을 '방문'으로 추가 */
 function addVisits(t){
   for(const k in overrides){
-    const v = overrides[k]; if(!v || !v.visit || v.hide) continue;
+    const v = overrides[k]; if(!v || !v.visit || v.hide || v.unk) continue;
     const vd = v.visit.d, x = diffDays(vd, t);
     const mine = e => e.post && (e.post.id===k || e.post._oid===k);
     const all = [...entries.filter(mine), ...unknown.filter(mine)];
@@ -1207,7 +1212,7 @@ function cardHTML(p, es, isUnknown, nth){
   const ks = es.map(e=>viewList.push(e)-1);
   const key = (isUnknown ? 'u:'+es[0].post.id : p.slug) + '|' + selDay;
   const a = Math.min(postPos[key]||0, es.length-1);
-  const pills = isUnknown ? (es[0].replaced?'<span class="pill">대체됨</span>':'') : progPills(p, es);
+  const pills = isUnknown ? (es[0].replaced?'<span class="pill">대체됨</span>':'') + (es[0].sent?'<span class="pill sent" title="달력에서 직접 옮긴 게시물">📤 옮김</span>':'') : progPills(p, es);
   const dn = doneDate(es[0]);
   const stamp = dn ? `<div class="dnx" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="-10" y1="88" x2="88" y2="-10"/><line x1="12" y1="110" x2="110" y2="12"/></svg><div class="stamp"><b>완료</b><small>${fmd(dn)} 방송</small></div></div>` : '';
   return `<section class="pc grp ${dn?'done':''}" id="${isUnknown?'u-'+esc(es[0].post.id):'p-'+p.slug+(nth?'-'+(nth+1):'')}" data-slug="${isUnknown?'':p.slug}" style="--pc:${p.color}" data-ks="${ks.join(',')}" data-key="${esc(key)}" data-u="${isUnknown?1:''}">
@@ -1310,6 +1315,7 @@ function bodyHTML(e, k, isUnknown, opts){
         <button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button>`}
         ${doneBtn(e)}
         <button data-a="memo" class="adm mbtn" title="직원들에게 보일 메모">📝 메모</button>
+        ${!isUnknown && !e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn" title="달력에서 빼서 확인 필요로 옮기기">📤 확인 필요로</button>' : ''}
         ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm" title="숨기기">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset" class="adm" title="자동으로 되돌리기">↺</button>':''}
       </div>
@@ -1352,7 +1358,7 @@ function browHTML(e, k, isBig){
   const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
   const s = e.slides && e.slides[0];
   const th = s ? `<img class="bth" src="${esc(s.url)}" loading="lazy" alt="" draggable="false">` : `<span class="bth bgn">${esc((e.guestName||nm).slice(0,3))}</span>`;
-  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${d?'<em class="bdone">완료</em>':''}</div>${memoBar(e,'sm')}${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${doneBtn(e)}<button data-a="memo" class="adm mbtn">📝 메모</button>${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="이 게시물 숨기기 (중복일 때)">숨기기</button>'}</div></div>`;
+  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${d?'<em class="bdone">완료</em>':''}</div>${memoBar(e,'sm')}${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${doneBtn(e)}<button data-a="memo" class="adm mbtn">📝 메모</button>${!e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn">📤 확인 필요로</button>' : ''}${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="이 게시물 숨기기 (중복일 때)">숨기기</button>'}</div></div>`;
 }
 const reducedMo = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
 // 카드 사진 넘기기: 휴대폰 자체 스크롤(스냅)로 움직여서 화면 주사율(120Hz) 그대로 부드럽게
@@ -1632,6 +1638,12 @@ function doAct(id, a, g){
     if(Object.keys(o).every(k=>k==='t')) delete overrides[id];
   }
   if(a==='hide') overrides[id]={hide:true, t:now};
+  if(a==='unk'){
+    if(!confirm('이 게시물을 달력에서 빼서 "확인 필요"로 옮길까요?\n(나중에 확인 필요에서 ✓ 맞음을 누르면 다시 달력으로 돌아와요)')) return false;
+    const ds = [...new Set(entries.filter(x=>x.post && (x.post.id===id || x.post._oid===id) && x.date).map(x=>x.date))].sort();
+    const o = {...(overrides[id]||{})}; delete o.dates; delete o.date; delete o.vdKeep; delete o.hide;
+    overrides[id] = {...o, unk:1, unkD:ds, t:now};
+  }
   if(a==='ok'){ const o = overrides[id]; overrides[id]={dates:g.split(','), t:now, ...(o&&o.visit?{visit:o.visit, vdKeep:true}:{}), ...(o&&o.dn?{dn:o.dn}:{}), ...keepMemo}; }
   if(a==='reset' || a==='del') delete overrides[id];
   if(a==='visit'){
@@ -1798,6 +1810,7 @@ function drawSide(){
         ${g?`<button class="pri" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${fmd(g[0])}~${fmd(g[g.length-1])}`:fmd(g[0])} 출연 맞음</button>`:''}
         ${doneBtn(e)}
         <button data-a="memo" class="adm mbtn">📝 메모</button>
+        ${!isU && !e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn">📤 확인 필요로</button>' : ''}
         ${e.guestName?'':'<button data-a="visit" class="adm">🚪 방문일</button>'}
         ${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="date" class="adm">${isU?'날짜 지정':'날짜 수정'}</button>`}
         ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm">숨기기</button>'}
@@ -2169,7 +2182,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-16c';
+const BUILD = '2026-10-16d';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
