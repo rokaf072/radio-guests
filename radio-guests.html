@@ -1131,6 +1131,7 @@ const keepSent = {};
 /* 오늘부터의 출연 기록을 저장소에 영구 보관 (검색용) */
 const histSent = store.get('histSent', {});
 function histText(e){
+  if(e.reg){ const x = e.regX || {}; return `${e.guestName} (고정 출연${e.regSt==='in'?` · 원래 ${fmd(e.from)} 대신`:''})${x.memo?' '+x.memo:''}${e.post.caption?' '+e.post.caption:''}`.slice(0,260); }
   if(e.guestName) return (e.guestName + ' ' + (e.post.caption||'')).trim().slice(0,260);
   const lines = (e.post.caption||'').split('\n');
   let txt = '';
@@ -1152,6 +1153,8 @@ function saveHist(){
   let n = 0;
   for(const e of entries){
     if(e.date > t || !e.post || e.vOnly) continue;
+    // 고정 출연자: 하루 지나서 기록 (그날 '안 옴'을 고칠 시간), 안 온 날·옮긴 원래 날은 기록 안 함
+    if(e.reg && (e.date >= t || e.regSt==='no' || e.regSt==='moved')) continue;
     const k = e.post.id + '|' + e.date;
     if(histSent[k]) continue;
     const s = e.slides[e.start||0];
@@ -2326,7 +2329,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-16e';
+const BUILD = '2026-10-16f';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
