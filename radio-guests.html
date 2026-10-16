@@ -1830,7 +1830,7 @@ function regPaint(){
 }
 function closeRegs(){ $('rdlg').classList.remove('on'); rEdit = null; }
 // 방문일만 들어간 게시물(방송 날짜 없음) → '사실 그날 방송'으로 바꾸는 버튼
-const v2dBtn = e => { const o = e.post && overrides[e.post.id]; return o && o.visit && !o.link && !o.guest && !o.reg && !ovDates(o).length ? `<button data-a="v2d" class="adm ubtn" title="방문일로 잘못 넣었을 때: 그날을 방송 날짜로 바꿔요">📅 이날 방송으로 바꾸기</button>` : ''; };
+const v2dBtn = e => { const o = e.post && overrides[e.post.id]; return o && o.visit && !o.link && !o.guest && !o.reg && !bcDates(o, e.post.id).length ? `<button data-a="v2d" class="adm ubtn" title="방문일로 잘못 넣었을 때: 그날을 방송 날짜로 바꿔요">📅 이날 방송으로 바꾸기</button>` : ''; };
 // 숨기기·날짜 수정 등 (어느 기기에서 해도 연동)
 function doAct(id, a, g){
   const now = Date.now();
@@ -2396,7 +2396,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-16l';
+const BUILD = '2026-10-16m';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
