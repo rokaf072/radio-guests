@@ -213,6 +213,19 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .rdow button{font:inherit;width:42px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);font-weight:900;font-size:14px;cursor:pointer}
 .rdow button.on{background:linear-gradient(135deg,#34d399,#0ea5e9);color:#04151c;border-color:transparent}
 .gbt #rnew[hidden],.gbt #rdel[hidden]{display:none}
+/* 출연자 사진 */
+.phr{display:flex;gap:12px;align-items:center}
+.phv{flex:none;width:78px;height:78px;border-radius:12px;overflow:hidden;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04)}
+.phv img{width:100%;height:100%;object-fit:cover;object-position:top center}
+.phv span{font-size:11px;color:var(--faint);font-weight:700}
+.phb{display:flex;flex-direction:column;gap:6px;min-width:0}
+.phb .phl{font-size:13px;font-weight:800}.phb .phl small{font-weight:600;color:var(--faint)}
+.phb div{display:flex;gap:6px;flex-wrap:wrap}
+.phb button{font:inherit;font-size:12.5px;font-weight:800;padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--ink);cursor:pointer}
+.phb #rpho,.phb #gpho{background:linear-gradient(135deg,#34d399,#0ea5e9);color:#04151c;border:0}
+.phb small{font-size:11.5px;color:#a7f3d0;font-weight:700}
+.tile .pic .gnm{position:absolute;left:10px;bottom:10px;z-index:3;display:flex;flex-direction:column;gap:2px;padding:6px 11px;border-radius:12px;background:rgba(8,10,16,.72);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:16px;font-weight:900;backdrop-filter:blur(6px);pointer-events:none}
+.tile .pic .gnm small{font-size:11px;font-weight:800;color:#a7f3d0}
 /* 메모 입력창 */
 .msub{font-size:12px;color:var(--faint);margin-top:-6px}
 .mpre{display:flex;flex-wrap:wrap;gap:6px}
@@ -500,6 +513,11 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 #hpv{-webkit-touch-callout:none;user-select:none;position:fixed;z-index:60;pointer-events:none;opacity:0;transform:scale(.92);transform-origin:center;transition:opacity .14s,transform .14s;background:#0d0f16;border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:6px;box-shadow:0 18px 50px rgba(0,0,0,.7);}
 #hpv.on{opacity:1;transform:none}
 #hpv img{display:block;width:100%;object-fit:contain;border-radius:9px}
+.hgst{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;aspect-ratio:1/1;border-radius:9px;padding:18px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--pc) 60%,#222),#12141a 80%);overflow:hidden}
+.hgst span{font-size:44px}.hgst b{font-size:clamp(26px,8vw,40px)!important;font-weight:900;color:#fff;padding:0!important;line-height:1.15;word-break:keep-all}
+.hgst i{font-style:normal;font-weight:800;color:rgba(255,255,255,.8)}
+.hgst em{font-style:normal;font-size:13px;font-weight:900;color:#a7f3d0;background:rgba(16,185,129,.2);border:1px solid rgba(52,211,153,.5);border-radius:999px;padding:3px 12px}
+.hgst small{font-size:13px;color:rgba(255,255,255,.75);font-weight:700}
 #hpv b{display:block;text-align:center;color:#fff;font-size:15px;font-weight:900;padding:6px 4px 2px}
 .pill.bcn{background:rgba(255,255,255,.14);color:#fff}
 @media (max-width:600px){.bp .bl{font-size:11px;padding:12px 5px 4px}.bp .bl i{font-size:10px}.blabel{font-size:11px;left:5px;top:5px}.bp .bgn{font-size:13px}}
@@ -539,6 +557,8 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .gbox label small{font-weight:600;color:var(--faint);margin-left:4px}
 .gbox input,.gbox select{height:40px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);padding:0 10px;font:inherit;font-size:14px;font-weight:600;color-scheme:dark;min-width:0}
 .gbox .gr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+select option,select optgroup{background:#1b1e27;color:#e9ecf5}
+select{color-scheme:dark}
 .gbox label.gck{flex-direction:row;align-items:center;gap:8px;font-weight:700}
 .gbox label.gck input{width:18px;height:18px}
 .gbox [hidden]{display:none!important}
@@ -666,6 +686,7 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
   <label id="gxvw" hidden>실제로 오는 날<input type="date" id="gxv"></label>
   <label>메모 <small>선택</small><input id="gxm" placeholder="예: 신곡 홍보, 방청 가능"></label>
   <label>인스타 링크 <small>선택</small><input id="gxl" type="url" placeholder="https://www.instagram.com/p/…"></label>
+  <div class="phr"><div class="phv" id="gphv"></div><div class="phb"><span class="phl">출연자 사진 <small>선택</small></span><div><button type="button" id="gpho">📷 사진 넣기</button><button type="button" id="gphx">사진 빼기</button></div><small id="gphs"></small></div></div>
   <div class="gbt"><button type="button" id="gxc">취소</button><button type="submit" class="pri">저장</button></div>
 </form></div>
 <div class="gdlg" id="rdlg" role="dialog" aria-modal="true"><form class="gbox rbox" id="rform" autocomplete="off">
@@ -678,6 +699,7 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
   <div class="rdw"><span>오는 요일</span><div class="rdow" id="rdow"><button type="button" data-d="1">월</button><button type="button" data-d="2">화</button><button type="button" data-d="3">수</button><button type="button" data-d="4">목</button><button type="button" data-d="5">금</button><button type="button" data-d="6">토</button><button type="button" data-d="0">일</button></div></div>
   <div class="gr"><label>오는 시간 <small>선택</small><input type="time" id="rt"></label><label>언제부터<input type="date" id="rs" required></label></div>
   <label>메모 <small>선택 · 코너 이름 등</small><input id="rm" placeholder="예: 화요일 코너 '만남의 광장'"></label>
+  <div class="phr"><div class="phv" id="rphv"></div><div class="phb"><span class="phl">출연자 사진 <small>선택</small></span><div><button type="button" id="rpho">📷 사진 넣기</button><button type="button" id="rphx">사진 빼기</button></div><small id="rphs"></small></div></div>
   <div class="gbt"><button type="button" id="rdel" class="mdel">삭제</button><button type="button" id="rnew">＋ 새로</button><button type="button" id="rc">닫기</button><button type="submit" class="pri">저장</button></div>
 </form></div>
 <div class="gdlg" id="mdlg" role="dialog" aria-modal="true"><form class="gbox" id="mform" autocomplete="off">
@@ -1091,7 +1113,7 @@ function rebuild(queue, force){
     const p = progs.find(x=>x.slug===v.slug); if(!p) continue;
     for(const d of ovDates(v)){
       const x = diffDays(d, t); if(d < weekStart(t) || x>FAR_DAYS) continue;
-      const e = {prog:p, post:{id:k, caption:v.note||(v.guest?'':'직접 추가한 게시물'), permalink:v.link||v.url||'', timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:d, start:0, link:true, guestName:v.guest||''};
+      const e = {prog:p, post:{id:k, caption:v.note||(v.guest?'':'직접 추가한 게시물'), permalink:v.link||v.url||'', timestamp:new Date(v.t||Date.now()).toISOString()}, slides:v.img?[{id:'gimg_'+k, url:v.img}]:[], posted:t, date:d, start:0, link:true, guestName:v.guest||''};
       if(x<=DAYS_AHEAD) entries.push(e); else unknown.push({...e, guess:d, far:true, confirmed:true});
     }
   }
@@ -1101,7 +1123,7 @@ function rebuild(queue, force){
     if(!v || !v.reg || !v.name) continue;
     const p = progs.find(x=>x.slug===v.slug); if(!p) continue;
     const ex = v.ex || {}, ws = weekStart(t);
-    const mk = (d, x, extra) => ({prog:p, post:{id:k+'@'+(extra&&extra.from||d), caption:v.note||'', permalink:'', timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:d, start:0, link:true, guestName:v.name, reg:k, regD:extra&&extra.from||d, regSt:extra?'in':(x?x.st:''), regX:x||null, ...(extra||{})});
+    const mk = (d, x, extra) => ({prog:p, post:{id:k+'@'+(extra&&extra.from||d), caption:v.note||'', permalink:'', timestamp:new Date(v.t||Date.now()).toISOString()}, slides:v.img?[{id:'rimg_'+k, url:v.img}]:[], posted:t, date:d, start:0, link:true, guestName:v.name, reg:k, regD:extra&&extra.from||d, regSt:extra?'in':(x?x.st:''), regX:x||null, ...(extra||{})});
     for(let i=0; i<=diffDays(addDays(t,DAYS_AHEAD), ws); i++){
       const d = addDays(ws, i);
       if(v.since && d < v.since) continue; if(v.until && d > v.until) continue;
@@ -1346,18 +1368,19 @@ function bodyHTML(e, k, isUnknown, opts){
   const bdg = (e.post._kept?'<span class="pill kp" title="원본이 삭제돼서 보관해 둔 내용">보관본</span>':'') + (isUnknown && isBanchung(e)?'<span class="pill hot">방청</span>':'');
   const g = isUnknown && e.guess && !e.confirmed ? (e.guessAll&&e.guessAll.length?e.guessAll:[e.guess]) : null;
   const short = d => `${+d.slice(5,7)}/${+d.slice(8)}`;
-  const pic = e.guestName
+  const gnm = e.guestName && n ? `<span class="gnm">${e.reg?'🔁':'🎤'} ${esc(e.guestName)}${e.reg&&overrides[e.reg]?`<small>매주 ${regDowTxt(overrides[e.reg])} 고정</small>`:''}</span>` : '';
+  const pic = e.guestName && !n
     ? `<div class="pic gst"><span class="gi">🎤</span><div class="gn">${esc(e.guestName)}</div><div class="gp">${esc(e.prog.name)}</div>${e.reg&&overrides[e.reg]?`<div class="greg">🔁 매주 ${regDowTxt(overrides[e.reg])} 고정${overrides[e.reg].tm?' · '+overrides[e.reg].tm:''}</div>`:''}${e.post.caption?`<div class="gm">${esc(e.post.caption)}</div>`:''}</div>`
-    : e.link
+    : e.link && !n
     ? `<div class="pic link"><span>📷</span>직접 추가한 게시물<small>눌러서 보기</small></div>`
     : n>1
     ? `<div class="pic car"><div class="trk">${e.slides.map((x,j)=>`<div class="sl"><img class="bg" src="${esc(x.url)}" ${Math.abs(j-si)>1?'loading="lazy"':''} alt="" aria-hidden="true"><img class="fg" src="${esc(x.url)}" ${Math.abs(j-si)>1?'loading="lazy"':''} alt="" draggable="false"></div>`).join('')}</div>
         <span class="cnt"><b>${si+1}</b>/${n}</span><button class="tnav prev" data-d="-1" aria-label="이전 사진" ${si<=0?'disabled':''}>‹</button><button class="tnav next" data-d="1" aria-label="다음 사진" ${si>=n-1?'disabled':''}>›</button>
-        ${bdg?`<span class="bdg">${bdg}</span>`:''}
+        ${bdg?`<span class="bdg">${bdg}</span>`:''}${gnm}
         <span class="zoom">${ZOOM}<em>크게 보기</em></span></div>`
     : `<div class="pic">${s?`<img class="bg" src="${esc(s.url)}" alt="" aria-hidden="true"><img class="fg" loading="lazy" src="${esc(s.url)}" alt="" draggable="false">`:''}
         ${n>1?`<span class="cnt"><b>${si+1}</b>/${n}</span><button class="tnav prev" data-d="-1" aria-label="이전 사진" ${si<=0?'disabled':''}>‹</button><button class="tnav next" data-d="1" aria-label="다음 사진" ${si>=n-1?'disabled':''}>›</button>`:''}
-        ${bdg?`<span class="bdg">${bdg}</span>`:''}
+        ${bdg?`<span class="bdg">${bdg}</span>`:''}${gnm}
         <span class="zoom">${ZOOM}<em>크게 보기</em></span></div>`;
   const text = sn
     ? `<div class="sn">${sn.lines.slice(0,3).map(l=>{const m=/^(\d{1,2}:\d{2})\s*(.*)$/.exec(l); return `<div>${m?`<b>${m[1]}</b>${esc(m[2])}`:esc(l)}</div>`;}).join('')}</div>`
@@ -1523,7 +1546,7 @@ function hoverPreview(el){
   const canHover = matchMedia('(hover:hover) and (pointer:fine)').matches;
   const host = el.closest('[data-k]');
   const show = (now) => {
-    const e = viewList[+host.dataset.k], s = e && e.slides && e.slides[0]; if(!s || e.weekly) return;   // 주간표는 호버 없이 클릭해서 확대
+    const e = viewList[+host.dataset.k], s = e && e.slides && e.slides[0]; if(!e || e.weekly || (!s && !e.guestName)) return;   // 주간표는 호버 없이 클릭해서 확대
     clearTimeout(hpvT);
     hpvT = setTimeout(() => {
       if(!hpv){ hpv = document.createElement('div'); hpv.id = 'hpv'; document.body.appendChild(hpv); }
@@ -1531,13 +1554,15 @@ function hoverPreview(el){
       const card = el.closest('.pc') || el, cr = card.getBoundingClientRect();
       const W = Math.round(Math.min(Math.max(cr.width * 1.12, 300), 440, innerWidth - 16));   // 카드 폭보다 살짝만 크게
       hpv.style.width = W + 'px';
-      hpv.innerHTML = `<img src="${esc(s.url)}" alt=""><b>${esc(nm)}</b>`;
+      const rv = e.reg && overrides[e.reg];
+      hpv.innerHTML = s ? `<img src="${esc(s.url)}" alt=""><b>${esc(nm)}</b>` : `<div class="hgst" style="--pc:${e.prog.color}"><span>${e.reg?'🔁':'🎤'}</span><b>${esc(e.guestName)}</b><i>${esc(e.prog.name)}</i>${rv?`<em>매주 ${regDowTxt(rv)} 고정${rv.tm?' · '+rv.tm:''}</em>`:''}${e.post.caption?`<small>${esc(e.post.caption)}</small>`:''}</div>`;
       hpv.classList.add('on');
-      const img = hpv.firstChild, place = () => {
+      const img = hpv.querySelector('img') || {style:{}}, place = () => {
         // 마우스를 올린 칸(과 그 버튼들)을 절대 가리지 않도록, 그 칸의 위쪽 또는 아래쪽 빈 공간에만 띄운다
         const r = host.getBoundingClientRect(), up = r.top - 10, down = innerHeight - r.bottom - 10, above = up >= down;
         const room = Math.max(160, (above ? up : down) - 8);
         img.style.maxHeight = Math.max(120, room - 44) + 'px';
+        const hg = hpv.querySelector('.hgst'); if(hg) hg.style.maxHeight = Math.max(120, room - 14) + 'px';
         const hh = hpv.offsetHeight;
         let x = cr.left + cr.width/2 - W/2; x = Math.max(8, Math.min(x, innerWidth - W - 8));
         let y = above ? r.top - 10 - hh : r.bottom + 10; y = Math.max(8, Math.min(y, innerHeight - hh - 8));
@@ -1628,7 +1653,7 @@ function daySnippet(text, ymd){
 }
 // '올린 날짜'와 주간표 기간
 function dateLine(e){
-  const up = e.post.timestamp ? tsYmd(e.post.timestamp) : '';
+  const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
   const parts = [];
   if(e.range && e.range[0] !== e.range[1]) parts.push(`<b>📅 ${fmd(e.range[0])} ~ ${fmd(e.range[1])}</b>`);
   else if(e.date) parts.push(`<b>📅 ${fmd(e.date)}</b>`);
@@ -1685,6 +1710,41 @@ function saveMemo(t){
   if(vw.classList.contains('on')) closeView();
   rebuild(false, true);
 }
+/* 출연자 사진: 폰 갤러리·PC 파일에서 골라 줄여서 구글 드라이브에 올림 (누구나 볼 수 있는 주소) */
+function pickPhoto(){
+  return new Promise(res=>{
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = () => res(inp.files && inp.files[0] || null); inp.click();
+  });
+}
+async function shrinkPhoto(file, max){
+  const url = URL.createObjectURL(file);
+  try{
+    const img = await new Promise((ok, bad)=>{ const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
+    const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth*s); c.height = Math.round(img.naturalHeight*s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.86).split(',')[1];
+  } finally { URL.revokeObjectURL(url); }
+}
+async function uploadPhoto(statusEl){
+  const f = await pickPhoto(); if(!f) return null;
+  if(!syncUrl){ alert('연동 주소가 없어서 사진을 올릴 수 없어요'); return null; }
+  try{
+    statusEl.textContent = '사진 올리는 중…';
+    const data = await shrinkPhoto(f, 1000);
+    const r = await fetch(syncUrl, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({photo:{name:'guest_'+Date.now()+'.jpg', type:'image/jpeg', data}})});
+    const j = await r.json();
+    if(!j || !j.url) throw new Error('no url');
+    statusEl.textContent = '사진 올렸어요 — 저장을 눌러야 반영돼요';
+    return j;
+  }catch(err){
+    statusEl.textContent = '';
+    alert('사진을 올리지 못했어요.\n구글 Apps Script를 새 버전으로 배포했는지 확인해 주세요.');
+    return null;
+  }
+}
+function photoRow(pv, img){ $(pv).innerHTML = img ? `<img src="${esc(img)}" alt="">` : '<span>사진 없음</span>'; }
 /* 고정 출연자 */
 const DOWK = '일월화수목금토';
 const regDowTxt = v => [1,2,3,4,5,6,0].filter(i=>(v.dow||[]).includes(i)).map(i=>DOWK[i]).join('·');
@@ -1731,7 +1791,7 @@ function regAct(k, d, a){
   return true;
 }
 // 고정 출연자 관리 창
-let rEdit = null, rDow = [];
+let rEdit = null, rDow = [], rImg = '';
 function regStats(v){   // 지난 회차 출석 기록 (최근 10번)
   const out = [], t = today(), ex = v.ex || {};
   let d = t; for(let i=0; i<120 && out.length<10; i++, d = addDays(d,-1)){
@@ -1759,7 +1819,7 @@ function openRegs(k){
   const v = k ? overrides[k] : null;
   $('rfh').textContent = v ? `✏ ${v.name} 고치기` : '＋ 새 고정 출연자';
   $('rp').value = v ? v.slug : ''; $('rn').value = v ? v.name : ''; $('rt').value = v && v.tm || ''; $('rs').value = v && v.since || today(); $('rm').value = v && v.note || '';
-  rDow = v ? [...(v.dow||[])] : [];
+  rDow = v ? [...(v.dow||[])] : []; rImg = v && v.img || ''; photoRow('rphv', rImg); $('rphs').textContent = '';
   $('rdel').hidden = !v; $('rnew').hidden = !v;
   regPaint(); $('rdlg').classList.add('on');
 }
@@ -1886,10 +1946,10 @@ function hideView(){ vw.classList.remove('on'); document.body.style.overflow='';
 function closeView(){ if(!vw.classList.contains('on')) return; hideView(); if(history.state && history.state.vw){ try{ history.back(); }catch(_){} } }
 function drawStage(){
   const e = viewList[vK], n = vSl.length, wrap = $('vstage').querySelector('.imgwrap'), cur = vSl[vI] || {};
-  if(e.guestName){
+  if(e.guestName && !n){
     wrap.innerHTML = `<div class="gstbig"><span>🎤</span><b>${esc(e.guestName)}</b><i>${esc(e.prog.name)}</i>${e.post.caption?`<em>${esc(e.post.caption)}</em>`:''}</div>`;
     wrap.firstChild.onclick = ev => { ev.stopPropagation(); closeView(); };
-  } else if(e.link || !n){
+  } else if(!n){
     wrap.innerHTML = `<a class="linkbig" href="${esc(e.post.permalink)}" target="_blank" rel="noopener"><span>📷</span>직접 추가한 게시물<br>눌러서 인스타에서 보기</a>`;
   } else {
     const sig = vK + '|' + n + '|' + vSl.map(s=>s.url).join(',').length;
@@ -2329,7 +2389,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-16f';
+const BUILD = '2026-10-16i';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
@@ -2470,6 +2530,7 @@ window.addEventListener('message', async e => {
 /* 🎤 출연자 직접 입력 (집 PC·폰 관리자 기기에서만 버튼이 보임) */
 let gEdit = null;
 const gSet = () => { $('gxvw').hidden = !$('gxr').checked; };
+let gImg = '';
 function openGuest(id){
   gEdit = id || null;
   const ov = id ? overrides[id] : null;
@@ -2485,11 +2546,14 @@ function openGuest(id){
     $('gxp').value = store.get('lastGuestProg', '') || ''; if($('gxp').selectedIndex<0) $('gxp').value = '';
     $('gxn').value = ''; $('gxd').value = base; $('gxt').value = ''; $('gxr').checked = false; $('gxv').value = ''; $('gxm').value = ''; $('gxl').value = '';
   }
+  gImg = ov && ov.img || ''; photoRow('gphv', gImg); $('gphs').textContent = '';
   gSet(); $('gdlg').classList.add('on'); setTimeout(()=>{ try{ ($('gxp').value ? $('gxn') : $('gxp')).focus(); }catch(_){} }, 50);
 }
 function closeGuest(){ $('gdlg').classList.remove('on'); gEdit = null; }
 $('addr').onclick = () => openRegs();
 $('rdow').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const d = +b.dataset.d; rDow = rDow.includes(d) ? rDow.filter(x=>x!==d) : [...rDow, d]; regPaint(); });
+$('rpho').onclick = async () => { const j = await uploadPhoto($('rphs')); if(j){ rImg = j.url; photoRow('rphv', rImg); } };
+$('rphx').onclick = () => { rImg = ''; photoRow('rphv', ''); $('rphs').textContent = '저장을 눌러야 반영돼요'; };
 $('rc').onclick = closeRegs; $('rnew').onclick = () => openRegs();
 $('rdlg').addEventListener('click', ev=>{ if(ev.target.id==='rdlg') closeRegs(); });
 $('rdel').onclick = () => { if(!rEdit || !confirm(`${overrides[rEdit].name} 고정 출연자를 삭제할까요? (기록도 함께 지워져요)`)) return; const k = rEdit; delete overrides[k]; pushSync({del:[k]}); store.set('overrides', overrides); rebuild(false, true); openRegs(); };
@@ -2497,7 +2561,7 @@ $('rform').addEventListener('submit', ev=>{
   ev.preventDefault();
   if(!rDow.length){ alert('오는 요일을 하나 이상 골라 주세요'); return; }
   const k = rEdit || ('reg_' + Date.now().toString(36)), old = rEdit ? overrides[rEdit] : {};
-  overrides[k] = {...old, reg:1, slug:$('rp').value, name:$('rn').value.trim(), dow:[...rDow].sort(), tm:$('rt').value||'', since:$('rs').value||today(), note:$('rm').value.trim(), ex:old.ex||{}, t:Date.now()};
+  overrides[k] = {...old, reg:1, slug:$('rp').value, name:$('rn').value.trim(), dow:[...rDow].sort(), img:rImg||'', tm:$('rt').value||'', since:$('rs').value||today(), note:$('rm').value.trim(), ex:old.ex||{}, t:Date.now()};
   pushSync({set:{[k]:overrides[k]}}); store.set('overrides', overrides); rebuild(false, true); openRegs(k);
 });
 $('mpre').innerHTML = MEMO_PRE.map((p,i)=>`<button type="button" data-i="${i}">${esc(p.t)}</button>`).join('');
@@ -2512,6 +2576,8 @@ $('addg').onclick = () => openGuest(null);
 $('gxc').onclick = closeGuest;
 $('gdlg').addEventListener('mousedown', ev=>{ if(ev.target===$('gdlg')) closeGuest(); });
 $('gxr').onchange = ()=>{ gSet(); if($('gxr').checked && !$('gxv').value) $('gxv').value = $('gxd').value; };
+$('gpho').onclick = async () => { const j = await uploadPhoto($('gphs')); if(j){ gImg = j.url; photoRow('gphv', gImg); } };
+$('gphx').onclick = () => { gImg = ''; photoRow('gphv', ''); };
 $('gxform').onsubmit = ev => {
   ev.preventDefault();
   const slug = $('gxp').value, names = $('gxn').value.split(/[,，、\n]/).map(s=>s.trim()).filter(Boolean);
@@ -2522,7 +2588,7 @@ $('gxform').onsubmit = ev => {
   names.forEach((nm, i)=>{
     const id = (gEdit && i===0) ? gEdit : 'guest_' + now.toString(36) + i;
     const old = (gEdit && i===0) ? overrides[gEdit] : null;
-    overrides[id] = {...(old||{}), guest:nm, slug, dates:[bd], visit:{d:vd, tm}, note, url, t:now + (names.length-1-i)};
+    overrides[id] = {...(old||{}), guest:nm, slug, dates:[bd], visit:{d:vd, tm}, note, url, img:gImg||'', t:now + (names.length-1-i)};
     delete overrides[id].hide; sets[id] = overrides[id];
   });
   pushSync({set:sets}); store.set('overrides', overrides); store.set('lastGuestProg', slug);
