@@ -1393,14 +1393,14 @@ function bodyHTML(e, k, isUnknown, opts){
       <div class="dl1">${e.atV?`<b class="vis">🚪 방문 ${visitTxt(e.visit)}</b>`:e.visit?`<b class="vis2" title="이 날은 미리 녹음한 방송이라 출연자가 오지 않아요">🎙 실제 방문 ${visitTxt(e.visit)}</b>`:''}${rg?`<b>📅 ${rg}</b>`:''}${upChip(up)}</div>
       ${text}
       <div class="ic" data-id="${esc(e.post.id)}">
-        ${g?`<button class="ok" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${short(g[0])}~${short(g[g.length-1])}`:short(g[0])} 맞음</button>`:''}
+        ${g?`<button class="ok adm" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${short(g[0])}~${short(g[g.length-1])}`:short(g[0])} 맞음</button>`:''}
         ${e.post.permalink?`<a href="${esc(e.post.permalink)}" target="_blank" rel="noopener" title="${e.post._yt?'유튜브':'인스타'}에서 보기">${e.post._yt?'유튜브':'인스타'} ↗</a>`:''}
         ${e.reg?regBtns(e):e.guestName?'<button data-a="edit" class="adm" title="출연자 정보 고치기">✏ 수정</button>':`${g?'':`<button data-a="date" class="adm" title="날짜 수정">날짜</button>`}
         <button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button>`}
         ${v2dBtn(e)}${e.reg?'':doneBtn(e)}
         ${e.reg?'':'<button data-a="memo" class="adm mbtn" title="직원들에게 보일 메모">📝 메모</button>'}
         ${!isUnknown && !e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn" title="달력에서 빼서 확인 필요로 옮기기">📤 확인 필요로</button>' : ''}
-        ${e.reg?'':e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm" title="숨기기">숨기기</button>'}
+        ${e.reg?'':e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="숨기기">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset" class="adm" title="자동으로 되돌리기">↺</button>':''}
       </div>
     </div>`;
@@ -1830,7 +1830,7 @@ function regPaint(){
 }
 function closeRegs(){ $('rdlg').classList.remove('on'); rEdit = null; }
 // 방문일만 들어간 게시물(방송 날짜 없음) → '사실 그날 방송'으로 바꾸는 버튼
-const v2dBtn = e => { const o = e.post && overrides[e.post.id]; return o && o.visit && !o.link && !o.guest && !o.reg && !bcDates(o, e.post.id).length ? `<button data-a="v2d" class="adm ubtn" title="방문일로 잘못 넣었을 때: 그날을 방송 날짜로 바꿔요">📅 이날 방송으로 바꾸기</button>` : ''; };
+const v2dBtn = e => { const o = e.post && overrides[e.post.id]; return o && o.visit && !o.link && !o.guest && !o.reg && (!bcDates(o, e.post.id).length || bcDates(o, e.post.id).includes(o.visit.d)) ? `<button data-a="v2d" class="adm ubtn" title="방문일로 잘못 넣었을 때: 그날을 방송 날짜로 바꿔요">📅 이날 방송으로 바꾸기</button>` : ''; };
 // 숨기기·날짜 수정 등 (어느 기기에서 해도 연동)
 function doAct(id, a, g){
   const now = Date.now();
@@ -1848,8 +1848,8 @@ function doAct(id, a, g){
   if(a==='hide') overrides[id]={hide:true, t:now};
   if(a==='v2d'){
     const o = {...(overrides[id]||{})}; if(!o.visit) return false;
-    const d = o.visit.d; delete o.visit; delete o.vdKeep; delete o.unk; delete o.unkD;
-    overrides[id] = {...o, dates:[d], t:now};
+    const d = o.visit.d, bc = bcDates(o, id); delete o.visit; delete o.vdKeep; delete o.unk; delete o.unkD;
+    overrides[id] = {...o, dates:[...new Set([...bc, d])].sort(), t:now};
   }
   if(a==='unk'){
     if(!confirm('이 게시물을 달력에서 빼서 "확인 필요"로 옮길까요?\n(나중에 확인 필요에서 ✓ 맞음을 누르면 다시 달력으로 돌아와요)')) return false;
@@ -2020,13 +2020,13 @@ function drawSide(){
       ${e.post._yt && e.date ? daySnippet(e.post.caption, e.date) : ''}
       <div class="act">
         ${e.post.permalink?`<a class="ig ${e.post._yt?'ytb':''}" href="${esc(e.post.permalink)}" target="_blank" rel="noopener">${e.post._yt?'유튜브에서 보기':'인스타에서 보기'}</a>`:''}
-        ${g?`<button class="pri" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${fmd(g[0])}~${fmd(g[g.length-1])}`:fmd(g[0])} 출연 맞음</button>`:''}
+        ${g?`<button class="pri adm" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${fmd(g[0])}~${fmd(g[g.length-1])}`:fmd(g[0])} 출연 맞음</button>`:''}
         ${v2dBtn(e)}${e.reg?regBtns(e):doneBtn(e)}
         ${e.reg?'':'<button data-a="memo" class="adm mbtn">📝 메모</button>'}
         ${!isU && !e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn">📤 확인 필요로</button>' : ''}
         ${e.guestName?'':'<button data-a="visit" class="adm">🚪 방문일</button>'}
         ${e.reg?'':e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="date" class="adm">${isU?'날짜 지정':'날짜 수정'}</button>`}
-        ${e.reg?'':e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm">숨기기</button>'}
+        ${e.reg?'':e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset" class="adm">자동으로 되돌리기</button>':''}
       </div>
       <div class="cap">${capLinks(e)}</div>
@@ -2396,7 +2396,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-16m';
+const BUILD = '2026-10-16o';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
