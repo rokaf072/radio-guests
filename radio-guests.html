@@ -186,6 +186,33 @@ main{max-width:1600px;margin:0 auto;padding:18px 16px 90px}
 .pill.sent{background:rgba(56,189,248,.18);color:#bae6fd;border-color:rgba(56,189,248,.5)}
 .pc .ic .ubtn,.brow .ic .ubtn,.vw .act .ubtn{border-color:rgba(56,189,248,.55)!important;color:#bae6fd!important}
 .pc .ic .mbtn,.brow .ic .mbtn,.vw .act .mbtn{border-color:rgba(253,224,71,.55)!important;color:#fde68a!important}
+/* 고정 출연자 */
+.bs1 .bgi{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:44px;background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--pc) 65%,#222),#12141a 80%);padding-bottom:30px}
+.tile.rno .pic,.bs1.rno{filter:grayscale(.85) brightness(.55)}
+.greg{font-size:12.5px;font-weight:900;color:#a7f3d0;background:rgba(16,185,129,.18);border:1px solid rgba(52,211,153,.5);border-radius:999px;padding:3px 10px}
+.brow .rgt{font-style:normal;font-size:10.5px;font-weight:900;color:#a7f3d0;border:1px solid rgba(52,211,153,.55);border-radius:6px;padding:0 5px;margin-left:2px}
+.rbox{width:min(560px,100%);max-height:calc(100vh - 28px);overflow:auto}
+.rbox h4{margin:6px 0 0;font-size:14.5px}
+.rlist{display:flex;flex-direction:column;gap:8px}
+.rnone{font-size:12.5px;color:var(--faint);padding:10px;border:1px dashed var(--line);border-radius:10px;text-align:center}
+.rrow{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.04);display:flex;flex-direction:column;gap:7px}
+.rrow.on{border-color:rgba(52,211,153,.7);background:rgba(16,185,129,.08)}
+.rh2{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rh2 b{font-size:15px}
+.rh2 span{font-size:12px;color:var(--sub);font-weight:700;flex:1;min-width:0}
+.rh2 .redt{font:inherit;font-size:12px;font-weight:800;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--ink);cursor:pointer}
+.rcs{display:flex;gap:4px;flex-wrap:wrap}
+.rcs .rc{font-style:normal;display:flex;flex-direction:column;align-items:center;min-width:34px;padding:3px 4px;border-radius:8px;font-size:14px;font-weight:900;line-height:1.1}
+.rcs .rc small{font-size:9.5px;font-weight:700;opacity:.85}
+.rc.ok{background:rgba(34,197,94,.18);color:#86efac}.rc.no{background:rgba(244,63,94,.2);color:#fda4af}.rc.mv{background:rgba(139,92,246,.22);color:#d8b4fe}.rc.td{background:rgba(255,255,255,.1);color:#fff}
+.rlogs{display:flex;flex-direction:column;gap:3px;border-top:1px dashed var(--line);padding-top:6px}
+.rlog{font-size:12px;color:var(--sub);font-weight:600}
+.rlog b{color:var(--ink);font-weight:800;margin-right:4px}
+.rdw{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:800}
+.rdow{display:flex;gap:6px;flex-wrap:wrap}
+.rdow button{font:inherit;width:42px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);font-weight:900;font-size:14px;cursor:pointer}
+.rdow button.on{background:linear-gradient(135deg,#34d399,#0ea5e9);color:#04151c;border-color:transparent}
+.gbt #rnew[hidden],.gbt #rdel[hidden]{display:none}
 /* 메모 입력창 */
 .msub{font-size:12px;color:var(--faint);margin-top:-6px}
 .mpre{display:flex;flex-wrap:wrap;gap:6px}
@@ -495,6 +522,7 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 @keyframes slam{0%{transform:translate(-50%,-50%) rotate(-14deg) scale(3);opacity:0}55%{transform:translate(-50%,-50%) rotate(-14deg) scale(.9);opacity:1}75%{transform:translate(-50%,-50%) rotate(-14deg) scale(1.06)}100%{transform:translate(-50%,-50%) rotate(-14deg) scale(1);opacity:1}}
 @media (max-width:600px){.dnx .stamp b{font-size:44px;letter-spacing:3px}.dnx line{stroke-width:5}}
 @media (prefers-reduced-motion:reduce){.dnx .stamp{animation:none!important}}
+.addbtn.r{bottom:122px;background:linear-gradient(135deg,#34d399,#0ea5e9);color:#04151c;box-shadow:0 10px 26px rgba(14,165,233,.35)}
 .addbtn.g{bottom:70px;background:linear-gradient(135deg,#ffd54a,#ff9f1c);color:#1a1000;box-shadow:0 10px 26px rgba(255,170,40,.35)}
 .tile .pic.gst{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--pc) 60%,#222) 0,#12141a 78%)}
 .tile .pic.gst .gi{font-size:34px;filter:drop-shadow(0 0 10px rgba(255,255,255,.35))}
@@ -628,6 +656,7 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 
 <button class="addbtn" id="add">＋ 링크 추가</button>
 <button class="addbtn g" id="addg">🎤 출연자 입력</button>
+<button class="addbtn r adm" id="addr">🔁 고정 출연자</button>
 <div class="gdlg" id="gdlg" role="dialog" aria-modal="true"><form class="gbox" id="gxform" autocomplete="off">
   <h3 id="gxh">🎤 출연자 직접 입력</h3>
   <label>프로그램<select id="gxp" required></select></label>
@@ -638,6 +667,18 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
   <label>메모 <small>선택</small><input id="gxm" placeholder="예: 신곡 홍보, 방청 가능"></label>
   <label>인스타 링크 <small>선택</small><input id="gxl" type="url" placeholder="https://www.instagram.com/p/…"></label>
   <div class="gbt"><button type="button" id="gxc">취소</button><button type="submit" class="pri">저장</button></div>
+</form></div>
+<div class="gdlg" id="rdlg" role="dialog" aria-modal="true"><form class="gbox rbox" id="rform" autocomplete="off">
+  <h3>🔁 고정 출연자</h3>
+  <div class="msub">정해진 요일마다 카드가 자동으로 생겨요. 안 온 날·다른 날 온 날은 카드의 🙅 안 옴 / ↪ 다른 날 버튼으로 기록하세요.</div>
+  <div class="rlist" id="rlist"></div>
+  <h4 id="rfh">＋ 새 고정 출연자</h4>
+  <label>프로그램<select id="rp" required></select></label>
+  <label>출연자 이름<input id="rn" required placeholder="예: 문세윤"></label>
+  <div class="rdw"><span>오는 요일</span><div class="rdow" id="rdow"><button type="button" data-d="1">월</button><button type="button" data-d="2">화</button><button type="button" data-d="3">수</button><button type="button" data-d="4">목</button><button type="button" data-d="5">금</button><button type="button" data-d="6">토</button><button type="button" data-d="0">일</button></div></div>
+  <div class="gr"><label>오는 시간 <small>선택</small><input type="time" id="rt"></label><label>언제부터<input type="date" id="rs" required></label></div>
+  <label>메모 <small>선택 · 코너 이름 등</small><input id="rm" placeholder="예: 화요일 코너 '만남의 광장'"></label>
+  <div class="gbt"><button type="button" id="rdel" class="mdel">삭제</button><button type="button" id="rnew">＋ 새로</button><button type="button" id="rc">닫기</button><button type="submit" class="pri">저장</button></div>
 </form></div>
 <div class="gdlg" id="mdlg" role="dialog" aria-modal="true"><form class="gbox" id="mform" autocomplete="off">
   <h3>📝 직원들에게 보일 메모</h3>
@@ -1054,6 +1095,22 @@ function rebuild(queue, force){
       if(x<=DAYS_AHEAD) entries.push(e); else unknown.push({...e, guess:d, far:true, confirmed:true});
     }
   }
+  // 고정 출연자: 정해진 요일마다 자동으로 카드가 생김 (안 옴·다른 날로 옮김·일기 기록 반영)
+  for(const k in overrides){
+    const v = overrides[k];
+    if(!v || !v.reg || !v.name) continue;
+    const p = progs.find(x=>x.slug===v.slug); if(!p) continue;
+    const ex = v.ex || {}, ws = weekStart(t);
+    const mk = (d, x, extra) => ({prog:p, post:{id:k+'@'+(extra&&extra.from||d), caption:v.note||'', permalink:'', timestamp:new Date(v.t||Date.now()).toISOString()}, slides:[], posted:t, date:d, start:0, link:true, guestName:v.name, reg:k, regD:extra&&extra.from||d, regSt:extra?'in':(x?x.st:''), regX:x||null, ...(extra||{})});
+    for(let i=0; i<=diffDays(addDays(t,DAYS_AHEAD), ws); i++){
+      const d = addDays(ws, i);
+      if(v.since && d < v.since) continue; if(v.until && d > v.until) continue;
+      if((v.dow||[]).includes(wdIdx(d))) entries.push(mk(d, ex[d]));
+    }
+    for(const od in ex){ const x = ex[od];
+      if(x && x.st==='moved' && x.to && x.to>=ws && diffDays(x.to,t)<=DAYS_AHEAD) entries.push(mk(x.to, x, {from:od}));
+    }
+  }
   addVisits(t);
   // 보관본(원본 삭제됨)은 같은 프로그램·같은 날짜에 새 게시물이 있으면 확인 필요로 옮김
   const fresh = new Set(entries.filter(e=>!e.post._kept).map(e=>e.prog.slug+'|'+e.date));
@@ -1261,6 +1318,7 @@ function upChip(up){
 }
 // 방송이 이미 끝난 게시물: 날짜가 확실하고(자동 확정·수동 지정·예정) 오늘보다 이전
 function doneDate(e){
+  if(e.reg && (e.regSt==='no' || e.regSt==='moved')) return '';
   const d = e.date || (e.confirmed && e.guess ? e.guess : '');
   if(d && d < today()) return d;
   const d2 = e.date || e.guess, ov = e.post && overrides[e.post.id];     // 직접 '완료'를 누른 것
@@ -1286,7 +1344,7 @@ function bodyHTML(e, k, isUnknown, opts){
   const g = isUnknown && e.guess && !e.confirmed ? (e.guessAll&&e.guessAll.length?e.guessAll:[e.guess]) : null;
   const short = d => `${+d.slice(5,7)}/${+d.slice(8)}`;
   const pic = e.guestName
-    ? `<div class="pic gst"><span class="gi">🎤</span><div class="gn">${esc(e.guestName)}</div><div class="gp">${esc(e.prog.name)}</div>${e.post.caption?`<div class="gm">${esc(e.post.caption)}</div>`:''}</div>`
+    ? `<div class="pic gst"><span class="gi">🎤</span><div class="gn">${esc(e.guestName)}</div><div class="gp">${esc(e.prog.name)}</div>${e.reg&&overrides[e.reg]?`<div class="greg">🔁 매주 ${regDowTxt(overrides[e.reg])} 고정${overrides[e.reg].tm?' · '+overrides[e.reg].tm:''}</div>`:''}${e.post.caption?`<div class="gm">${esc(e.post.caption)}</div>`:''}</div>`
     : e.link
     ? `<div class="pic link"><span>📷</span>직접 추가한 게시물<small>눌러서 보기</small></div>`
     : n>1
@@ -1302,7 +1360,7 @@ function bodyHTML(e, k, isUnknown, opts){
     ? `<div class="sn">${sn.lines.slice(0,3).map(l=>{const m=/^(\d{1,2}:\d{2})\s*(.*)$/.exec(l); return `<div>${m?`<b>${m[1]}</b>${esc(m[2])}`:esc(l)}</div>`;}).join('')}</div>`
     : e.guestName ? '' : `<div class="cp">${esc((e.post.caption||'').replace(/\s+/g,' ').trim())}</div>`;
   const bento = !!(opts && opts.bento);
-  const tileHTML = `<div class="tile" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${memoBar(e)}${bento?'':ribbon(e)}${pic}</div>`;
+  const tileHTML = `<div class="tile ${e.regSt==='no'?'rno':''}" tabindex="0" data-k="${k}" data-id="${esc(e.post.id)}">${regBar(e)}${memoBar(e)}${bento?'':ribbon(e)}${pic}</div>`;
   if(bento) return tileHTML;
   return `${tileHTML}
     <div class="ft">
@@ -1311,12 +1369,12 @@ function bodyHTML(e, k, isUnknown, opts){
       <div class="ic" data-id="${esc(e.post.id)}">
         ${g?`<button class="ok" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${short(g[0])}~${short(g[g.length-1])}`:short(g[0])} 맞음</button>`:''}
         ${e.post.permalink?`<a href="${esc(e.post.permalink)}" target="_blank" rel="noopener" title="${e.post._yt?'유튜브':'인스타'}에서 보기">${e.post._yt?'유튜브':'인스타'} ↗</a>`:''}
-        ${e.guestName?'<button data-a="edit" class="adm" title="출연자 정보 고치기">✏ 수정</button>':`${g?'':`<button data-a="date" class="adm" title="날짜 수정">날짜</button>`}
+        ${e.reg?regBtns(e):e.guestName?'<button data-a="edit" class="adm" title="출연자 정보 고치기">✏ 수정</button>':`${g?'':`<button data-a="date" class="adm" title="날짜 수정">날짜</button>`}
         <button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button>`}
-        ${doneBtn(e)}
-        <button data-a="memo" class="adm mbtn" title="직원들에게 보일 메모">📝 메모</button>
+        ${e.reg?'':doneBtn(e)}
+        ${e.reg?'':'<button data-a="memo" class="adm mbtn" title="직원들에게 보일 메모">📝 메모</button>'}
         ${!isUnknown && !e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn" title="달력에서 빼서 확인 필요로 옮기기">📤 확인 필요로</button>' : ''}
-        ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm" title="숨기기">숨기기</button>'}
+        ${e.reg?'':e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm" title="숨기기">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset" class="adm" title="자동으로 되돌리기">↺</button>':''}
       </div>
     </div>`;
@@ -1334,7 +1392,7 @@ function bentoHTML(p, es){
     const sh = es.slice(0,4), more = es.length - sh.length;
     media = `<div class="bsplit n${sh.length}">${sh.map((e,i)=>{
       const s = e.slides && e.slides[0], nm = e.guestName || shortLabel(postLabel(e));
-      return `<button class="bs1 ${doneDate(e)?'dn':''} ${e.atV?'v':''}" data-k="${ks[i]}">${s?`<img src="${esc(s.url)}" loading="lazy" alt="" draggable="false">`:''}<span class="bn">${e.atV?'🚪 ':''}${esc(nm)}</span>${i===3&&more>0?`<span class="bmore">+${more}</span>`:''}</button>`;
+      return `<button class="bs1 ${doneDate(e)?'dn':''} ${e.atV?'v':''} ${e.regSt==='no'?'rno':''}" data-k="${ks[i]}">${s?`<img src="${esc(s.url)}" loading="lazy" alt="" draggable="false">`:`<span class="bgi">${e.reg?'🔁':'🎤'}</span>`}<span class="bn">${e.atV?'🚪 ':''}${esc(nm)}</span>${i===3&&more>0?`<span class="bmore">+${more}</span>`:''}</button>`;
     }).join('')}</div>`;
     rows = es.map((e,i)=>browHTML(e, ks[i])).join('');
   }
@@ -1358,7 +1416,7 @@ function browHTML(e, k, isBig){
   const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
   const s = e.slides && e.slides[0];
   const th = s ? `<img class="bth" src="${esc(s.url)}" loading="lazy" alt="" draggable="false">` : `<span class="bth bgn">${esc((e.guestName||nm).slice(0,3))}</span>`;
-  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${d?'<em class="bdone">완료</em>':''}</div>${memoBar(e,'sm')}${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${doneBtn(e)}<button data-a="memo" class="adm mbtn">📝 메모</button>${!e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn">📤 확인 필요로</button>' : ''}${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="이 게시물 숨기기 (중복일 때)">숨기기</button>'}</div></div>`;
+  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${e.reg?'<em class="rgt">🔁 고정</em>':''}${d?'<em class="bdone">완료</em>':''}</div>${regBar(e,'sm')}${memoBar(e,'sm')}${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.reg?regBtns(e):e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${e.reg?'':doneBtn(e)}${e.reg?'':'<button data-a="memo" class="adm mbtn">📝 메모</button>'}${!e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn">📤 확인 필요로</button>' : ''}${e.reg?'':e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="이 게시물 숨기기 (중복일 때)">숨기기</button>'}</div></div>`;
 }
 const reducedMo = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
 // 카드 사진 넘기기: 휴대폰 자체 스크롤(스냅)로 움직여서 화면 주사율(120Hz) 그대로 부드럽게
@@ -1624,9 +1682,94 @@ function saveMemo(t){
   if(vw.classList.contains('on')) closeView();
   rebuild(false, true);
 }
+/* 고정 출연자 */
+const DOWK = '일월화수목금토';
+const regDowTxt = v => [1,2,3,4,5,6,0].filter(i=>(v.dow||[]).includes(i)).map(i=>DOWK[i]).join('·');
+function regBar(e, cls){
+  if(!e.reg) return '';
+  const x = e.regX || {}, mm = x.memo ? ` · ${esc(x.memo)}` : '';
+  let c = '', ic = '', tx = '';
+  if(e.regSt==='no'){ c='red'; ic='🙅'; tx=`${e.date<today()?'이날 안 왔어요':'이번엔 안 와요'}${mm}`; }
+  else if(e.regSt==='moved'){ c='violet'; ic='↪'; tx=`${fmd(x.to)}로 옮겨서 ${x.to<today()?'왔어요':'와요'}${mm}`; }
+  else if(e.regSt==='in'){ c='blue'; ic='↩'; tx=`원래 ${fmd(e.from)} 대신 이날 ${e.date<today()?'왔어요':'와요'}${mm}`; }
+  else if(x.memo){ c='blue'; ic='📝'; tx=esc(x.memo); }
+  else return '';
+  return `<div class="memo m-${c} ${cls||''}"><b class="mi">${ic}</b><span>${tx}</span><i class="vgl"></i></div>`;
+}
+function regBtns(e){
+  if(!e.reg) return '';
+  const x = e.regX;
+  return `<button data-a="rno" class="adm">🙅 안 옴</button><button data-a="rmove" class="adm">↪ 다른 날</button><button data-a="rnote" class="adm mbtn">📝 일기</button>${x||e.regSt==='in'?'<button data-a="rreset" class="adm">↺ 원래대로</button>':''}<button data-a="redit" class="adm">🔁 고정 설정</button>`;
+}
+function regAct(k, d, a){
+  const v = overrides[k]; if(!v) return false;
+  if(a==='redit'){ openRegs(k); return false; }
+  const ex = {...(v.ex||{})}, cur = ex[d] || null;
+  if(a==='rno'){
+    const m = prompt(`${v.name} · ${fmd(d)} 안 옴으로 기록할게요\n이유나 메모가 있으면 적어 주세요 (없으면 그냥 확인)`, cur && cur.memo || '');
+    if(m==null) return false; ex[d] = {st:'no', ...(m.trim()?{memo:m.trim()}:{})};
+  } else if(a==='rmove'){
+    const s = prompt(`${v.name} · 원래 ${fmd(d)}\n실제로 온(올) 날짜를 적어 주세요. 뒤에 메모를 붙여도 돼요\n예: 10/23  또는  10/23 녹음 일정 변경`, cur && cur.to ? `${+cur.to.slice(5,7)}/${+cur.to.slice(8)}${cur.memo?' '+cur.memo:''}` : '');
+    if(s==null || !s.trim()) return false;
+    const mt = /(\d{1,2})\s*[\/.월-]\s*(\d{1,2})\s*일?/.exec(s); const ds = mt ? findDates(`${+mt[1]}/${+mt[2]}`, d) : [];
+    if(!ds.length){ alert('날짜 형식을 확인해 주세요 (예: 10/23)'); return false; }
+    const memo = s.slice(mt.index + mt[0].length).trim();
+    ex[d] = {st:'moved', to:ds[0], ...(memo?{memo}:{})};
+  } else if(a==='rnote'){
+    const m = prompt(`${v.name} · ${fmd(d)} 일기\n이날 있었던 일을 적어 두세요 (직원 화면에도 보여요)`, cur && cur.memo || '');
+    if(m==null) return false;
+    if(m.trim()) ex[d] = {...(cur||{st:'note'}), memo:m.trim()};
+    else if(cur){ const n = {...cur}; delete n.memo; if(n.st==='note') delete ex[d]; else ex[d] = n; }
+  } else if(a==='rreset'){
+    delete ex[d];
+  } else return false;
+  overrides[k] = {...v, ex, t:Date.now()};
+  pushSync({set:{[k]:overrides[k]}}); store.set('overrides', overrides); rebuild(false, true);
+  return true;
+}
+// 고정 출연자 관리 창
+let rEdit = null, rDow = [];
+function regStats(v){   // 지난 회차 출석 기록 (최근 10번)
+  const out = [], t = today(), ex = v.ex || {};
+  let d = t; for(let i=0; i<120 && out.length<10; i++, d = addDays(d,-1)){
+    if(v.since && d < v.since) break;
+    if(!(v.dow||[]).includes(wdIdx(d))) continue;
+    const x = ex[d]; out.push({d, st: x ? x.st : (d<t?'ok':'today'), x});
+  }
+  return out.reverse();
+}
+function regListHTML(){
+  const regs = Object.entries(overrides).filter(([k,v])=>v && v.reg);
+  if(!regs.length) return '<div class="rnone">아직 등록된 고정 출연자가 없어요</div>';
+  return regs.map(([k,v])=>{
+    const p = progs.find(x=>x.slug===v.slug), st = regStats(v);
+    const chip = s => { const m = s.st==='no'?['✗','no','안 옴']:s.st==='moved'?['↪','mv',`${fmd(s.x.to)}로 옮김`]:s.st==='today'?['•','td','오늘']:['✓','ok','온 날']; return `<i class="rc ${m[1]}" title="${fmd(s.d)} ${m[2]}${s.x&&s.x.memo?' · '+esc(s.x.memo):''}">${m[0]}<small>${+s.d.slice(5,7)}/${+s.d.slice(8)}</small></i>`; };
+    const notes = Object.entries(v.ex||{}).filter(([d,x])=>x && (x.memo || x.st==='no' || x.st==='moved')).sort((a,b)=>a[0]<b[0]?1:-1).slice(0,6)
+      .map(([d,x])=>`<div class="rlog"><b>${fmd(d)}</b> ${x.st==='no'?'🙅 안 옴':x.st==='moved'?`↪ ${fmd(x.to)}로 옮김`:'📝'} ${x.memo?esc(x.memo):''}</div>`).join('');
+    return `<div class="rrow ${rEdit===k?'on':''}" data-k="${esc(k)}"><div class="rh2"><b>${esc(v.name)}</b><span>${p?esc(p.name):'?'} · 매주 ${regDowTxt(v)||'-'}${v.tm?' · '+v.tm:''}</span><button type="button" class="redt" data-k="${esc(k)}">고치기</button></div>
+      <div class="rcs">${st.map(chip).join('') || '<small>아직 지난 회차가 없어요</small>'}</div>${notes?`<div class="rlogs">${notes}</div>`:''}</div>`;
+  }).join('');
+}
+function openRegs(k){
+  rEdit = k || null;
+  $('rp').innerHTML = '<option value="">프로그램 고르기</option>' + progs.map(p=>`<option value="${esc(p.slug)}">${esc(p.name)} (${fmtTime(p.start)})</option>`).join('');
+  const v = k ? overrides[k] : null;
+  $('rfh').textContent = v ? `✏ ${v.name} 고치기` : '＋ 새 고정 출연자';
+  $('rp').value = v ? v.slug : ''; $('rn').value = v ? v.name : ''; $('rt').value = v && v.tm || ''; $('rs').value = v && v.since || today(); $('rm').value = v && v.note || '';
+  rDow = v ? [...(v.dow||[])] : [];
+  $('rdel').hidden = !v; $('rnew').hidden = !v;
+  regPaint(); $('rdlg').classList.add('on');
+}
+function regPaint(){
+  $('rdow').querySelectorAll('button').forEach(b=>b.classList.toggle('on', rDow.includes(+b.dataset.d)));
+  $('rlist').innerHTML = regListHTML();
+  $('rlist').querySelectorAll('.redt').forEach(b=>b.onclick=()=>openRegs(b.dataset.k));
+}
+function closeRegs(){ $('rdlg').classList.remove('on'); rEdit = null; }
 // 숨기기·날짜 수정 등 (어느 기기에서 해도 연동)
 function doAct(id, a, g){
   const now = Date.now();
+  { const rm = /^(.+)@(\d{4}-\d{2}-\d{2})$/.exec(id||''); if(rm && overrides[rm[1]] && overrides[rm[1]].reg) return regAct(rm[1], rm[2], a); }
   if(a==='edit'){ openGuest(id); return false; }
   if(a==='memo'){ openMemo(id); return false; }
   const keepMemo = overrides[id] && overrides[id].memo ? {memo:overrides[id].memo} : {};
@@ -1799,7 +1942,7 @@ function drawSide(){
       <div class="m"><span class="tmv">${fmtTime(p.start)}</span>${p.ch?`<span class="pill ch" style="color:#fff;border-color:rgba(255,255,255,.35)">${p.ch}</span>`:''}${isBanchung(e)?'<span class="pill hot">방청</span>':''}${e.weekly?'<span class="pill week">주간표</span>':''}${e.post._yt?'<span class="pill yt">생.녹</span>':''}${e.post._kept?'<span class="pill kp">보관본</span>':''}</div></div>
       <button class="x" id="vx" aria-label="닫기">×</button></div>
     <div class="vb">
-      ${memoBar(e,'big')}
+      ${regBar(e,'big')}${memoBar(e,'big')}
       ${dateLine(e)}
       ${vExtra.length?`<div class="exbox"><b>➕ 이날 추가 게시물 ${vExtra.length}개</b> <small>— 사진 목록에 그날 사진 바로 뒤로 넣었어요</small>${vExtra.map((x,j)=>`<div class="exi"><button class="exgo" data-x="${j}">${esc(postLabel(x))} 보기</button><span>${esc((x.post.caption||'').replace(/\s+/g,' ').slice(0,90))}</span>${x.post.permalink?`<a href="${esc(x.post.permalink)}" target="_blank" rel="noopener">↗</a>`:''}</div>`).join('')}</div>`:''}
       ${e.replaced?'<div class="kept">같은 날짜에 새 게시물이 올라와서 이 보관본은 확인 필요로 옮겼어요</div>':''}
@@ -1808,12 +1951,12 @@ function drawSide(){
       <div class="act">
         ${e.post.permalink?`<a class="ig ${e.post._yt?'ytb':''}" href="${esc(e.post.permalink)}" target="_blank" rel="noopener">${e.post._yt?'유튜브에서 보기':'인스타에서 보기'}</a>`:''}
         ${g?`<button class="pri" data-a="ok" data-g="${g.join(',')}">✓ ${g.length>1?`${fmd(g[0])}~${fmd(g[g.length-1])}`:fmd(g[0])} 출연 맞음</button>`:''}
-        ${doneBtn(e)}
-        <button data-a="memo" class="adm mbtn">📝 메모</button>
+        ${e.reg?regBtns(e):doneBtn(e)}
+        ${e.reg?'':'<button data-a="memo" class="adm mbtn">📝 메모</button>'}
         ${!isU && !e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn">📤 확인 필요로</button>' : ''}
         ${e.guestName?'':'<button data-a="visit" class="adm">🚪 방문일</button>'}
-        ${e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="date" class="adm">${isU?'날짜 지정':'날짜 수정'}</button>`}
-        ${e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm">숨기기</button>'}
+        ${e.reg?'':e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="date" class="adm">${isU?'날짜 지정':'날짜 수정'}</button>`}
+        ${e.reg?'':e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del">삭제</button>':'<button data-a="hide" class="adm">숨기기</button>'}
         ${e.manual&&!e.link?'<button data-a="reset" class="adm">자동으로 되돌리기</button>':''}
       </div>
       <div class="cap">${capLinks(e)}</div>
@@ -1873,6 +2016,7 @@ $('vstage').onclick = ev=>{ if(ev.target.id==='vstage' || ev.target.classList.co
 document.addEventListener('keydown', ev=>{
   if($('gdlg').classList.contains('on')){ if(ev.key==='Escape') closeGuest(); return; }
   if($('mdlg').classList.contains('on')){ if(ev.key==='Escape') closeMemo(); return; }
+  if($('rdlg').classList.contains('on')){ if(ev.key==='Escape') closeRegs(); return; }
   if(!vw.classList.contains('on')) return;
   if(ev.key==='ArrowLeft') slideGo(-1); else if(ev.key==='ArrowRight') slideGo(1);
   else if(ev.key==='ArrowUp'){ ev.preventDefault(); postGo(-1); } else if(ev.key==='ArrowDown'){ ev.preventDefault(); postGo(1); }
@@ -2182,7 +2326,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-16d';
+const BUILD = '2026-10-16e';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
@@ -2341,6 +2485,18 @@ function openGuest(id){
   gSet(); $('gdlg').classList.add('on'); setTimeout(()=>{ try{ ($('gxp').value ? $('gxn') : $('gxp')).focus(); }catch(_){} }, 50);
 }
 function closeGuest(){ $('gdlg').classList.remove('on'); gEdit = null; }
+$('addr').onclick = () => openRegs();
+$('rdow').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const d = +b.dataset.d; rDow = rDow.includes(d) ? rDow.filter(x=>x!==d) : [...rDow, d]; regPaint(); });
+$('rc').onclick = closeRegs; $('rnew').onclick = () => openRegs();
+$('rdlg').addEventListener('click', ev=>{ if(ev.target.id==='rdlg') closeRegs(); });
+$('rdel').onclick = () => { if(!rEdit || !confirm(`${overrides[rEdit].name} 고정 출연자를 삭제할까요? (기록도 함께 지워져요)`)) return; const k = rEdit; delete overrides[k]; pushSync({del:[k]}); store.set('overrides', overrides); rebuild(false, true); openRegs(); };
+$('rform').addEventListener('submit', ev=>{
+  ev.preventDefault();
+  if(!rDow.length){ alert('오는 요일을 하나 이상 골라 주세요'); return; }
+  const k = rEdit || ('reg_' + Date.now().toString(36)), old = rEdit ? overrides[rEdit] : {};
+  overrides[k] = {...old, reg:1, slug:$('rp').value, name:$('rn').value.trim(), dow:[...rDow].sort(), tm:$('rt').value||'', since:$('rs').value||today(), note:$('rm').value.trim(), ex:old.ex||{}, t:Date.now()};
+  pushSync({set:{[k]:overrides[k]}}); store.set('overrides', overrides); rebuild(false, true); openRegs(k);
+});
 $('mpre').innerHTML = MEMO_PRE.map((p,i)=>`<button type="button" data-i="${i}">${esc(p.t)}</button>`).join('');
 $('mpre').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const p = MEMO_PRE[+b.dataset.i]; $('mtx').value = p.t; memoCol = p.c; memoPaint(); });
 $('mcol').querySelectorAll('button').forEach(b=>b.onclick=()=>{ memoCol = b.dataset.c; memoPaint(); });
