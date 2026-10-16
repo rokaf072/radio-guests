@@ -483,7 +483,7 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .brow .ic button{font:inherit;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;cursor:pointer}
 .brow .ic button:hover{background:rgba(255,255,255,.2)}
 .brow.dn{opacity:.62}
-.brow .bdone{font-style:normal;font-size:11px;font-weight:900;color:#ff8a8a;border:1px solid rgba(236,64,64,.6);border-radius:6px;padding:0 5px}
+.brow .bdone{font-style:normal;font-size:11px;font-weight:900;color:#cbd5e1;border:1px solid rgba(148,163,184,.6);border-radius:6px;padding:0 5px}
 .brow .rh{display:flex;align-items:center;gap:10px;min-width:0}
 .brow .bnm{font-weight:900;color:#fff;font-size:14px;min-width:0}
 .brow .ri{display:flex;flex-wrap:wrap;gap:4px 6px}
@@ -530,16 +530,14 @@ html:not(.admin) #info,html:not(.admin) #add,html:not(.admin) #addg,html:not(.ad
 .vw .dl .up b{background:none;padding:0;color:#fff}
 .vw .dl .up i{font-style:normal;font-weight:800;color:#ffd27a}
 /* 이미 끝난 방송: 큰 X 두 줄 + 완료 도장 */
-.pc.done .tabs,.pc.done .pcb{filter:grayscale(.5) brightness(.72)}
+.pc.done .tabs,.pc.done .pcb{filter:grayscale(.55) brightness(.8)}
+.pc.done{opacity:.92}
 .dnx{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden;border-radius:inherit}
-.dnx svg{position:absolute;inset:0;width:100%;height:100%}
-.dnx line{stroke:rgba(236,64,64,.82);stroke-width:7;stroke-linecap:round;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 6px rgba(236,64,64,.55))}
-.dnx .stamp{position:absolute;left:50%;top:50%;display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 22px 4px;border:7px double rgba(236,64,64,.95);border-radius:16px;color:rgba(236,64,64,.96);background:rgba(18,0,0,.58);text-shadow:0 0 14px rgba(236,64,64,.45);transform:translate(-50%,-50%) rotate(-14deg);animation:slam .55s cubic-bezier(.2,1.4,.4,1) both;white-space:nowrap}
-.dnx .stamp b{font-size:clamp(48px,6.5vw,84px);font-weight:900;letter-spacing:6px;line-height:1.05;padding-left:6px}
-.dnx .stamp small{font-size:13px;font-weight:900;letter-spacing:1px}
-@keyframes slam{0%{transform:translate(-50%,-50%) rotate(-14deg) scale(3);opacity:0}55%{transform:translate(-50%,-50%) rotate(-14deg) scale(.9);opacity:1}75%{transform:translate(-50%,-50%) rotate(-14deg) scale(1.06)}100%{transform:translate(-50%,-50%) rotate(-14deg) scale(1);opacity:1}}
-@media (max-width:600px){.dnx .stamp b{font-size:44px;letter-spacing:3px}.dnx line{stroke-width:5}}
-@media (prefers-reduced-motion:reduce){.dnx .stamp{animation:none!important}}
+.dnx .sash{position:absolute;top:22px;right:-46px;width:190px;transform:rotate(38deg);display:flex;flex-direction:column;align-items:center;gap:0;padding:5px 0 4px;background:linear-gradient(90deg,#3b4254,#5b6478 50%,#3b4254);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.45);border-top:1px solid rgba(255,255,255,.35);border-bottom:1px solid rgba(0,0,0,.4);overflow:hidden}
+.dnx .sash b{font-size:14px;font-weight:900;letter-spacing:1px;line-height:1.15}
+.dnx .sash small{font-size:10.5px;font-weight:800;color:rgba(255,255,255,.75);letter-spacing:.5px}
+.dnx .sash .vgl{position:absolute;top:-30%;bottom:-30%;left:0;width:30%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35) 50%,transparent);transform:translateX(-160%) skewX(-18deg);animation:gloss 3.4s ease-in-out infinite;pointer-events:none}
+@media (prefers-reduced-motion:reduce){.dnx .sash .vgl{animation:none}}
 .addbtn.r{bottom:122px;background:linear-gradient(135deg,#34d399,#0ea5e9);color:#04151c;box-shadow:0 10px 26px rgba(14,165,233,.35)}
 .addbtn.g{bottom:70px;background:linear-gradient(135deg,#ffd54a,#ff9f1c);color:#1a1000;box-shadow:0 10px 26px rgba(255,170,40,.35)}
 .tile .pic.gst{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--pc) 60%,#222) 0,#12141a 78%)}
@@ -1296,7 +1294,7 @@ function cardHTML(p, es, isUnknown, nth){
   const a = Math.min(postPos[key]||0, es.length-1);
   const pills = isUnknown ? (es[0].replaced?'<span class="pill">대체됨</span>':'') + (es[0].sent?'<span class="pill sent" title="달력에서 직접 옮긴 게시물">📤 옮김</span>':'') : progPills(p, es);
   const dn = doneDate(es[0]);
-  const stamp = dn ? `<div class="dnx" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="-10" y1="88" x2="88" y2="-10"/><line x1="12" y1="110" x2="110" y2="12"/></svg><div class="stamp"><b>완료</b><small>${fmd(dn)} 방송</small></div></div>` : '';
+  const stamp = dn ? doneMark(dn) : '';
   return `<section class="pc grp ${dn?'done':''}" id="${isUnknown?'u-'+esc(es[0].post.id):'p-'+p.slug+(nth?'-'+(nth+1):'')}" data-slug="${isUnknown?'':p.slug}" style="--pc:${p.color}" data-ks="${ks.join(',')}" data-key="${esc(key)}" data-u="${isUnknown?1:''}">
     <div class="pch">${p.logo?`<img class="lg" src="${p.logo}" alt="">`:''}
       <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
@@ -1342,6 +1340,8 @@ function upChip(up){
   return `<span class="up" title="작가님이 인스타(유튜브)에 올린 날"><span class="lf">작가님이 인스타(유튜브)에 올린 날</span><span class="ls">작가님 올린 날</span> <b>${fmd(up)}</b> <i>${ago}</i></span>`;
 }
 // 방송이 이미 끝난 게시물: 날짜가 확실하고(자동 확정·수동 지정·예정) 오늘보다 이전
+// 방송이 끝난 카드: 오른쪽 위 모서리에 띠 하나만 (사선·도장 없이 조용하게)
+const doneMark = d => `<div class="dnx" aria-hidden="true"><div class="sash"><b>지난 방송</b><small>${fmd(d)}</small><i class="vgl"></i></div></div>`;
 function doneDate(e){
   if(e.reg && (e.regSt==='no' || e.regSt==='moved')) return '';
   const d = e.date || (e.confirmed && e.guess ? e.guess : '');
@@ -1354,7 +1354,7 @@ const doneAuto = e => { const d = e.date || (e.confirmed && e.guess ? e.guess : 
 function doneBtn(e){
   const d = e.date || e.guess; if(!d || !e.post || doneAuto(e)) return '';
   const ov = overrides[e.post.id], on = ov && ov.dn && ov.dn[d];
-  return on ? `<button class="adm" data-a="undone" data-g="${d}" title="완료 표시 지우기">↺ 완료 취소</button>` : `<button class="adm dn" data-a="done" data-g="${d}" title="이 방송이 끝났다고 표시">✔ 완료</button>`;
+  return on ? `<button class="adm" data-a="undone" data-g="${d}" title="지난 방송 표시 지우기">↺ 지난 방송 취소</button>` : `<button class="adm dn" data-a="done" data-g="${d}" title="이 방송이 끝났다고 표시">✔ 지난 방송</button>`;
 }
 const visitTxt = v => v ? `${fmd(v.d)}${v.tm?' '+v.tm:''}` : '';
 const shortLabel = l => ({'주간 편성표':'주간표','유튜브 일정':'유튜브 일정','방청 안내':'방청','직접 추가':'직접 추가'})[l] || l;
@@ -1423,7 +1423,7 @@ function bentoHTML(p, es){
     rows = es.map((e,i)=>browHTML(e, ks[i])).join('');
   }
   const allDone = es.every(e=>doneDate(e));
-  const stamp = allDone ? (()=>{ const d = doneDate(es[0]); return `<div class="dnx" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="-10" y1="88" x2="88" y2="-10"/><line x1="12" y1="110" x2="110" y2="12"/></svg><div class="stamp"><b>완료</b><small>${fmd(d)} 방송</small></div></div>`; })() : '';
+  const stamp = allDone ? (()=>{ const d = doneDate(es[0]); return doneMark(d); })() : '';
   return `<section class="pc grp bentocard ${allDone?'done':''}" id="p-${p.slug}" data-slug="${p.slug}" style="--pc:${p.color}" data-ks="${ks.join(',')}" data-key="${esc(p.slug+'|'+selDay)}" data-u="">
     <div class="pch">${p.logo?`<img class="lg" src="${p.logo}" alt="">`:''}
       <div class="t"><div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
@@ -1442,7 +1442,7 @@ function browHTML(e, k, isBig){
   const up = e.post.timestamp && !e.guestName ? tsYmd(e.post.timestamp) : '';
   const s = e.slides && e.slides[0];
   const th = s ? `<img class="bth" src="${esc(s.url)}" loading="lazy" alt="" draggable="false">` : `<span class="bth bgn">${esc((e.guestName||nm).slice(0,3))}</span>`;
-  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${e.reg?'<em class="rgt">🔁 고정</em>':''}${d?'<em class="bdone">완료</em>':''}</div>${regBar(e,'sm')}${memoBar(e,'sm')}${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.reg?regBtns(e):e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${e.reg?'':doneBtn(e)}${e.reg?'':'<button data-a="memo" class="adm mbtn">📝 메모</button>'}${!e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn">📤 확인 필요로</button>' : ''}${e.reg?'':e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="이 게시물 숨기기 (중복일 때)">숨기기</button>'}</div></div>`;
+  return `<div class="brow ${e.atV?'v':''} ${d?'dn':''}" data-k="${k}" role="button" tabindex="0"><div class="rh">${th}<b class="bnm">${esc(nm)}</b>${e.reg?'<em class="rgt">🔁 고정</em>':''}${d?'<em class="bdone">지난 방송</em>':''}</div>${regBar(e,'sm')}${memoBar(e,'sm')}${info?`<div class="ri">${info}</div>`:''}${up?`<div class="r2">${upChip(up)}</div>`:''}<div class="ic" data-id="${esc(e.post.id)}">${e.reg?regBtns(e):e.guestName?'<button data-a="edit" class="adm">✏ 수정</button>':`<button data-a="visit" class="adm" title="작가에게 들은 실제 방문 날짜·시간 등록">🚪 방문일</button><button data-a="date" class="adm">날짜</button>`}${e.reg?'':doneBtn(e)}${e.reg?'':'<button data-a="memo" class="adm mbtn">📝 메모</button>'}${!e.link && !e.guestName ? '<button data-a="unk" class="adm ubtn">📤 확인 필요로</button>' : ''}${e.reg?'':e.guestName?'<button data-a="del" class="adm">삭제</button>':e.link?'<button data-a="del" class="adm">삭제</button>':'<button data-a="hide" class="adm" title="이 게시물 숨기기 (중복일 때)">숨기기</button>'}</div></div>`;
 }
 const reducedMo = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
 // 카드 사진 넘기기: 휴대폰 자체 스크롤(스냅)로 움직여서 화면 주사율(120Hz) 그대로 부드럽게
@@ -2389,7 +2389,7 @@ setInterval(()=>updateSchCnt(true), 10*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') updateSchCnt(true); });
 
 /* 켜 두기만 해도 자동 갱신: 10분마다 새 수집 내용 반영 + 새 버전(디자인) 올라오면 알아서 다시 열기 */
-const BUILD = '2026-10-16i';
+const BUILD = '2026-10-16k';
 const idle = () => !loading && !['vw','sr','sch'].some(id=>$(id) && $(id).classList.contains('on'))
   && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'');
 async function autoTick(){
